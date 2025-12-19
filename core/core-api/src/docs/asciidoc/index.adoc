@@ -9,30 +9,24 @@
 
 == Introduce
 
-This is the Core API documentation.
+This is the Core API documentation for TPA Admin Back-office.
 
-== Example API
+== 풍수해 관리 API (Pungsu Admin API)
 
-=== Example GET API
+=== 가입신청내역 조회
+가입 신청 내역 리스트를 조회합니다. 사업자번호, 상호명, 연락처 등을 통한 키워드 검색과 가입 상태별 필터링을 지원합니다.
+
 ==== Curl Request
-include::{snippets}/exampleGet/curl-request.adoc[]
-==== Path Parameters
-include::{snippets}/exampleGet/path-parameters.adoc[]
+include::{snippets}/admin-insured-contract-list/curl-request.adoc[]
+
+==== HTTP Request
+include::{snippets}/admin-insured-contract-list/http-request.adoc[]
+
 ==== Query Parameters
-include::{snippets}/exampleGet/query-parameters.adoc[]
-==== Http Response
-include::{snippets}/exampleGet/http-response.adoc[]
-==== Response Fields
-include::{snippets}/exampleGet/response-fields.adoc[]
+include::{snippets}/admin-insured-contract-list/query-parameters.adoc[]
 
-'''
+==== HTTP Response
+include::{snippets}/admin-insured-contract-list/http-response.adoc[]
 
-=== Example POST API
-==== Curl Request
-include::{snippets}/examplePost/curl-request.adoc[]
-==== Request Fields
-include::{snippets}/examplePost/request-fields.adoc[]
-==== Http Response
-include::{snippets}/examplePost/http-response.adoc[]
 ==== Response Fields
-include::{snippets}/examplePost/response-fields.adoc[]
+include::{snippets}/admin-insured-contract-list/response-fields.adoc[]

@@ -1,13 +1,12 @@
 spring.application.name: core-api
-spring.profiles.active: local
+spring.profiles.active: local-dev
 
 spring:
   config:
     import:
-      - monitoring.yml
+      - optional:file:.env[.properties]
       - logging.yml
       - db-core.yml
-      - client-example.yml
   web.resources.add-mappings: false
 
 server:
@@ -23,8 +22,9 @@ spring.config.activate.on-profile: local
 
 ---
 spring.config.activate.on-profile: local-dev
-
-
+spring:
+  jmx:
+    enabled: false
 ---
 spring.config.activate.on-profile: dev
 

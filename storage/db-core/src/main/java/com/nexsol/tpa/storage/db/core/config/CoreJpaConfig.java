@@ -7,8 +7,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@EntityScan(basePackages = "io.dodn.springboot.storage.db.core")
-@EnableJpaRepositories(basePackages = "io.dodn.springboot.storage.db.core")
+@EntityScan(basePackages = "com.nexsol.tpa.storage.db.core")
+@EnableJpaRepositories(basePackages = "com.nexsol.tpa.storage.db.core")
 class CoreJpaConfig {
 
 }
