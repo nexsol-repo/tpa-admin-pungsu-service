@@ -2,6 +2,8 @@ package com.nexsol.tpa.core.domain;
 
 import com.nexsol.tpa.core.support.DomainPage;
 import com.nexsol.tpa.core.support.OffsetLimit;
+import com.nexsol.tpa.core.support.error.CoreException;
+import com.nexsol.tpa.core.support.error.ErrorType;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberEntity;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +46,49 @@ public class InsuredContractFinder {
             .toList();
 
         return new DomainPage<>(contracts, result.hasNext());
+    }
+
+    public InsuredContractDetail findDetail(Integer id) {
+        TotalFormMemberEntity entity = totalFormMemberRepository.findById(id)
+            .orElseThrow(() -> new CoreException(ErrorType.DEFAULT_ERROR));
+
+        return InsuredContractDetail.builder()
+            .insuredInfo(mapToInsuredInfo(entity))
+            .contractInfo(mapToContractInfo(entity))
+            .build();
+    }
+
+    private InsuredInfo mapToInsuredInfo(TotalFormMemberEntity entity) {
+        return InsuredInfo.builder()
+            .companyName(entity.getCompanyName())
+            .businessNumber(entity.getBusinessNumber())
+            .phoneNumber(entity.getPhoneNumber())
+            .address(entity.getAddress())
+            .category(entity.getBizCategory())
+            .structure(entity.getStructure())
+            .floor(entity.getFloor())
+            .prctrNo(entity.getPrctrNo())
+            .build();
+    }
+
+    private InsuredContractInfo mapToContractInfo(TotalFormMemberEntity entity) {
+        return InsuredContractInfo.builder()
+            .joinCk(entity.getJoinCheck())
+            .insuranceStartDate(entity.getInsuranceStartDate())
+            .insuranceEndDate(entity.getInsuranceEndDate())
+            .insuranceCompany(entity.getInsuranceCompany())
+            .insuranceNumber(entity.getInsuranceNumber())
+            .insuranceCostBld(entity.getCoverage().getInsuranceCostBld())
+            .insuranceCostFcl(entity.getCoverage().getInsuranceCostFcl())
+            .insuranceCostMach(entity.getCoverage().getInsuranceCostMach())
+            .insuranceCostInven(entity.getCoverage().getInsuranceCostInven())
+            .insuranceCostShopSign(entity.getCoverage().getInsuranceCostShopSign())
+            .insuranceCostDeductible(entity.getCoverage().getInsuranceCostDeductible())
+            .totalInsuranceCost(entity.getPremium().getTotalInsuranceCost())
+            .totalInsuranceMyCost(entity.getPremium().getTotalInsuranceMyCost())
+            .totalGovernmentCost(entity.getPremium().getTotalGovernmentCost())
+            .totalLocalGovernmentCost(entity.getPremium().getTotalLocalGovernmentCost())
+            .build();
     }
 
 }

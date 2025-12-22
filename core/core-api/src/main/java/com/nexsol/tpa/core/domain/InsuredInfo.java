@@ -3,23 +3,12 @@ package com.nexsol.tpa.core.domain;
 import lombok.Builder;
 
 @Builder
-public record InsuredInfo(
-        String companyName,
-        String businessNumber,
-        String birthDate,
-        String email,
-        String phoneNumber,
-        String address,
+public record InsuredInfo(String companyName, String name, String businessNumber, String birthDate, String email,
+        String phoneNumber, String address,
+        // 업종
         String category,
-        String tenant,
-        String floor,
-        String subFloor,
-        String endSubFloor,
-        String underground,
-        String structure,
-        String prctrNo
-
-
+        // 임차여부
+        String tenant, String floor, String structure, String prctrNo
 
 ) {
 }

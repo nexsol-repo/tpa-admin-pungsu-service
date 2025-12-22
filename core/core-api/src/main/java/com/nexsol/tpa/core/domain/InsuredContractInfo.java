@@ -1,14 +1,13 @@
 package com.nexsol.tpa.core.domain;
 
+import lombok.Builder;
+
 import java.time.LocalDateTime;
 
-public record InsuredContractInfo(
-        String joinCk,
-         boolean isRenewalTarget, // 갱신대상 여부
+@Builder
+public record InsuredContractInfo(String joinCk, boolean isRenewalTarget, // 갱신대상 여부
         LocalDateTime insuranceStartDate, // 보험기간 시작
-        LocalDateTime insuranceEndDate,
-        String insuranceCompany,
-        String insuranceNumber,
+        LocalDateTime insuranceEndDate, String insuranceCompany, String insuranceNumber,
         // 건물가입금액
         Long insuranceCostBld,
         // 시설/집기 가입금액
@@ -19,17 +18,11 @@ public record InsuredContractInfo(
         Long insuranceCostInven,
         // 야외간판
         Long insuranceCostShopSign,
-        //개인 부담금
-        Long insuranceCostDeductible,
-        Long totalInsuranceCost,
-        Long totalInsuranceMyCost,
-        Long totalGovernmentCost,
+        // 개인 부담금
+        Long insuranceCostDeductible, Long totalInsuranceCost, Long totalInsuranceMyCost, Long totalGovernmentCost,
         Long totalLocalGovernmentCost
 
-
-
-        ) {
-
+) {
 
     public boolean isRenewalTarget(LocalDateTime now) {
         if (insuranceEndDate == null) {

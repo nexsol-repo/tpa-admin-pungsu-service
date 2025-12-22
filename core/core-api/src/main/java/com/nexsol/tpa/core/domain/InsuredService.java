@@ -12,9 +12,21 @@ public class InsuredService {
 
     private final InsuredContractFinder insuredContractFinder;
 
+    private final InsuredContractorWriter insuredContractorWriter;
+
     @Transactional(readOnly = true)
     public DomainPage<InsuredContract> getList(InsuredSearchCondition condition, OffsetLimit offsetLimit) {
         return insuredContractFinder.find(condition, offsetLimit);
+    }
+
+    @Transactional(readOnly = true)
+    public InsuredContractDetail getDetail(Integer id) {
+        return insuredContractFinder.findDetail(id);
+    }
+
+    @Transactional
+    public Integer modify(Integer id, InsuredInfo info, InsuredContractInfo contract) {
+        return insuredContractorWriter.write(id, info, contract);
     }
 
 }

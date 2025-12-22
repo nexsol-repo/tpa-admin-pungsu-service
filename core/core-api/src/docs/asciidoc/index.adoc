@@ -30,3 +30,42 @@ include::{snippets}/admin-insured-contract-list/http-response.adoc[]
 
 ==== Response Fields
 include::{snippets}/admin-insured-contract-list/response-fields.adoc[]
+
+=== 계약 상세보기
+특정 계약의 상세 정보(가입자 정보 및 보험 계약 상세)를 조회합니다.
+
+==== Curl Request
+include::{snippets}/admin-insured-detail/curl-request.adoc[]
+
+==== HTTP Request
+include::{snippets}/admin-insured-detail/http-request.adoc[]
+
+==== Path Parameters
+include::{snippets}/admin-insured-detail/path-parameters.adoc[]
+
+==== HTTP Response
+include::{snippets}/admin-insured-detail/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/admin-insured-detail/response-fields.adoc[]
+
+=== 계약 정보 수정
+가입자 정보 및 보험 계약 상세 내용을 수정합니다. 수정 완료 후 결과 메시지를 반환합니다.
+
+==== Curl Request
+include::{snippets}/admin-insured-modify/curl-request.adoc[]
+
+==== HTTP Request
+include::{snippets}/admin-insured-modify/http-request.adoc[]
+
+==== Path Parameters
+include::{snippets}/admin-insured-modify/path-parameters.adoc[]
+
+==== Request Fields
+include::{snippets}/admin-insured-modify/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/admin-insured-modify/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/admin-insured-modify/response-fields.adoc[]

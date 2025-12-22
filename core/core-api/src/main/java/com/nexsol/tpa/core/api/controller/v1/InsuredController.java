@@ -1,7 +1,9 @@
 package com.nexsol.tpa.core.api.controller.v1;
 
+import com.nexsol.tpa.core.api.controller.v1.request.InsuredModifyRequest;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractResponse;
 import com.nexsol.tpa.core.domain.InsuredContract;
+import com.nexsol.tpa.core.domain.InsuredContractDetail;
 import com.nexsol.tpa.core.domain.InsuredSearchCondition;
 import com.nexsol.tpa.core.domain.InsuredService;
 import com.nexsol.tpa.core.support.DomainPage;
@@ -9,7 +11,9 @@ import com.nexsol.tpa.core.support.OffsetLimit;
 import com.nexsol.tpa.core.support.response.ApiResponse;
 
 import com.nexsol.tpa.core.support.response.PageResponse;
+import com.nexsol.tpa.core.support.response.ResultType;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -46,6 +50,18 @@ public class InsuredController {
 
     }
 
+    @GetMapping("/{id}")
+    public ApiResponse<InsuredContractDetail> getDetail(@PathVariable Integer id) {
+        return ApiResponse.success(insuredService.getDetail(id));
+    }
 
+    @PutMapping("/{id}")
+    public ApiResponse<ResultType> modify(@PathVariable Integer id, @RequestBody InsuredModifyRequest request) {
+        // 서비스 레이어에 수정을 위임
+        // (ID와 함께 가입자/계약정보 Record를 전달)
+        insuredService.modify(id, request.insuredInfo(), request.contractInfo());
+
+        return ApiResponse.success(ResultType.SUCCESS);
+    }
 
 }

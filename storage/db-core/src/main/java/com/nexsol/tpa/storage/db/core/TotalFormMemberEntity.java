@@ -23,6 +23,12 @@ public class TotalFormMemberEntity {
     @Column(name = "businessnumber")
     private String businessNumber; // 사업자번호
 
+    @Column(name = "ins_number")
+    private String insuranceNumber;
+
+    @Column(name = "insured_nm")
+    private String name;
+
     @Column(name = "company")
     private String companyName; // 상호명
 
@@ -56,5 +62,77 @@ public class TotalFormMemberEntity {
 
     @Column(name = "pay_method")
     private String payMethod; // 결제 수단
+
+    @Column(name = "bizcategory")
+    private String bizCategory;
+
+    @Column(name = "structure")
+    private String structure;
+
+    @Column(name = "tenant")
+    private String tenant;
+
+    @Column(name = "floor")
+    private String floor;
+
+    @Column(name = "subfloor")
+    private String subFloor;
+
+    @Column(name = "endsubfloor")
+    private String endSubFloor;
+
+    @Column(name = "prctr_no")
+    private String prctrNo;
+
+    @Embedded
+    private CoverageAmount coverage;
+
+    @Embedded
+    private PremiumAmount premium;
+
+    /**
+     * 가입자 기본 인적 사항 변경
+     */
+    public void applyInsuredBasic(String companyName, String name, String businessNumber, String phoneNumber) {
+        this.companyName = companyName;
+        this.name = name; // 계약자=피보험자 규칙 강제
+        this.businessNumber = businessNumber;
+        this.phoneNumber = phoneNumber;
+    }
+
+    /**
+     * 사업장 정보 변경
+     */
+    public void applyLocationInfo(String address, String tenant, String category, String structure, String floor,
+            String prctrNo) {
+        this.address = address;
+        this.bizCategory = category;
+        this.tenant = tenant;
+        this.structure = structure;
+        this.floor = floor;
+        this.prctrNo = prctrNo;
+    }
+
+    public void applyContractStatus(String joinCheck, LocalDateTime insuranceStartDate, LocalDateTime insuranceEndDate,
+            String insuranceNumber) {
+        this.joinCheck = joinCheck;
+        this.insuranceStartDate = insuranceStartDate;
+        this.insuranceEndDate = insuranceEndDate;
+        this.insuranceNumber = insuranceNumber;
+    }
+
+    /**
+     * 가입금액 전체 수정 (객체 단위로 한 번에)
+     */
+    public void applyCoverage(CoverageAmount coverage) {
+        this.coverage = coverage;
+    }
+
+    /**
+     * 보험료 전체 수정 (객체 단위로 한 번에)
+     */
+    public void applyPremium(PremiumAmount premium) {
+        this.premium = premium;
+    }
 
 }
