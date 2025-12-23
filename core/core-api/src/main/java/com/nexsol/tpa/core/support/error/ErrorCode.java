@@ -2,6 +2,6 @@ package com.nexsol.tpa.core.support.error;
 
 public enum ErrorCode {
 
-    E500
+    T1000, T1001, T1002
 
 }

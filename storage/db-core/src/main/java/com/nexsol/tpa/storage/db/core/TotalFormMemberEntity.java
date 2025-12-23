@@ -84,6 +84,12 @@ public class TotalFormMemberEntity {
     @Column(name = "prctr_no")
     private String prctrNo;
 
+    @Column(name = "account")
+    private String account;
+
+    @Column(name = "path")
+    private String path;
+
     @Embedded
     private CoverageAmount coverage;
 

@@ -8,7 +8,8 @@ import java.time.LocalDateTime;
 @Builder
 public record InsuredContractResponse(Integer id, String payMethod, String businessNumber, String companyName,
         String address, String phoneNumber, LocalDateTime applicationDate, String insuranceCompany,
-        LocalDateTime insuranceStartDate, LocalDateTime insuranceEndDate, boolean isRenewalTarget) {
+        LocalDateTime insuranceStartDate, LocalDateTime insuranceEndDate, boolean isRenewalTarget, String joinCk,
+        String account, String path) {
 
     public static InsuredContractResponse of(InsuredContract contract) {
         // 응답을 만드는 시점의 시간으로 비즈니스 로직 수행
@@ -26,6 +27,9 @@ public record InsuredContractResponse(Integer id, String payMethod, String busin
             .insuranceStartDate(contract.insuranceStartDate())
             .insuranceEndDate(contract.insuranceEndDate())
             .isRenewalTarget(renewalTarget)
+            .joinCk(contract.joinCk())
+            .account(contract.account())
+            .path(contract.path())
             .build();
     }
 }

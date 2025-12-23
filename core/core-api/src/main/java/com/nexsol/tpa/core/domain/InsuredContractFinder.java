@@ -42,6 +42,9 @@ public class InsuredContractFinder {
                 .phoneNumber(entity.getPhoneNumber())
                 .payMethod(entity.getPayMethod())
                 .address(entity.getAddress())
+                .joinCk(entity.getJoinCheck())
+                .account(entity.getAccount())
+                .path(entity.getPath())
                 .build())
             .toList();
 
@@ -53,6 +56,7 @@ public class InsuredContractFinder {
             .orElseThrow(() -> new CoreException(ErrorType.DEFAULT_ERROR));
 
         return InsuredContractDetail.builder()
+            .id(entity.getId())
             .insuredInfo(mapToInsuredInfo(entity))
             .contractInfo(mapToContractInfo(entity))
             .build();
