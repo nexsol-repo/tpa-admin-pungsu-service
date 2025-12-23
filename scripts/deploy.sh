@@ -2,7 +2,7 @@
 
 # 사용법: ./deploy.sh [dev|prod]
 TARGET_ENV=$1
-APP_NAME="tpa-admin-pungsu-api"
+APP_NAME="tpa-admin-api"
 BASE_PATH="/home/nex3/app/${APP_NAME}"
 
 if [ -z "$TARGET_ENV" ]; then

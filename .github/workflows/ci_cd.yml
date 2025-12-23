@@ -9,7 +9,7 @@ on:
 
 env:
   IMAGE_NAME: tpa-admin-pungsu-api
-  DEPLOY_PATH: /home/nex3/app/tpa-admin-pungsu-api
+  DEPLOY_PATH: /home/nex3/app/tpa-admin-api
 
 jobs:
   build-and-deploy:
