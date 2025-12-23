@@ -22,7 +22,7 @@ subprojects {
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
     apply plugin: 'org.asciidoctor.jvm.convert'
-    
+
     dependencyManagement {
         imports {
             mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudDependenciesVersion}"
@@ -99,8 +99,43 @@ subprojects {
             }
         }
     }
+}
 
-    tasks.named('asciidoctor').configure {
+// RestDocs 전용 모듈 설정
+project(':tests:api-docs') {
+    apply plugin: 'org.asciidoctor.jvm.convert'
+
+    ext {
+        snippetsDir = layout.buildDirectory.dir('generated-snippets')
+    }
+
+    test {
+        outputs.dir snippetsDir
+    }
+
+    tasks.named('asciidoctor') {
+        // configurations 'asciidoctorExtensions'는 해당 모듈 build.gradle에서 관리하도록 제거 가능
+        inputs.dir snippetsDir
         dependsOn restDocsTest
+
+        sources {
+            include '**/index.adoc'
+        }
+
+        baseDirFollowsSourceDir()
+    }
+}
+
+// 실행 모듈 설정: 타 모듈의 결과물을 가져오는 전용 로직
+project(':core:core-api') {
+    bootJar {
+        // 다른 모듈(api-docs)의 태스크가 완료된 후 실행되도록 의존성만 정의
+        def apiDocsProject = project(':tests:api-docs')
+        dependsOn apiDocsProject.tasks.named('asciidoctor')
+
+        // 생성된 문서를 JAR 내부로 복사하는 로직만 유지
+        from (apiDocsProject.layout.buildDirectory.dir('docs/asciidoc')) {
+            into 'static/docs'
+        }
     }
 }
