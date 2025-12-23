@@ -18,6 +18,4 @@ public class WebMvcConfig implements WebMvcConfigurer {
             .addResourceLocations("file:build/docs/asciidoc/");
     }
 
-
-
 }

@@ -21,8 +21,9 @@ RUN chmod +x ./gradlew
 RUN ./gradlew dependencies --no-daemon || return 0
 
 COPY . .
-# 테스트 제외하고 bootJar 빌드 (빠른 빌드를 위함)
-RUN ./gradlew clean bootJar -x test --no-daemon
+
+RUN ./gradlew :core:core-api:clean :core:core-api:bootJar \
+    -x unitTest -x contextTest -x developTest --no-daemon
 
 # 2. Runtime Stage
 FROM eclipse-temurin:25-jre
