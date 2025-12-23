@@ -1,4 +1,4 @@
-name: CI/CD - TPA Admin Pungsu API
+name: CI/CD - TPA Admin API
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: tpa-admin-pungsu-api
+  IMAGE_NAME: tpa-admin-api
   DEPLOY_PATH: /home/nex3/app/tpa-admin-api
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout Source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Docker Image Build
         run: |
@@ -27,9 +27,10 @@ jobs:
       - name: Prepare & Execute Deployment
         run: |
           mkdir -p ${{ env.DEPLOY_PATH }}
-          # 필요한 설정 파일을 배포 폴더로 복사
+          
+          # [수정 포인트] 파일 경로가 scripts/deploy.sh 인지 확인하세요.
           cp docker-compose.yml ${{ env.DEPLOY_PATH }}/
-          cp deploy.sh ${{ env.DEPLOY_PATH }}/
+          cp scripts/deploy.sh ${{ env.DEPLOY_PATH }}/
           chmod +x ${{ env.DEPLOY_PATH }}/deploy.sh
           
           # 환경 결정 (dev/prod)
