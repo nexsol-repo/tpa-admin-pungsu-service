@@ -3,6 +3,7 @@
 # 사용법: ./deploy.sh [dev|prod]
 TARGET_ENV=$1
 APP_NAME="tpa-admin-api"
+# Nginx 설정 내에서 바꿀 location 경로
 ROUTE_PATH="/admin/pungsu/"
 BASE_PATH="/home/nex3/app/${APP_NAME}"
 
@@ -26,6 +27,7 @@ echo "🚀 ${APP_NAME} (${TARGET_ENV}) 배포 시작..."
 # 1. 환경 파일 준비 (.env.dev -> .env)
 if [ -f "${BASE_PATH}/${ENV_FILE}" ]; then
   cp "${BASE_PATH}/${ENV_FILE}" "${BASE_PATH}/.env"
+  echo "✅ 환경 설정 파일 로드 완료"
 else
   echo "❌ 서버의 ${BASE_PATH}/${ENV_FILE} 파일이 없습니다. 수동 생성이 필요합니다."
   exit 1
@@ -39,8 +41,13 @@ else
     CURRENT_PORT="$DEFAULT_PORT"
 fi
 
-[ "$CURRENT_PORT" == "8083" ] && TARGET_PORT="8084" || TARGET_PORT="8083"
-echo "🔄 포트 스위칭: ${CURRENT_PORT} -> ${TARGET_PORT}"
+# 8083 <-> 8084 스위칭
+if [ "$CURRENT_PORT" == "8083" ]; then
+    TARGET_PORT="8084"
+else
+    TARGET_PORT="8083"
+fi
+echo "🔄 포트 스위칭 계획: ${CURRENT_PORT} -> ${TARGET_PORT}"
 
 # 3. 신규 컨테이너 실행
 export HOST_PORT=$TARGET_PORT
@@ -48,41 +55,42 @@ export TARGET_ENV=$TARGET_ENV
 export DOCKER_IMAGE="${APP_NAME}:${TARGET_ENV}"
 export COMPOSE_PROJECT_NAME="${APP_NAME}-${TARGET_ENV}-${TARGET_PORT}"
 
+echo "📦 컨테이너 기동: ${COMPOSE_PROJECT_NAME} (Port: ${TARGET_PORT})"
 docker compose -f docker-compose.yml -p $COMPOSE_PROJECT_NAME up -d
 
-# 4. Health Check (최대 75초 대기)
-echo "🏥 서비스 상태 확인 중... (http://127.0.0.1:${TARGET_PORT}/health)"
-for i in {1..15}; do
+# 4. Health Check (최대 100초 대기)
+echo "🏥 서비스 헬스체크 중... (http://127.0.0.1:${TARGET_PORT}/health)"
+for i in {1..20}; do
   STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:${TARGET_PORT}/health)
   if [ "$STATUS" == "200" ]; then
     echo "✅ 헬스체크 성공!"
     break
   fi
-  echo "⏳ 대기 중... ($i/15) - HTTP 응답코드: $STATUS"
+  echo "⏳ 대기 중... ($i/20) - HTTP 응답코드: $STATUS"
   sleep 5
 
-  if [ $i -eq 15 ]; then
-    echo "❌ 배포 실패! 앱 로그를 출력합니다:"
+  if [ $i -eq 20 ]; then
+    echo "❌ 배포 실패! 앱 로그(마지막 100줄)를 출력합니다:"
     docker logs $COMPOSE_PROJECT_NAME --tail 100
-    echo "🛑 컨테이너를 중지하고 롤백합니다."
+    echo "🛑 신규 컨테이너를 중지하고 제거합니다."
     docker stop $COMPOSE_PROJECT_NAME && docker rm $COMPOSE_PROJECT_NAME
     exit 1
   fi
 done
 
-# 5. Nginx 트래픽 전환 (정교한 sed 처리)
+# 5. Nginx 트래픽 전환 (Surgical Update)
 echo "🔄 Nginx 트래픽 전환 중..."
-# location /admin/pungsu/ 가 포함된 블록 내의 127.0.0.1:XXXX 포트만 변경
+# 특정 location 블록 내의 proxy_pass 포트만 변경
 sudo sed -i "/location ${ROUTE_PATH//\//\\/}/,/}/ s/127.0.0.1:[0-9]\{4\}/127.0.0.1:${TARGET_PORT}/g" $NGINX_CONF
 sudo nginx -t && sudo nginx -s reload
 
 # 6. 구 버전 컨테이너 제거
 OLD_PROJECT_NAME="${APP_NAME}-${TARGET_ENV}-${CURRENT_PORT}"
 if [ "$(docker ps -a -q -f name=$OLD_PROJECT_NAME)" ]; then
-    echo "🛑 이전 컨테이너 제거: ${OLD_PROJECT_NAME}"
+    echo "🛑 이전 버전 컨테이너 제거: ${OLD_PROJECT_NAME}"
     docker stop $OLD_PROJECT_NAME && docker rm $OLD_PROJECT_NAME
 fi
 
-# 7. 현재 포트 정보 저장
+# 7. 현재 포트 정보 업데이트
 echo "$TARGET_PORT" > "$CURRENT_PORT_FILE"
-echo "🎉 배포 성공: ${TARGET_PORT} 포트로 서비스 중입니다."
+echo "🎉 배포 성공! 현재 서비스 포트: ${TARGET_PORT}"
