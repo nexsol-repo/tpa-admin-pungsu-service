@@ -102,6 +102,7 @@ subprojects {
 }
 
 // RestDocs 전용 모듈 설정
+// 1. 문서 생성 모듈 (오케스트레이션)
 project(':tests:api-docs') {
     apply plugin: 'org.asciidoctor.jvm.convert'
 
@@ -114,7 +115,6 @@ project(':tests:api-docs') {
     }
 
     tasks.named('asciidoctor') {
-        // configurations 'asciidoctorExtensions'는 해당 모듈 build.gradle에서 관리하도록 제거 가능
         inputs.dir snippetsDir
         dependsOn restDocsTest
 
@@ -126,14 +126,14 @@ project(':tests:api-docs') {
     }
 }
 
-// 실행 모듈 설정: 타 모듈의 결과물을 가져오는 전용 로직
+// 2. 실제 배포 모듈: core-api
 project(':core:core-api') {
     bootJar {
-        // 다른 모듈(api-docs)의 태스크가 완료된 후 실행되도록 의존성만 정의
         def apiDocsProject = project(':tests:api-docs')
+        // 빌드 전 문서 생성 선행
         dependsOn apiDocsProject.tasks.named('asciidoctor')
 
-        // 생성된 문서를 JAR 내부로 복사하는 로직만 유지
+        // 생성된 문서를 JAR 내부의 정적 리소스 경로로 복사
         from (apiDocsProject.layout.buildDirectory.dir('docs/asciidoc')) {
             into 'static/docs'
         }
