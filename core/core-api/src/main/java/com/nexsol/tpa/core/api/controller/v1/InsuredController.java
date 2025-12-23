@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
-@RequestMapping("/v1/admin/pungsu/insured")
+@RequestMapping("/v1/insured")
 @RestController
 @RequiredArgsConstructor
 public class InsuredController {
