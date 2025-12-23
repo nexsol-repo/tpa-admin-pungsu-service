@@ -1,0 +1,54 @@
+name: CI/CD - TPA Back-office Backend
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: tpa-back-office-api
+  DEPLOY_PATH: /home/nex3/app/tpa-back-office
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v6
+
+      - name: Set up JDK 25 # 프로젝트 gradle 스펙에 맞춤
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Build with Gradle
+        run: ./gradlew :core:core-api:bootJar
+
+      - name: Set Environment Variables
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "TARGET_ENV=prod" >> $GITHUB_ENV
+          else
+            echo "TARGET_ENV=dev" >> $GITHUB_ENV
+          fi
+
+      - name: Docker Image Build
+        run: |
+          docker build -t ${{ env.IMAGE_NAME }}:${{ env.TARGET_ENV }} .
+
+      - name: Deploy to Server
+        run: |
+          mkdir -p ${{ env.DEPLOY_PATH }}
+          cp docker-compose.yml ${{ env.DEPLOY_PATH }}/
+          cp deploy.sh ${{ env.DEPLOY_PATH }}/
+          chmod +x ${{ env.DEPLOY_PATH }}/deploy.sh
+          cd ${{ env.DEPLOY_PATH }}
+          ./deploy.sh ${{ env.TARGET_ENV }}
+
+      - name: Cleanup
+        run: docker image prune -f
