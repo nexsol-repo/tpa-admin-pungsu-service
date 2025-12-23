@@ -23,7 +23,8 @@ RUN ./gradlew dependencies --no-daemon || return 0
 # 소스 전체 복사 및 빌드
 COPY . .
 # :core:core-api:bootJar만 실행해도 asciidoctor가 자동으로 실행되도록 설정함
-RUN ./gradlew :core:core-api:clean :core:core-api:bootJar -x test --no-daemon
+RUN ./gradlew :core:core-api:clean :core:core-api:bootJar \
+    -x unitTest -x contextTest -x developTest --no-daemon
 
 # 2. Runtime Stage
 FROM eclipse-temurin:25-jre

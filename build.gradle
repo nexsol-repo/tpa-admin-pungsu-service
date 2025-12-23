@@ -99,6 +99,7 @@ subprojects {
             }
         }
     }
+    // --- 문서화 관련 설정 (수정 및 보강된 로직) ---
     tasks.named('asciidoctor') {
         dependsOn restDocsTest
         inputs.dir file('build/generated-snippets')
