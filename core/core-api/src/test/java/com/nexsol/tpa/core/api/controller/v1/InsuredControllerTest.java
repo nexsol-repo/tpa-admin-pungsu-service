@@ -137,6 +137,7 @@ public class InsuredControllerTest extends RestDocsTest {
                 .floor("1층")
                 .structure("철근콘크리트")
                 .prctrNo("PRC12345") // MeritzService 조회에 사용될 키값
+                .pnu("24214214124124124")
                 .build())
             .contractInfo(InsuredContractInfo.builder()
                 .joinCk("가입완료")
@@ -185,6 +186,7 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("data.insuredInfo.floor").type(JsonFieldType.STRING).description("층수"),
                             fieldWithPath("data.insuredInfo.structure").type(JsonFieldType.STRING).description("건물구조"),
                             fieldWithPath("data.insuredInfo.prctrNo").type(JsonFieldType.STRING).description("질권번호"),
+                            fieldWithPath("data.insuredInfo.pnu").type(JsonFieldType.STRING).description("PNU코드"),
 
                             // data.contractInfo 상세 필드
                             fieldWithPath("data.contractInfo.joinCk").type(JsonFieldType.STRING).description("가입 상태"),

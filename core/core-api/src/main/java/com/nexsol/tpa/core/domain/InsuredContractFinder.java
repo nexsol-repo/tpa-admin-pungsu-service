@@ -72,6 +72,7 @@ public class InsuredContractFinder {
             .structure(entity.getStructure())
             .floor(entity.getFloor())
             .prctrNo(entity.getPrctrNo())
+            .pnu(entity.getPnu())
             .build();
     }
 

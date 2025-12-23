@@ -23,7 +23,7 @@ public class InsuredContractorWriter {
             entity.applyInsuredBasic(info.companyName(), info.name(), info.businessNumber(), info.phoneNumber());
 
             entity.applyLocationInfo(info.address(), info.tenant(), info.category(), info.structure(), info.floor(),
-                    info.prctrNo());
+                    info.prctrNo(), info.pnu());
         }
 
         if (contract != null) {
