@@ -251,9 +251,7 @@ public class InsuredControllerTest extends RestDocsTest {
         given(insuredService.modify(eq(id), any(), any())).willReturn(id);
 
         // when & then
-        mockMvc
-            .perform(put("/v1/insured/{id}", id).contentType(MediaType.APPLICATION_JSON)
-                .content(requestJson))
+        mockMvc.perform(put("/v1/insured/{id}", id).contentType(MediaType.APPLICATION_JSON).content(requestJson))
             .andExpect(status().isOk())
             .andDo(document("admin-insured-modify", pathParameters(parameterWithName("id").description("계약 PK ID")),
                     requestFields(

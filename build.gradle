@@ -101,22 +101,26 @@ subprojects {
     }
 }
 
-// RestDocs 전용 모듈 설정
-// 1. 문서 생성 모듈 (오케스트레이션)
-project(':tests:api-docs') {
-    apply plugin: 'org.asciidoctor.jvm.convert'
+// --- 오케스트레이션 코드 (수정 부분) ---
 
+// 1. 문서 생성 모듈 (tests:api-docs)
+project(':tests:api-docs') {
     ext {
+        // 스니펫이 생성될 경로
         snippetsDir = layout.buildDirectory.dir('generated-snippets')
     }
 
-    test {
+    // restDocsTest 태스크가 snippetsDir에 결과를 저장하도록 설정
+    tasks.named('restDocsTest') {
         outputs.dir snippetsDir
     }
 
     tasks.named('asciidoctor') {
-        inputs.dir snippetsDir
         dependsOn restDocsTest
+        inputs.dir snippetsDir
+
+        // index.adoc에서 스니펫을 참조할 수 있도록 설정
+        attributes 'snippets': snippetsDir.get().asFile
 
         sources {
             include '**/index.adoc'
@@ -126,15 +130,18 @@ project(':tests:api-docs') {
     }
 }
 
-// 2. 실제 배포 모듈: core-api
+// 2. 실제 배포 모듈 (core-api)
 project(':core:core-api') {
+    // core-api는 실행 가능한 jar를 만들어야 하므로 bootJar 활성화
     bootJar {
+        enabled = true
+
         def apiDocsProject = project(':tests:api-docs')
         // 빌드 전 문서 생성 선행
         dependsOn apiDocsProject.tasks.named('asciidoctor')
 
-        // 생성된 문서를 JAR 내부의 정적 리소스 경로로 복사
-        from (apiDocsProject.layout.buildDirectory.dir('docs/asciidoc')) {
+        // 생성된 HTML 문서를 JAR 내부의 정적 리소스 경로(static/docs)로 복사
+        from(apiDocsProject.layout.buildDirectory.dir('docs/asciidoc')) {
             into 'static/docs'
         }
     }
