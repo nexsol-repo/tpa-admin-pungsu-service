@@ -1,6 +1,5 @@
 package com.nexsol.tpa.core.api.controller.v1;
 
-import com.nexsol.tpa.core.api.controller.v1.request.InsuredModifyRequest;
 import com.nexsol.tpa.core.domain.*;
 
 import com.nexsol.tpa.core.support.DomainPage;
@@ -12,7 +11,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
-import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,10 +32,13 @@ public class InsuredControllerTest extends RestDocsTest {
 
     private InsuredService insuredService;
 
+    private MeritzService meritzService;
+
     @BeforeEach
     public void setUp() {
         insuredService = mock(InsuredService.class);
-        mockMvc = mockController(new InsuredController(insuredService));
+        meritzService = mock(MeritzService.class);
+        mockMvc = mockController(new InsuredController(insuredService, meritzService));
     }
 
     @Test
@@ -56,6 +57,9 @@ public class InsuredControllerTest extends RestDocsTest {
             .insuranceStartDate(LocalDateTime.of(2025, 12, 1, 0, 0))
             .insuranceEndDate(LocalDateTime.of(2026, 11, 30, 23, 59))
             .isRenewalTarget(false)
+            .joinCk("Y")
+            .account("TPA KOREA")
+            .path("TPA KOREA")
             .build();
         DomainPage<InsuredContract> mockPage = new DomainPage<>(List.of(mockContract), true);
 
@@ -63,7 +67,7 @@ public class InsuredControllerTest extends RestDocsTest {
 
         // when & then
         mockMvc
-            .perform(get("/v1/admin/pungsu/insured/contract").contentType(MediaType.APPLICATION_JSON)
+            .perform(get("/v1/insured/contract").contentType(MediaType.APPLICATION_JSON)
                 .param("payYn", "Y")
                 .param("startDate", "2025-01-01")
                 .param("endDate", "2025-12-31")
@@ -100,6 +104,9 @@ public class InsuredControllerTest extends RestDocsTest {
                                 .description("보험 종료일"),
                             fieldWithPath("data.content[].isRenewalTarget").type(JsonFieldType.BOOLEAN)
                                 .description("갱신 대상 여부"),
+                            fieldWithPath("data.content[].joinCk").type(JsonFieldType.STRING).description("상태"),
+                            fieldWithPath("data.content[].account").type(JsonFieldType.STRING).description("제휴사"),
+                            fieldWithPath("data.content[].path").type(JsonFieldType.STRING).description("채널"),
 
                             fieldWithPath("data.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 존재 여부"),
                             fieldWithPath("error").type(JsonFieldType.NULL).description("에러 정보 (성공 시 null)"))));
@@ -110,6 +117,9 @@ public class InsuredControllerTest extends RestDocsTest {
     void getDetail() throws Exception {
         // given
         Integer id = 1;
+        String mockCertificateUrl = "https://meritz.com/cert/12345"; // 테스트용 가입확인서 URL
+
+        // 1. 핵심 도메인 정보(InsuredContractDetail) 준비
         InsuredContractDetail response = InsuredContractDetail.builder()
             .id(id.intValue())
             .insuredInfo(InsuredInfo.builder()
@@ -124,7 +134,8 @@ public class InsuredControllerTest extends RestDocsTest {
                 .tenant("임차인")
                 .floor("1층")
                 .structure("철근콘크리트")
-                .prctrNo("PRC12345")
+                .prctrNo("PRC12345") // MeritzService 조회에 사용될 키값
+                .pnu("24214214124124124")
                 .build())
             .contractInfo(InsuredContractInfo.builder()
                 .joinCk("가입완료")
@@ -146,16 +157,19 @@ public class InsuredControllerTest extends RestDocsTest {
                 .build())
             .build();
 
+        // 2. 각 서비스의 Mocking 설정
         given(insuredService.getDetail(id)).willReturn(response);
+        given(meritzService.getLink4("PRC12345")).willReturn(mockCertificateUrl);
 
         // when & then
-        mockMvc.perform(get("/v1/admin/pungsu/insured/{id}", id).accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/v1/insured/{id}", id).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(document("admin-insured-detail", pathParameters(parameterWithName("id").description("계약 PK ID")),
                     responseFields(
                             fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (SUCCESS/FAIL)"),
                             fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("계약 ID"),
-                            // insuredInfo
+
+                            // data.insuredInfo 상세 필드
                             fieldWithPath("data.insuredInfo.companyName").type(JsonFieldType.STRING).description("상호명"),
                             fieldWithPath("data.insuredInfo.name").type(JsonFieldType.STRING).description("성명"),
                             fieldWithPath("data.insuredInfo.businessNumber").type(JsonFieldType.STRING)
@@ -170,7 +184,9 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("data.insuredInfo.floor").type(JsonFieldType.STRING).description("층수"),
                             fieldWithPath("data.insuredInfo.structure").type(JsonFieldType.STRING).description("건물구조"),
                             fieldWithPath("data.insuredInfo.prctrNo").type(JsonFieldType.STRING).description("질권번호"),
-                            // contractInfo
+                            fieldWithPath("data.insuredInfo.pnu").type(JsonFieldType.STRING).description("PNU코드"),
+
+                            // data.contractInfo 상세 필드
                             fieldWithPath("data.contractInfo.joinCk").type(JsonFieldType.STRING).description("가입 상태"),
                             fieldWithPath("data.contractInfo.isRenewalTarget").type(JsonFieldType.BOOLEAN)
                                 .description("갱신 대상 여부"),
@@ -202,6 +218,11 @@ public class InsuredControllerTest extends RestDocsTest {
                                 .description("정부지원 보험료"),
                             fieldWithPath("data.contractInfo.totalLocalGovernmentCost").type(JsonFieldType.NUMBER)
                                 .description("지자체지원 보험료"),
+
+                            // 새로 조합되어 추가된 필드
+                            fieldWithPath("data.certificateUrl").type(JsonFieldType.STRING)
+                                .description("가입확인서 PDF 다운로드 URL")
+                                .optional(),
 
                             fieldWithPath("error").type(JsonFieldType.NULL).description("에러 정보 (성공 시 null)"))));
     }
@@ -251,9 +272,7 @@ public class InsuredControllerTest extends RestDocsTest {
         given(insuredService.modify(eq(id), any(), any())).willReturn(id);
 
         // when & then
-        mockMvc
-            .perform(put("/v1/admin/pungsu/insured/{id}", id).contentType(MediaType.APPLICATION_JSON)
-                .content(requestJson))
+        mockMvc.perform(put("/v1/insured/{id}", id).contentType(MediaType.APPLICATION_JSON).content(requestJson))
             .andExpect(status().isOk())
             .andDo(document("admin-insured-modify", pathParameters(parameterWithName("id").description("계약 PK ID")),
                     requestFields(

@@ -22,7 +22,7 @@ subprojects {
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
     apply plugin: 'org.asciidoctor.jvm.convert'
-    
+
     dependencyManagement {
         imports {
             mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudDependenciesVersion}"
@@ -99,8 +99,26 @@ subprojects {
             }
         }
     }
-
-    tasks.named('asciidoctor').configure {
+    // --- 문서화 관련 설정 (수정 및 보강된 로직) ---
+    tasks.named('asciidoctor') {
         dependsOn restDocsTest
+        inputs.dir file('build/generated-snippets')
+    }
+    bootJar {
+        dependsOn asciidoctor
+
+        from("${asciidoctor.outputDir}"){
+            into 'static/docs'
+        }
+    }
+
+    tasks.register('copyDocsToResources', Copy) {
+        dependsOn asciidoctor
+        from asciidoctor.outputDir
+        into file("build/resources/main/static/docs") // 실행되는 클래스패스 위치
+    }
+
+    tasks.named('bootRun') {
+        dependsOn 'copyDocsToResources'
     }
 }

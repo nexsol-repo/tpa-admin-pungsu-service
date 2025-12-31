@@ -15,6 +15,11 @@ server:
     threads:
       max: 600
       min-spare: 100
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
 
 ---
 spring.config.activate.on-profile: local

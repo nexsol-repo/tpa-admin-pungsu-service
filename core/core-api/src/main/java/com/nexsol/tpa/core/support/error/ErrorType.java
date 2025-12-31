@@ -5,8 +5,9 @@ import org.springframework.http.HttpStatus;
 
 public enum ErrorType {
 
-    DEFAULT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.E500, "An unexpected error has occurred.",
-            LogLevel.ERROR);
+    DEFAULT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.T1000, "알수없는 오류가 발생했습니다.", LogLevel.ERROR),
+    INVALID_REQUEST(HttpStatus.BAD_REQUEST, ErrorCode.T1001, "요청이 올바르지 않습니다.", LogLevel.INFO),
+    NOT_FOUND_DATA(HttpStatus.BAD_REQUEST, ErrorCode.T1002, "해당 데이터를 찾을 수 없습니다.", LogLevel.ERROR);
 
     private final HttpStatus status;
 

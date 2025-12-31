@@ -1,11 +1,9 @@
 package com.nexsol.tpa.core.api.controller.v1;
 
 import com.nexsol.tpa.core.api.controller.v1.request.InsuredModifyRequest;
+import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractDetailResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractResponse;
-import com.nexsol.tpa.core.domain.InsuredContract;
-import com.nexsol.tpa.core.domain.InsuredContractDetail;
-import com.nexsol.tpa.core.domain.InsuredSearchCondition;
-import com.nexsol.tpa.core.domain.InsuredService;
+import com.nexsol.tpa.core.domain.*;
 import com.nexsol.tpa.core.support.DomainPage;
 import com.nexsol.tpa.core.support.OffsetLimit;
 import com.nexsol.tpa.core.support.response.ApiResponse;
@@ -19,12 +17,14 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
-@RequestMapping("/v1/admin/pungsu/insured")
+@RequestMapping("/v1/insured")
 @RestController
 @RequiredArgsConstructor
 public class InsuredController {
 
     private final InsuredService insuredService;
+
+    private final MeritzService meritzService;
 
     @GetMapping("/contract")
     public ApiResponse<PageResponse<InsuredContractResponse>> getContract(@RequestParam(required = false) String status,
@@ -51,8 +51,13 @@ public class InsuredController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<InsuredContractDetail> getDetail(@PathVariable Integer id) {
-        return ApiResponse.success(insuredService.getDetail(id));
+    public ApiResponse<InsuredContractDetailResponse> getDetail(@PathVariable Integer id) {
+
+        InsuredContractDetail detail = insuredService.getDetail(id);
+
+        String certificateUrl = meritzService.getLink4(detail.insuredInfo().prctrNo());
+
+        return ApiResponse.success(InsuredContractDetailResponse.of(detail, certificateUrl));
     }
 
     @PutMapping("/{id}")
@@ -63,5 +68,6 @@ public class InsuredController {
 
         return ApiResponse.success(ResultType.SUCCESS);
     }
+
 
 }

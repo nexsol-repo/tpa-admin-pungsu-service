@@ -1,0 +1,44 @@
+name: CI/CD - TPA Admin API
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: tpa-admin-pungsu-api
+  DEPLOY_PATH: /home/nex3/app/tpa-admin-pungsu-api
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v6
+
+      - name: Docker Image Build
+        run: |
+          # 서버에서 직접 이미지를 빌드합니다.
+          docker build -t ${{ env.IMAGE_NAME }}:${{ github.ref_name }} .
+
+      - name: Prepare & Execute Deployment
+        run: |
+          mkdir -p ${{ env.DEPLOY_PATH }}
+          
+          # [수정 포인트] 파일 경로가 scripts/deploy.sh 인지 확인하세요.
+          cp docker-compose.yml ${{ env.DEPLOY_PATH }}/
+          cp scripts/deploy.sh ${{ env.DEPLOY_PATH }}/
+          chmod +x ${{ env.DEPLOY_PATH }}/deploy.sh
+          
+          # 환경 결정 (dev/prod)
+          TARGET_ENV="dev"
+          [[ "${{ github.ref_name }}" == "main" ]] && TARGET_ENV="prod"
+          
+          # 배포 스크립트 실행
+          cd ${{ env.DEPLOY_PATH }}
+          ./deploy.sh $TARGET_ENV
+
+      - name: Cleanup Docker
+        run: docker image prune -f

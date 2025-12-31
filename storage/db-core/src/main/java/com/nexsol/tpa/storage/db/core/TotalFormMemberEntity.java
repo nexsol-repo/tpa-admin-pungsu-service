@@ -84,6 +84,15 @@ public class TotalFormMemberEntity {
     @Column(name = "prctr_no")
     private String prctrNo;
 
+    @Column(name = "account")
+    private String account;
+
+    @Column(name = "path")
+    private String path;
+
+    @Column(name = "pnu")
+    private String pnu;
+
     @Embedded
     private CoverageAmount coverage;
 
@@ -104,13 +113,14 @@ public class TotalFormMemberEntity {
      * 사업장 정보 변경
      */
     public void applyLocationInfo(String address, String tenant, String category, String structure, String floor,
-            String prctrNo) {
+            String pnu, String prctrNo) {
         this.address = address;
         this.bizCategory = category;
         this.tenant = tenant;
         this.structure = structure;
         this.floor = floor;
         this.prctrNo = prctrNo;
+        this.pnu = pnu;
     }
 
     public void applyContractStatus(String joinCheck, LocalDateTime insuranceStartDate, LocalDateTime insuranceEndDate,

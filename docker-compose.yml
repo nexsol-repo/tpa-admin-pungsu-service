@@ -1,0 +1,24 @@
+services:
+  app:
+    image: ${DOCKER_IMAGE}
+    container_name: ${COMPOSE_PROJECT_NAME}
+    restart: always
+    # 서버 로컬에 존재하는 .env 파일을 읽어와 컨테이너에 주입
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:${HOST_PORT}:8080"
+    environment:
+      - TZ=Asia/Seoul
+      - SERVER_PORT=8080
+      # deploy.sh에서 넘겨주는 환경 변수 사용
+      - SPRING_PROFILES_ACTIVE=${TARGET_ENV}
+      # .env 파일에 작성된 변수들을 Spring 프로퍼티로 매핑
+      - STORAGE_DATASOURCE_CORE_JDBC_URL=${DB_URL}
+      - STORAGE_DATASOURCE_CORE_USERNAME=${DB_USERNAME}
+      - STORAGE_DATASOURCE_CORE_PASSWORD=${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3

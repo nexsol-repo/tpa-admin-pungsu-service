@@ -8,7 +8,7 @@ public record InsuredInfo(String companyName, String name, String businessNumber
         // 업종
         String category,
         // 임차여부
-        String tenant, String floor, String structure, String prctrNo
+        String tenant, String floor, String structure, String prctrNo, String pnu
 
 ) {
 }
