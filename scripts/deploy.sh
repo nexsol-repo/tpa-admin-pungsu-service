@@ -2,50 +2,44 @@
 
 # 사용법: ./deploy.sh [dev|prod]
 TARGET_ENV=$1
-APP_NAME="tpa-admin-api"
+APP_NAME="tpa-admin-pungsu-api"
 # Nginx 설정 내에서 바꿀 location 경로
-ROUTE_PATH="/admin/pungsu/"
+ROUTE_PATH="/upstream/pungsu/"
 BASE_PATH="/home/nex3/app/${APP_NAME}"
 
-if [ -z "$TARGET_ENV" ]; then
-  echo "⚠️ 사용법: ./deploy.sh [dev|prod]"
+if [ "$TARGET_ENV" != "prod" ]; then
+  echo "⚠️ 현재 설정은 main 브랜치(prod) 배포만 지원합니다."
   exit 1
 fi
 
-if [ "$TARGET_ENV" == "prod" ]; then
-  ENV_FILE=".env.prod"
-  NGINX_CONF="/etc/nginx/conf.d/${APP_NAME}-prod.conf"
-  DEFAULT_PORT="8091"
-else
-  ENV_FILE=".env.dev"
-  NGINX_CONF="/etc/nginx/conf.d/${APP_NAME}-dev.conf"
-  DEFAULT_PORT="8083"
-fi
+# Prod 환경 설정
+ENV_FILE=".env.prod"
+NGINX_CONF="/etc/nginx/conf.d/tpa-admin.conf"
+DEFAULT_PORT="8091"
 
 echo "🚀 ${APP_NAME} (${TARGET_ENV}) 배포 시작..."
 
 # 1. 환경 파일 준비 (.env.dev -> .env)
 if [ -f "${BASE_PATH}/${ENV_FILE}" ]; then
   cp "${BASE_PATH}/${ENV_FILE}" "${BASE_PATH}/.env"
-  echo "✅ 환경 설정 파일 로드 완료"
 else
-  echo "❌ 서버의 ${BASE_PATH}/${ENV_FILE} 파일이 없습니다. 수동 생성이 필요합니다."
+  echo "❌ .env.prod 파일이 없습니다. 서버에 파일을 생성해주세요."
   exit 1
 fi
 
 # 2. Blue-Green 포트 결정
-CURRENT_PORT_FILE="${BASE_PATH}/current_port_${TARGET_ENV}.txt"
+CURRENT_PORT_FILE="${BASE_PATH}/current_port.txt"
 if [ -f "$CURRENT_PORT_FILE" ]; then
     CURRENT_PORT=$(cat "$CURRENT_PORT_FILE")
 else
     CURRENT_PORT="$DEFAULT_PORT"
 fi
 
-# 8083 <-> 8084 스위칭
-if [ "$CURRENT_PORT" == "8083" ]; then
-    TARGET_PORT="8084"
+
+if [ "$CURRENT_PORT" == "8091" ]; then
+    TARGET_PORT="8092"
 else
-    TARGET_PORT="8083"
+    TARGET_PORT="8091"
 fi
 echo "🔄 포트 스위칭 계획: ${CURRENT_PORT} -> ${TARGET_PORT}"
 

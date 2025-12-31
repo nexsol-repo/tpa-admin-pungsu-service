@@ -3,13 +3,12 @@ name: CI/CD - TPA Admin API
 on:
   push:
     branches:
-      - dev
       - main
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: tpa-admin-api
-  DEPLOY_PATH: /home/nex3/app/tpa-admin-api
+  IMAGE_NAME: tpa-admin-pungsu-api
+  DEPLOY_PATH: /home/nex3/app/tpa-admin-pungsu-api
 
 jobs:
   build-and-deploy:

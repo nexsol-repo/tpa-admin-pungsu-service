@@ -1,6 +1,5 @@
 package com.nexsol.tpa.core.api.controller.v1;
 
-import com.nexsol.tpa.core.api.controller.v1.request.InsuredModifyRequest;
 import com.nexsol.tpa.core.domain.*;
 
 import com.nexsol.tpa.core.support.DomainPage;
@@ -12,7 +11,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
-import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -69,4 +69,5 @@ public class InsuredController {
         return ApiResponse.success(ResultType.SUCCESS);
     }
 
+
 }
