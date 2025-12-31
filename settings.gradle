@@ -7,7 +7,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'tpa-back-office-api'
+rootProject.name = 'tpa-admin-pungsu-api'
 
 include 'core:core-enum'
 include 'core:core-api'
