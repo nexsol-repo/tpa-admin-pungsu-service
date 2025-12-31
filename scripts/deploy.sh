@@ -45,7 +45,7 @@ echo "🔄 포트 스위칭 계획: ${CURRENT_PORT} -> ${TARGET_PORT}"
 
 # 3. 신규 컨테이너 실행
 export HOST_PORT=$TARGET_PORT
-export TARGET_ENV=$TARGET_ENV
+export TARGET_ENV="prod"
 export DOCKER_IMAGE="${APP_NAME}:${TARGET_ENV}"
 export COMPOSE_PROJECT_NAME="${APP_NAME}-${TARGET_ENV}-${TARGET_PORT}"
 
