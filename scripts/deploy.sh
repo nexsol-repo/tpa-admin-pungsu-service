@@ -75,7 +75,7 @@ done
 # 5. Nginx 트래픽 전환 (Surgical Update)
 echo "🔄 Nginx 트래픽 전환 중..."
 # 특정 location 블록 내의 proxy_pass 포트만 변경
-sudo sed -i "/location ${ROUTE_PATH//\//\\/}/,/}/ s/127.0.0.1:[0-9]\{4\}/127.0.0.1:${TARGET_PORT}/g" $NGINX_CONF
+sudo sed -i "/location ${ROUTE_PATH//\//\\/}/,/}/ s/127.0.0.1:[0-9]\{4\}/127.0.0.1:${TARGET_PORT}/" $NGINX_CONF
 sudo nginx -t && sudo nginx -s reload
 
 # 6. 구 버전 컨테이너 제거
