@@ -1,5 +1,7 @@
 services:
   app:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     image: ${DOCKER_IMAGE}
     container_name: ${COMPOSE_PROJECT_NAME}
     restart: always

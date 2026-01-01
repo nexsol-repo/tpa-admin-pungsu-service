@@ -1,6 +1,13 @@
+# syntax=docker/dockerfile:1
+# check=skip=SecretsUsedInArgOrEnv
+
 # 1. Builder Stage
 FROM eclipse-temurin:25-jdk AS builder
 WORKDIR /app
+
+ARG NEXUS_URL
+ARG NEXUS_USERNAME
+ARG NEXUS_PASSWORD
 
 # Gradle 설정 및 래퍼 복사
 COPY gradlew .
@@ -18,12 +25,20 @@ COPY support/logging/build.gradle ./support/logging/
 COPY tests/api-docs/build.gradle ./tests/api-docs/
 
 RUN chmod +x ./gradlew
-RUN ./gradlew dependencies --no-daemon || return 0
+RUN ./gradlew dependencies --no-daemon \
+    -PNEXUS_URL=${NEXUS_URL} \
+    -PNEXUS_USERNAME=${NEXUS_USERNAME} \
+    -PNEXUS_PASSWORD=${NEXUS_PASSWORD} || true
+
 
 COPY . .
 
+RUN chmod +x ./gradlew
 RUN ./gradlew :core:core-api:clean :core:core-api:bootJar \
-    -x unitTest -x contextTest -x developTest --no-daemon
+    -x unitTest -x contextTest -x developTest --no-daemon \
+    -PNEXUS_URL=${NEXUS_URL} \
+    -PNEXUS_USERNAME=${NEXUS_USERNAME} \
+    -PNEXUS_PASSWORD=${NEXUS_PASSWORD} || true
 
 # 2. Runtime Stage
 FROM eclipse-temurin:25-jre

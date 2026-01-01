@@ -5,14 +5,24 @@ import com.nexsol.tpa.core.domain.*;
 import com.nexsol.tpa.core.support.DomainPage;
 import com.nexsol.tpa.core.support.OffsetLimit;
 import com.nexsol.tpa.test.api.RestDocsTest;
+import com.nexsol.tpa.web.auth.AdminUserProvider;
+import com.nexsol.tpa.web.auth.LoginAdmin;
 import org.junit.jupiter.api.BeforeEach;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -21,6 +31,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
@@ -35,16 +46,35 @@ public class InsuredControllerTest extends RestDocsTest {
     private MeritzService meritzService;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp(RestDocumentationContextProvider restDocumentation) {
         insuredService = mock(InsuredService.class);
         meritzService = mock(MeritzService.class);
-        mockMvc = mockController(new InsuredController(insuredService, meritzService));
+
+        HandlerMethodArgumentResolver loginAdminResolver = new HandlerMethodArgumentResolver() {
+            @Override
+            public boolean supportsParameter(MethodParameter parameter) {
+                return parameter.hasParameterAnnotation(LoginAdmin.class);
+            }
+
+            @Override
+            public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+                    NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+                // 테스트용 관리자 정보 (ID: 1L) 반환
+                return new AdminUserProvider(1L, "MASTER", Collections.emptySet());
+            }
+        };
+
+        // standaloneSetup을 직접 호출하여 customArgumentResolvers 등록
+        mockMvc = MockMvcBuilders.standaloneSetup(new InsuredController(insuredService, meritzService))
+            .setCustomArgumentResolvers(loginAdminResolver)
+            .apply(documentationConfiguration(restDocumentation))
+            .build();
     }
 
     @Test
     @DisplayName("풍수해 가입신청내역 조회 API 문서화")
     void getContracts() throws Exception {
-        // given: Mock 데이터 준비 (도메인 객체)
+        // given
         InsuredContract mockContract = InsuredContract.builder()
             .id(1)
             .payMethod("CARD")
@@ -76,14 +106,12 @@ public class InsuredControllerTest extends RestDocsTest {
                 .param("limit", "10"))
             .andExpect(status().isOk())
             .andDo(document("admin-insured-contract-list",
-                    // 1. 쿼리 파라미터 문서화
                     queryParameters(parameterWithName("payYn").description("결제 여부 (Y/N, 선택)").optional(),
                             parameterWithName("startDate").description("조회 시작일 (yyyy-MM-dd, 선택)").optional(),
                             parameterWithName("endDate").description("조회 종료일 (yyyy-MM-dd, 선택)").optional(),
                             parameterWithName("keyword").description("검색어 (사업자번호/명/연락처, 선택)").optional(),
                             parameterWithName("offset").description("페이지 오프셋 (기본값 0)").optional(),
                             parameterWithName("limit").description("페이지 크기 (기본값 10)").optional()),
-                    // 2. 응답 필드 문서화
                     responseFields(
                             fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (SUCCESS/FAIL)"),
                             fieldWithPath("data.content").type(JsonFieldType.ARRAY).description("가입신청 내역 리스트"),
@@ -117,11 +145,10 @@ public class InsuredControllerTest extends RestDocsTest {
     void getDetail() throws Exception {
         // given
         Integer id = 1;
-        String mockCertificateUrl = "https://meritz.com/cert/12345"; // 테스트용 가입확인서 URL
+        String mockCertificateUrl = "https://meritz.com/cert/12345";
 
-        // 1. 핵심 도메인 정보(InsuredContractDetail) 준비
         InsuredContractDetail response = InsuredContractDetail.builder()
-            .id(id.intValue())
+            .id(id)
             .insuredInfo(InsuredInfo.builder()
                 .companyName("테스트상호")
                 .name("홍길동")
@@ -134,7 +161,7 @@ public class InsuredControllerTest extends RestDocsTest {
                 .tenant("임차인")
                 .floor("1층")
                 .structure("철근콘크리트")
-                .prctrNo("PRC12345") // MeritzService 조회에 사용될 키값
+                .prctrNo("PRC12345")
                 .pnu("24214214124124124")
                 .build())
             .contractInfo(InsuredContractInfo.builder()
@@ -157,11 +184,9 @@ public class InsuredControllerTest extends RestDocsTest {
                 .build())
             .build();
 
-        // 2. 각 서비스의 Mocking 설정
         given(insuredService.getDetail(id)).willReturn(response);
         given(meritzService.getLink4("PRC12345")).willReturn(mockCertificateUrl);
 
-        // when & then
         mockMvc.perform(get("/v1/insured/{id}", id).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(document("admin-insured-detail", pathParameters(parameterWithName("id").description("계약 PK ID")),
@@ -169,7 +194,6 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (SUCCESS/FAIL)"),
                             fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("계약 ID"),
 
-                            // data.insuredInfo 상세 필드
                             fieldWithPath("data.insuredInfo.companyName").type(JsonFieldType.STRING).description("상호명"),
                             fieldWithPath("data.insuredInfo.name").type(JsonFieldType.STRING).description("성명"),
                             fieldWithPath("data.insuredInfo.businessNumber").type(JsonFieldType.STRING)
@@ -186,7 +210,6 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("data.insuredInfo.prctrNo").type(JsonFieldType.STRING).description("질권번호"),
                             fieldWithPath("data.insuredInfo.pnu").type(JsonFieldType.STRING).description("PNU코드"),
 
-                            // data.contractInfo 상세 필드
                             fieldWithPath("data.contractInfo.joinCk").type(JsonFieldType.STRING).description("가입 상태"),
                             fieldWithPath("data.contractInfo.isRenewalTarget").type(JsonFieldType.BOOLEAN)
                                 .description("갱신 대상 여부"),
@@ -219,7 +242,6 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("data.contractInfo.totalLocalGovernmentCost").type(JsonFieldType.NUMBER)
                                 .description("지자체지원 보험료"),
 
-                            // 새로 조합되어 추가된 필드
                             fieldWithPath("data.certificateUrl").type(JsonFieldType.STRING)
                                 .description("가입확인서 PDF 다운로드 URL")
                                 .optional(),
@@ -232,6 +254,7 @@ public class InsuredControllerTest extends RestDocsTest {
     void modify() throws Exception {
         // given
         Integer id = 1;
+        Long adminId = 1L; // 테스트용 Admin ID
         String requestJson = """
                 {
                     "insuredInfo": {
@@ -265,11 +288,13 @@ public class InsuredControllerTest extends RestDocsTest {
                         "totalInsuranceMyCost": 100000,
                         "totalGovernmentCost": 300000,
                         "totalLocalGovernmentCost": 100000
-                    }
+                    },
+                    "memoContent": "수정 사유: 사업자 요청"
                 }
                 """;
 
-        given(insuredService.modify(eq(id), any(), any())).willReturn(id);
+        // [중요] adminId(1L) 전달 여부 검증
+        given(insuredService.modify(eq(id), any(), any(), any(), eq(adminId))).willReturn(id);
 
         // when & then
         mockMvc.perform(put("/v1/insured/{id}", id).contentType(MediaType.APPLICATION_JSON).content(requestJson))
@@ -305,7 +330,10 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("contractInfo.totalInsuranceCost").description("총 보험료"),
                             fieldWithPath("contractInfo.totalInsuranceMyCost").description("본인부담 보험료"),
                             fieldWithPath("contractInfo.totalGovernmentCost").description("정부지원 보험료"),
-                            fieldWithPath("contractInfo.totalLocalGovernmentCost").description("지자체지원 보험료")),
+                            fieldWithPath("contractInfo.totalLocalGovernmentCost").description("지자체지원 보험료"),
+
+                            // [추가] 메모 필드 문서화
+                            fieldWithPath("memoContent").description("관리자 메모 내용 (선택)").optional()),
                     responseFields(
                             fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (SUCCESS/FAIL)"),
                             fieldWithPath("data").type(JsonFieldType.STRING).description("결과 데이터 (SUCCESS)"),

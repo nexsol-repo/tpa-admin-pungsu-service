@@ -5,5 +5,5 @@ import com.nexsol.tpa.core.domain.InsuredInfo;
 import lombok.Builder;
 
 @Builder
-public record InsuredModifyRequest(InsuredInfo insuredInfo, InsuredContractInfo contractInfo) {
+public record InsuredModifyRequest(InsuredInfo insuredInfo, InsuredContractInfo contractInfo, String memoContent) {
 }

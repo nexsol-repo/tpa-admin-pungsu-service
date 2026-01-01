@@ -10,6 +10,8 @@ import com.nexsol.tpa.core.support.response.ApiResponse;
 
 import com.nexsol.tpa.core.support.response.PageResponse;
 import com.nexsol.tpa.core.support.response.ResultType;
+import com.nexsol.tpa.web.auth.AdminUserProvider;
+import com.nexsol.tpa.web.auth.LoginAdmin;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +32,8 @@ public class InsuredController {
     public ApiResponse<PageResponse<InsuredContractResponse>> getContract(@RequestParam(required = false) String status,
             @RequestParam(required = false) String payYn, @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate, @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit) {
+            @RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit,
+            @LoginAdmin AdminUserProvider admin) {
 
         InsuredSearchCondition condition = InsuredSearchCondition.builder()
             .status(status)
@@ -61,13 +64,13 @@ public class InsuredController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<ResultType> modify(@PathVariable Integer id, @RequestBody InsuredModifyRequest request) {
+    public ApiResponse<ResultType> modify(@PathVariable Integer id, @RequestBody InsuredModifyRequest request,
+            @LoginAdmin AdminUserProvider admin) {
         // 서비스 레이어에 수정을 위임
         // (ID와 함께 가입자/계약정보 Record를 전달)
-        insuredService.modify(id, request.insuredInfo(), request.contractInfo());
+        insuredService.modify(id, request.insuredInfo(), request.contractInfo(), request.memoContent(), admin.id());
 
         return ApiResponse.success(ResultType.SUCCESS);
     }
-
 
 }

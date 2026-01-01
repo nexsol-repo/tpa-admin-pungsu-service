@@ -21,8 +21,12 @@ jobs:
       - name: Docker Image Build
         run: |
           # 서버에서 직접 이미지를 빌드합니다.
-      
-          docker build -t ${{ env.IMAGE_NAME }}:prod -f Dockerfile .
+          docker build /
+            --network=host \
+            --build-arg NEXUS_URL=${{ secrets.NEXUS_URL }} \
+            --build-arg NEXUS_USERNAME=${{ secrets.NEXUS_USERNAME }} \
+            --build-arg NEXUS_PASSWORD=${{ secrets.NEXUS_PASSWORD }} \
+            -t ${{ env.IMAGE_NAME }}:prod -f Dockerfile .
 
       - name: Prepare & Execute Deployment
         run: |

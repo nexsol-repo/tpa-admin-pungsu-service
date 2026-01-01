@@ -5,9 +5,12 @@ dependencies {
     implementation project(":core:core-enum")
     implementation project(":support:logging")
     implementation project(":storage:db-core")
+    implementation project(":client:client-memo")
 
 
     testImplementation project(":tests:api-docs")
     
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'com.nexsol.tpa:web-auth:0.0.1-SNAPSHOT'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 }
