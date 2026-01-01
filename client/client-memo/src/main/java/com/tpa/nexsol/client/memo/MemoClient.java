@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 @FeignClient(name = "memo-service", url = "${external.memo-service.url}", configuration = FeignHeaderConfig.class)
 public interface MemoClient {
 
-    @PostMapping("/v1/admin/memo/{contractId}")
-    void registerMemo(@PathVariable("contractId") Long contractId, @RequestBody CreateMemoRequest request,  @RequestHeader("Authorization") String token );
-
+//    @PostMapping("/v1/admin/memo/{contractId}")
+//    void registerMemo(@PathVariable("contractId") Long contractId, @RequestBody CreateMemoRequest request,  @RequestHeader("Authorization") String token );
+@PostMapping("/v1/admin/memo/{contractId}")
+void registerMemo(@PathVariable("contractId") Long contractId, @RequestBody CreateMemoRequest request);
 }
