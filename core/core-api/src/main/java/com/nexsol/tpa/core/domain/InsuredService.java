@@ -32,7 +32,7 @@ public class InsuredService {
 
     @Transactional
     public Integer modify(Integer id, InsuredInfo info, InsuredContractInfo contract, String memoContent,
-                          Long adminId) {
+            Long adminId) {
         // 1. DB 업데이트 (계약 정보 수정)
         Integer updatedId = insuredContractorWriter.write(id, info, contract);
 
