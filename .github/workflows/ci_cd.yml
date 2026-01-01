@@ -20,8 +20,8 @@ jobs:
 
       - name: Docker Image Build
         run: |
-          # 서버에서 직접 이미지를 빌드합니다.
-          docker build /
+          echo "🐳 Build Docker Images"
+          docker build \
             --network=host \
             --build-arg NEXUS_URL=${{ secrets.NEXUS_URL }} \
             --build-arg NEXUS_USERNAME=${{ secrets.NEXUS_USERNAME }} \
