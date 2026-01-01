@@ -80,10 +80,9 @@ sudo nginx -t && sudo nginx -s reload
 
 # 6. 구 버전 컨테이너 제거
 OLD_PROJECT_NAME="${APP_NAME}-${TARGET_ENV}-${CURRENT_PORT}"
-if [ "$(docker ps -a -q -f name=$OLD_PROJECT_NAME)" ]; then
-    echo "🛑 이전 버전 컨테이너 제거: ${OLD_PROJECT_NAME}"
-    docker stop $OLD_PROJECT_NAME && docker rm $OLD_PROJECT_NAME
-fi
+echo "🛑 이전 버전 제거: ${OLD_PROJECT_NAME}"
+docker compose -p $OLD_PROJECT_NAME down || true
+
 
 # 7. 현재 포트 정보 업데이트
 echo "$TARGET_PORT" > "$CURRENT_PORT_FILE"
