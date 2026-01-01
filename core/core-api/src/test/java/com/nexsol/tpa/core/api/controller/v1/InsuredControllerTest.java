@@ -97,7 +97,7 @@ public class InsuredControllerTest extends RestDocsTest {
 
         // when & then
         mockMvc
-            .perform(get("/v1/insured/contract").contentType(MediaType.APPLICATION_JSON)
+            .perform(get("/v1/admin/pungsu/contract").contentType(MediaType.APPLICATION_JSON)
                 .param("payYn", "Y")
                 .param("startDate", "2025-01-01")
                 .param("endDate", "2025-12-31")
@@ -187,7 +187,7 @@ public class InsuredControllerTest extends RestDocsTest {
         given(insuredService.getDetail(id)).willReturn(response);
         given(meritzService.getLink4("PRC12345")).willReturn(mockCertificateUrl);
 
-        mockMvc.perform(get("/v1/insured/{id}", id).accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/v1/admin/pungsu/{id}", id).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(document("admin-insured-detail", pathParameters(parameterWithName("id").description("계약 PK ID")),
                     responseFields(
@@ -297,7 +297,7 @@ public class InsuredControllerTest extends RestDocsTest {
         given(insuredService.modify(eq(id), any(), any(), any(), eq(adminId))).willReturn(id);
 
         // when & then
-        mockMvc.perform(put("/v1/insured/{id}", id).contentType(MediaType.APPLICATION_JSON).content(requestJson))
+        mockMvc.perform(put("/v1/admin/pungsu/{id}", id).contentType(MediaType.APPLICATION_JSON).content(requestJson))
             .andExpect(status().isOk())
             .andDo(document("admin-insured-modify", pathParameters(parameterWithName("id").description("계약 PK ID")),
                     requestFields(
