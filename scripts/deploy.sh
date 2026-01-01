@@ -15,7 +15,7 @@ fi
 # Prod 환경 설정
 ENV_FILE=".env.prod"
 NGINX_CONF="/etc/nginx/conf.d/tpa-admin-api.conf"
-DEFAULT_PORT="8091"
+DEFAULT_PORT="8103"
 
 echo "🚀 ${APP_NAME} (${TARGET_ENV}) 배포 시작..."
 
@@ -36,10 +36,10 @@ else
 fi
 
 
-if [ "$CURRENT_PORT" == "8091" ]; then
-    TARGET_PORT="8092"
+if [ "$CURRENT_PORT" == "8103" ]; then
+    TARGET_PORT="8104"
 else
-    TARGET_PORT="8091"
+    TARGET_PORT="8103"
 fi
 echo "🔄 포트 스위칭 계획: ${CURRENT_PORT} -> ${TARGET_PORT}"
 
