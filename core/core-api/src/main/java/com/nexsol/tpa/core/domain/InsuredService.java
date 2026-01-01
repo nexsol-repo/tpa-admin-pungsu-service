@@ -30,18 +30,16 @@ public class InsuredService {
 
     @Transactional
     public Integer modify(Integer id, InsuredInfo info, InsuredContractInfo contract, String memoContent,
-            Long adminId) {
+                          Long adminId) {
         // 1. DB 업데이트 (계약 정보 수정)
         Integer updatedId = insuredContractorWriter.write(id, info, contract);
 
         // 2. 메모가 있다면 이벤트 발행 (작성자 ID 포함)
         if (StringUtils.hasText(memoContent)) {
             // 이벤트 발행 -> 리스너에서 FeignClient 호출
-            eventPublisher.publishEvent(new InsuredModifiedEvent(id, memoContent, String.valueOf(adminId) // Long
-                                                                                                          // ID
-                                                                                                          // ->
-                                                                                                          // String
-                                                                                                          // 변환
+            eventPublisher.publishEvent(new InsuredModifiedEvent(id, memoContent, String.valueOf(adminId)
+
+
             ));
         }
 
