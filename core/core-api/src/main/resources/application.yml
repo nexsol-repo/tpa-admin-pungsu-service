@@ -20,6 +20,10 @@ logging:
     org.hibernate.SQL: DEBUG
     org.springframework.security: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
+jwt:
+  secret: ${JWT_SECRET:default_secret_key_here} # .env의 값을 읽거나 기본값 사용
+  expiration-seconds: 36000
+  issuer: "nexsol-admin"
 external:
   memo-service:
     url: ${MEMO_SERVICE_URL}
