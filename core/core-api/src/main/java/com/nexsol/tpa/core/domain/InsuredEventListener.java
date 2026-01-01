@@ -43,9 +43,9 @@ public class InsuredEventListener {
                 return token;
             }
         }
-        // 토큰이 없는 경우(ex: 테스트 코드, 내부 스케줄러 등) 처리 필요
+
         log.warn("현재 요청에 Authorization 헤더가 없습니다.");
-        return ""; // 혹은 예외 발생
+        return "";
     }
 
 }
