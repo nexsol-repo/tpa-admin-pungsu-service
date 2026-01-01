@@ -22,10 +22,10 @@ public class InsuredEventListener {
     @EventListener
     public void handleInsuredModified(InsuredModifiedEvent event) {
         try {
-//            String token = getJwtToken();
+
             // 메모 서비스 호출
             memoClient.registerMemo(Long.valueOf(event.contractId()), // Integer -> Long
-                    new CreateMemoRequest(event.memoContent(), "PUNGSU"));
+                    new CreateMemoRequest(event.memoContent(), "PUNGSU"), event.token());
         }
         catch (Exception e) {
             log.error("메모 저장 실패 contractId={}", event.contractId(), e);
@@ -34,19 +34,6 @@ public class InsuredEventListener {
         }
     }
 
-//    private String getJwtToken() {
-//        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-//        if (attributes != null) {
-//            HttpServletRequest request = attributes.getRequest();
-//            String token = request.getHeader("Authorization");
-//            if (token != null) {
-//                log.info("token={}",token);
-//                return token;
-//            }
-//        }
-//
-//        log.warn("현재 요청에 Authorization 헤더가 없습니다.");
-//        return "";
-//    }
+
 
 }
