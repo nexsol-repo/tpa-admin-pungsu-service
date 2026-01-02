@@ -20,7 +20,7 @@ public record InsuredContractInfo(String joinCk, boolean isRenewalTarget, // 갱
         Long insuranceCostShopSign,
         // 개인 부담금
         Long insuranceCostDeductible, Long totalInsuranceCost, Long totalInsuranceMyCost, Long totalGovernmentCost,
-        Long totalLocalGovernmentCost
+        Long totalLocalGovernmentCost,String payYn
 
 ) {
 

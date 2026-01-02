@@ -32,6 +32,9 @@ public class TotalFormMemberEntity {
     @Column(name = "company")
     private String companyName; // 상호명
 
+    @Column(name="insured_rr_no")
+    private String birthDate;
+
     @Column(name = "phone")
     private String phoneNumber; // 휴대폰번호
 
@@ -69,8 +72,8 @@ public class TotalFormMemberEntity {
     @Column(name = "tenant")
     private String tenant;
 
-    @Column(name = "ground_floor_yn")
-    private String groundFloorYn;
+    @Column(name = "ground_floor_cd")
+    private String groundFloorCd;
 
     @Column(name = "grnd_flr_cnt")
     private int groundFloor;
@@ -105,11 +108,12 @@ public class TotalFormMemberEntity {
     /**
      * 가입자 기본 인적 사항 변경
      */
-    public void applyInsuredBasic(String companyName, String name, String businessNumber, String phoneNumber) {
+    public void applyInsuredBasic(String companyName, String name, String businessNumber, String phoneNumber,String birthDate) {
         this.companyName = companyName;
         this.name = name; // 계약자=피보험자 규칙 강제
         this.businessNumber = businessNumber;
         this.phoneNumber = phoneNumber;
+        this.birthDate=birthDate;
     }
 
     /**
@@ -121,7 +125,7 @@ public class TotalFormMemberEntity {
         this.address = address;
         this.bizCategory = category;
         this.tenant = tenant;
-        this.groundFloorYn = groundFloorYn;
+        this.groundFloorCd = groundFloorYn;
         this.groundFloor = groundFloor;
         this.underGroundFloor = underGroundFloor;
         this.structure = structure;
@@ -132,11 +136,12 @@ public class TotalFormMemberEntity {
     }
 
     public void applyContractStatus(String joinCheck, LocalDateTime insuranceStartDate, LocalDateTime insuranceEndDate,
-            String insuranceNumber) {
+            String insuranceNumber,String payYn) {
         this.joinCheck = joinCheck;
         this.insuranceStartDate = insuranceStartDate;
         this.insuranceEndDate = insuranceEndDate;
         this.insuranceNumber = insuranceNumber;
+        this.payYn=payYn;
     }
 
     /**

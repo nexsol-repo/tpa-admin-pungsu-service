@@ -169,7 +169,7 @@ public class InsuredControllerTest extends RestDocsTest {
                 .address("서울시 강남구 테헤란로")
                 .category("음식점")
                 .tenant("임차인")
-                .groundFloorYn("Y")
+                .groundFloorCd("0")
                 .groundFloor(5)
                 .underGroundFloor(1)
                 .subFloor("1")
@@ -218,7 +218,7 @@ public class InsuredControllerTest extends RestDocsTest {
                         fieldWithPath("data.insuredInfo.address").type(JsonFieldType.STRING).description("주소"),
                         fieldWithPath("data.insuredInfo.category").type(JsonFieldType.STRING).description("업종"),
                         fieldWithPath("data.insuredInfo.tenant").type(JsonFieldType.STRING).description("임차여부"),
-                        fieldWithPath("data.insuredInfo.groundFloorYn").type(JsonFieldType.STRING)
+                        fieldWithPath("data.insuredInfo.groundFloorCd").type(JsonFieldType.STRING)
                             .description("사업장 지하소재여부 코드(0: 지하, 1: 지상(1층), 2: 지상(그외)"),
                         fieldWithPath("data.insuredInfo.groundFloor").type(JsonFieldType.NUMBER)
                             .description("건물 지상 층수 정보"),
@@ -288,7 +288,7 @@ public class InsuredControllerTest extends RestDocsTest {
                         "address": "서울시 강남구 테헤란로",
                         "category": "음식점",
                         "tenant": "임차인",
-                        "groundFloorYn": "Y",
+                        "groundFloorCd": "Y",
                         "groundFloor":5,
                         "underGroundFloor":1,
                         "subFloor":"1",
@@ -336,7 +336,7 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("insuredInfo.address").description("주소"),
                             fieldWithPath("insuredInfo.category").description("업종"),
                             fieldWithPath("insuredInfo.tenant").description("임차여부"),
-                            fieldWithPath("insuredInfo.groundFloorYn")
+                            fieldWithPath("insuredInfo.groundFloorCd")
                                 .description("사업장 지하소재여부 코드(0: 지하, 1: 지상(1층), 2: 지상(그외)"),
                             fieldWithPath("insuredInfo.groundFloor").description("건물 지상 층수 정보"),
                             fieldWithPath("insuredInfo.underGroundFloor").description("건물 지하 층수 정보"),

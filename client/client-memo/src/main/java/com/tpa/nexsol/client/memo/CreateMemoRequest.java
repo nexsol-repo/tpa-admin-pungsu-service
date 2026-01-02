@@ -1,4 +1,6 @@
 package com.tpa.nexsol.client.memo;
 
-public record CreateMemoRequest(String content, String serviceType) {
+import com.nexsol.tpa.core.enums.ServiceType;
+
+public record CreateMemoRequest(String content, ServiceType serviceType) {
 }

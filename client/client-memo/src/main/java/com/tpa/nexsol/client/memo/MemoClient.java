@@ -1,6 +1,5 @@
 package com.tpa.nexsol.client.memo;
 
-import com.tpa.nexsol.client.memo.config.FeignHeaderConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,8 +12,13 @@ public interface MemoClient {
     @PostMapping("/v1/admin/memo/{contractId}")
     void registerMemo(@PathVariable("contractId") Long contractId, @RequestBody CreateMemoRequest request,
             @RequestHeader("X-User-Id") String userId, @RequestHeader("Authorization") String token);
-    // @PostMapping("/v1/admin/memo/{contractId}")
-    // void registerMemo(@PathVariable("contractId") Long contractId, @RequestBody
-    // CreateMemoRequest request);
+
+
+    @PostMapping("/v1/admin/memo/{contractId}/system-log")
+    void registerSystemLog(@PathVariable("contractId") Long contractId,
+                           @RequestBody CreateSystemLogRequest request,
+                           @RequestHeader("X-User-Id") String userId,
+                           @RequestHeader("Authorization") String token);
+
 
 }

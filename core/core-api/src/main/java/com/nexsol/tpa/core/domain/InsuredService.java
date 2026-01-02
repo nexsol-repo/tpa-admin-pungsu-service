@@ -10,6 +10,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class InsuredService {
@@ -32,19 +35,26 @@ public class InsuredService {
 
     @Transactional
     public Integer modify(Integer id, InsuredInfo info, InsuredContractInfo contract, String memoContent,
-            Long adminId) {
-        // 1. DB 업데이트 (계약 정보 수정)
-        Integer updatedId = insuredContractorWriter.write(id, info, contract);
+                          Long adminId) {
 
-        // 2. 메모가 있다면 이벤트 발행 (작성자 ID 포함)
+        List<ChangeDetail> diffs = insuredContractorWriter.writeAndGetDiff(id, info, contract);
+        String token = getJwtToken();
+
+        if (!diffs.isEmpty()) {
+            String systemMemo = "시스템 변경 로그: " + diffs.stream()
+                    .map(ChangeDetail::toString)
+                    .collect(Collectors.joining(", "));
+
+            // memo-service의 'SYSTEM' 분류로 전송하기 위한 이벤트
+            eventPublisher.publishEvent(new InsuredModifiedEvent(id, systemMemo, String.valueOf(adminId), token));
+        }
+
+        // 3. 관리자가 직접 작성한 메모가 있다면 이벤트 발행
         if (StringUtils.hasText(memoContent)) {
-            // 이벤트 발행 -> 리스너에서 FeignClient 호출
-
-            String token = getJwtToken();
             eventPublisher.publishEvent(new InsuredModifiedEvent(id, memoContent, String.valueOf(adminId), token));
         }
 
-        return updatedId;
+        return id;
     }
 
     private String getJwtToken() {
