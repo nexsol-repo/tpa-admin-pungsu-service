@@ -32,7 +32,7 @@ public class TotalFormMemberEntity {
     @Column(name = "company")
     private String companyName; // 상호명
 
-    @Column(name="insured_rr_no")
+    @Column(name = "insured_rr_no")
     private String birthDate;
 
     @Column(name = "phone")
@@ -108,12 +108,13 @@ public class TotalFormMemberEntity {
     /**
      * 가입자 기본 인적 사항 변경
      */
-    public void applyInsuredBasic(String companyName, String name, String businessNumber, String phoneNumber,String birthDate) {
+    public void applyInsuredBasic(String companyName, String name, String businessNumber, String phoneNumber,
+            String birthDate) {
         this.companyName = companyName;
         this.name = name; // 계약자=피보험자 규칙 강제
         this.businessNumber = businessNumber;
         this.phoneNumber = phoneNumber;
-        this.birthDate=birthDate;
+        this.birthDate = birthDate;
     }
 
     /**
@@ -136,12 +137,12 @@ public class TotalFormMemberEntity {
     }
 
     public void applyContractStatus(String joinCheck, LocalDateTime insuranceStartDate, LocalDateTime insuranceEndDate,
-            String insuranceNumber,String payYn) {
+            String insuranceNumber, String payYn) {
         this.joinCheck = joinCheck;
         this.insuranceStartDate = insuranceStartDate;
         this.insuranceEndDate = insuranceEndDate;
         this.insuranceNumber = insuranceNumber;
-        this.payYn=payYn;
+        this.payYn = payYn;
     }
 
     /**

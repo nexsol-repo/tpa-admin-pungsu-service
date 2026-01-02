@@ -35,15 +35,14 @@ public class InsuredService {
 
     @Transactional
     public Integer modify(Integer id, InsuredInfo info, InsuredContractInfo contract, String memoContent,
-                          Long adminId) {
+            Long adminId) {
 
         List<ChangeDetail> diffs = insuredContractorWriter.writeAndGetDiff(id, info, contract);
         String token = getJwtToken();
 
         if (!diffs.isEmpty()) {
-            String systemMemo = "시스템 변경 로그: " + diffs.stream()
-                    .map(ChangeDetail::toString)
-                    .collect(Collectors.joining(", "));
+            String systemMemo = "시스템 변경 로그: "
+                    + diffs.stream().map(ChangeDetail::toString).collect(Collectors.joining(", "));
 
             // memo-service의 'SYSTEM' 분류로 전송하기 위한 이벤트
             eventPublisher.publishEvent(new InsuredModifiedEvent(id, systemMemo, String.valueOf(adminId), token));

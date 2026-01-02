@@ -180,6 +180,7 @@ public class InsuredControllerTest extends RestDocsTest {
                 .build())
             .contractInfo(InsuredContractInfo.builder()
                 .joinCk("가입완료")
+                .payYn("Y")
                 .isRenewalTarget(false)
                 .insuranceStartDate(LocalDateTime.of(2025, 1, 1, 0, 0))
                 .insuranceEndDate(LocalDateTime.of(2025, 12, 31, 23, 59))
@@ -232,6 +233,8 @@ public class InsuredControllerTest extends RestDocsTest {
                         fieldWithPath("data.insuredInfo.pnu").type(JsonFieldType.STRING).description("PNU코드"),
 
                         fieldWithPath("data.contractInfo.joinCk").type(JsonFieldType.STRING).description("가입 상태"),
+                        fieldWithPath("data.contractInfo.payYn").type(JsonFieldType.STRING)
+                            .description("가입 유형 ? Y 유료 : 무료"),
                         fieldWithPath("data.contractInfo.isRenewalTarget").type(JsonFieldType.BOOLEAN)
                             .description("갱신 대상 여부"),
                         fieldWithPath("data.contractInfo.insuranceStartDate").type(JsonFieldType.STRING)
