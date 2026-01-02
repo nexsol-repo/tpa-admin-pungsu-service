@@ -5,7 +5,9 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Builder
-public record InsuredContract(Integer id, String payMethod, // 결제 구분
+public record InsuredContract(
+        Integer id,
+        String payYn, // 결제 구분
         String businessNumber, // 사업자번호
         String companyName, // 사업장명
         String address, // 사업장 주소
@@ -16,7 +18,8 @@ public record InsuredContract(Integer id, String payMethod, // 결제 구분
         LocalDateTime insuranceEndDate, // 보험기간 종료
         String joinCk, boolean isRenewalTarget, // 갱신대상 여부,
         String account, // 제휴사
-        String path // 채널
+        String path // 채널,
+
 ) {
 
     public boolean isRenewalTarget(LocalDateTime now) {
