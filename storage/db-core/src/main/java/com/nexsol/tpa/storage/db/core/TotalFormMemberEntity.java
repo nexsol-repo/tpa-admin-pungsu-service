@@ -69,8 +69,14 @@ public class TotalFormMemberEntity {
     @Column(name = "tenant")
     private String tenant;
 
-    @Column(name = "floor")
-    private String floor;
+    @Column(name = "gorund_floor_yn")
+    private String groundFloorYn;
+
+    @Column(name = "grnd_flr_cnt")
+    private int groundFloor;
+
+    @Column(name = "ugrnd_flr_cnt")
+    private int underGroundFloor;
 
     @Column(name = "subfloor")
     private String subFloor;
@@ -109,13 +115,18 @@ public class TotalFormMemberEntity {
     /**
      * 사업장 정보 변경
      */
-    public void applyLocationInfo(String address, String tenant, String category, String structure, String floor,
-            String pnu, String prctrNo) {
+    public void applyLocationInfo(String address, String tenant, String category, String structure, String pnu,
+            String prctrNo, String groundFloorYn, int groundFloor, int underGroundFloor, String subFloor,
+            String endSubFloor) {
         this.address = address;
         this.bizCategory = category;
         this.tenant = tenant;
+        this.groundFloorYn = groundFloorYn;
+        this.groundFloor = groundFloor;
+        this.underGroundFloor = underGroundFloor;
         this.structure = structure;
-        this.floor = floor;
+        this.subFloor = subFloor;
+        this.endSubFloor = endSubFloor;
         this.prctrNo = prctrNo;
         this.pnu = pnu;
     }

@@ -169,7 +169,11 @@ public class InsuredControllerTest extends RestDocsTest {
                 .address("서울시 강남구 테헤란로")
                 .category("음식점")
                 .tenant("임차인")
-                .floor("1층")
+                .groundFloorYn("Y")
+                .groundFloor(5)
+                .underGroundFloor(1)
+                .subFloor("1")
+                .endSubFloor("5")
                 .structure("철근콘크리트")
                 .prctrNo("PRC12345")
                 .pnu("24214214124124124")
@@ -199,64 +203,71 @@ public class InsuredControllerTest extends RestDocsTest {
 
         mockMvc.perform(get("/v1/admin/pungsu/{id}", id).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andDo(document("admin-insured-detail", pathParameters(parameterWithName("id").description("계약 PK ID")),
-                    responseFields(
-                            fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (SUCCESS/FAIL)"),
-                            fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("계약 ID"),
+            .andDo(document("admin-insured-detail", pathParameters(parameterWithName("id")
+                .description("계약 PK ID")), responseFields(
+                        fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (SUCCESS/FAIL)"),
+                        fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("계약 ID"),
 
-                            fieldWithPath("data.insuredInfo.companyName").type(JsonFieldType.STRING).description("상호명"),
-                            fieldWithPath("data.insuredInfo.name").type(JsonFieldType.STRING).description("성명"),
-                            fieldWithPath("data.insuredInfo.businessNumber").type(JsonFieldType.STRING)
-                                .description("사업자 번호"),
-                            fieldWithPath("data.insuredInfo.birthDate").type(JsonFieldType.STRING).description("생년월일"),
-                            fieldWithPath("data.insuredInfo.email").type(JsonFieldType.STRING).description("이메일"),
-                            fieldWithPath("data.insuredInfo.phoneNumber").type(JsonFieldType.STRING)
-                                .description("전화번호"),
-                            fieldWithPath("data.insuredInfo.address").type(JsonFieldType.STRING).description("주소"),
-                            fieldWithPath("data.insuredInfo.category").type(JsonFieldType.STRING).description("업종"),
-                            fieldWithPath("data.insuredInfo.tenant").type(JsonFieldType.STRING).description("임차여부"),
-                            fieldWithPath("data.insuredInfo.floor").type(JsonFieldType.STRING).description("층수"),
-                            fieldWithPath("data.insuredInfo.structure").type(JsonFieldType.STRING).description("건물구조"),
-                            fieldWithPath("data.insuredInfo.prctrNo").type(JsonFieldType.STRING).description("질권번호"),
-                            fieldWithPath("data.insuredInfo.pnu").type(JsonFieldType.STRING).description("PNU코드"),
+                        fieldWithPath("data.insuredInfo.companyName").type(JsonFieldType.STRING).description("상호명"),
+                        fieldWithPath("data.insuredInfo.name").type(JsonFieldType.STRING).description("성명"),
+                        fieldWithPath("data.insuredInfo.businessNumber").type(JsonFieldType.STRING)
+                            .description("사업자 번호"),
+                        fieldWithPath("data.insuredInfo.birthDate").type(JsonFieldType.STRING).description("생년월일"),
+                        fieldWithPath("data.insuredInfo.email").type(JsonFieldType.STRING).description("이메일"),
+                        fieldWithPath("data.insuredInfo.phoneNumber").type(JsonFieldType.STRING).description("전화번호"),
+                        fieldWithPath("data.insuredInfo.address").type(JsonFieldType.STRING).description("주소"),
+                        fieldWithPath("data.insuredInfo.category").type(JsonFieldType.STRING).description("업종"),
+                        fieldWithPath("data.insuredInfo.tenant").type(JsonFieldType.STRING).description("임차여부"),
+                        fieldWithPath("data.insuredInfo.groundFloorYn").type(JsonFieldType.STRING)
+                            .description("사업장 지하소재여부 코드(0: 지하, 1: 지상(1층), 2: 지상(그외)"),
+                        fieldWithPath("data.insuredInfo.groundFloor").type(JsonFieldType.NUMBER)
+                            .description("건물 지상 층수 정보"),
+                        fieldWithPath("data.insuredInfo.underGroundFloor").type(JsonFieldType.NUMBER)
+                            .description("건물 지하 층수 정보"),
+                        fieldWithPath("data.insuredInfo.subFloor").type(JsonFieldType.STRING).description("사업장 시작 층수"),
+                        fieldWithPath("data.insuredInfo.endSubFloor").type(JsonFieldType.STRING)
+                            .description("사업장 끝 층수"),
+                        fieldWithPath("data.insuredInfo.structure").type(JsonFieldType.STRING).description("건물구조"),
+                        fieldWithPath("data.insuredInfo.prctrNo").type(JsonFieldType.STRING).description("질권번호"),
+                        fieldWithPath("data.insuredInfo.pnu").type(JsonFieldType.STRING).description("PNU코드"),
 
-                            fieldWithPath("data.contractInfo.joinCk").type(JsonFieldType.STRING).description("가입 상태"),
-                            fieldWithPath("data.contractInfo.isRenewalTarget").type(JsonFieldType.BOOLEAN)
-                                .description("갱신 대상 여부"),
-                            fieldWithPath("data.contractInfo.insuranceStartDate").type(JsonFieldType.STRING)
-                                .description("보험 시작일"),
-                            fieldWithPath("data.contractInfo.insuranceEndDate").type(JsonFieldType.STRING)
-                                .description("보험 종료일"),
-                            fieldWithPath("data.contractInfo.insuranceCompany").type(JsonFieldType.STRING)
-                                .description("보험사"),
-                            fieldWithPath("data.contractInfo.insuranceNumber").type(JsonFieldType.STRING)
-                                .description("증권번호"),
-                            fieldWithPath("data.contractInfo.insuranceCostBld").type(JsonFieldType.NUMBER)
-                                .description("건물 가입금액"),
-                            fieldWithPath("data.contractInfo.insuranceCostFcl").type(JsonFieldType.NUMBER)
-                                .description("시설/집기 가입금액"),
-                            fieldWithPath("data.contractInfo.insuranceCostMach").type(JsonFieldType.NUMBER)
-                                .description("기계 가입금액"),
-                            fieldWithPath("data.contractInfo.insuranceCostInven").type(JsonFieldType.NUMBER)
-                                .description("재고자산 가입금액"),
-                            fieldWithPath("data.contractInfo.insuranceCostShopSign").type(JsonFieldType.NUMBER)
-                                .description("야외간판 가입금액"),
-                            fieldWithPath("data.contractInfo.insuranceCostDeductible").type(JsonFieldType.NUMBER)
-                                .description("개인 부담금"),
-                            fieldWithPath("data.contractInfo.totalInsuranceCost").type(JsonFieldType.NUMBER)
-                                .description("총 보험료"),
-                            fieldWithPath("data.contractInfo.totalInsuranceMyCost").type(JsonFieldType.NUMBER)
-                                .description("본인부담 보험료"),
-                            fieldWithPath("data.contractInfo.totalGovernmentCost").type(JsonFieldType.NUMBER)
-                                .description("정부지원 보험료"),
-                            fieldWithPath("data.contractInfo.totalLocalGovernmentCost").type(JsonFieldType.NUMBER)
-                                .description("지자체지원 보험료"),
+                        fieldWithPath("data.contractInfo.joinCk").type(JsonFieldType.STRING).description("가입 상태"),
+                        fieldWithPath("data.contractInfo.isRenewalTarget").type(JsonFieldType.BOOLEAN)
+                            .description("갱신 대상 여부"),
+                        fieldWithPath("data.contractInfo.insuranceStartDate").type(JsonFieldType.STRING)
+                            .description("보험 시작일"),
+                        fieldWithPath("data.contractInfo.insuranceEndDate").type(JsonFieldType.STRING)
+                            .description("보험 종료일"),
+                        fieldWithPath("data.contractInfo.insuranceCompany").type(JsonFieldType.STRING)
+                            .description("보험사"),
+                        fieldWithPath("data.contractInfo.insuranceNumber").type(JsonFieldType.STRING)
+                            .description("증권번호"),
+                        fieldWithPath("data.contractInfo.insuranceCostBld").type(JsonFieldType.NUMBER)
+                            .description("건물 가입금액"),
+                        fieldWithPath("data.contractInfo.insuranceCostFcl").type(JsonFieldType.NUMBER)
+                            .description("시설/집기 가입금액"),
+                        fieldWithPath("data.contractInfo.insuranceCostMach").type(JsonFieldType.NUMBER)
+                            .description("기계 가입금액"),
+                        fieldWithPath("data.contractInfo.insuranceCostInven").type(JsonFieldType.NUMBER)
+                            .description("재고자산 가입금액"),
+                        fieldWithPath("data.contractInfo.insuranceCostShopSign").type(JsonFieldType.NUMBER)
+                            .description("야외간판 가입금액"),
+                        fieldWithPath("data.contractInfo.insuranceCostDeductible").type(JsonFieldType.NUMBER)
+                            .description("개인 부담금"),
+                        fieldWithPath("data.contractInfo.totalInsuranceCost").type(JsonFieldType.NUMBER)
+                            .description("총 보험료"),
+                        fieldWithPath("data.contractInfo.totalInsuranceMyCost").type(JsonFieldType.NUMBER)
+                            .description("본인부담 보험료"),
+                        fieldWithPath("data.contractInfo.totalGovernmentCost").type(JsonFieldType.NUMBER)
+                            .description("정부지원 보험료"),
+                        fieldWithPath("data.contractInfo.totalLocalGovernmentCost").type(JsonFieldType.NUMBER)
+                            .description("지자체지원 보험료"),
 
-                            fieldWithPath("data.certificateUrl").type(JsonFieldType.STRING)
-                                .description("가입확인서 PDF 다운로드 URL")
-                                .optional(),
+                        fieldWithPath("data.certificateUrl").type(JsonFieldType.STRING)
+                            .description("가입확인서 PDF 다운로드 URL")
+                            .optional(),
 
-                            fieldWithPath("error").type(JsonFieldType.NULL).description("에러 정보 (성공 시 null)"))));
+                        fieldWithPath("error").type(JsonFieldType.NULL).description("에러 정보 (성공 시 null)"))));
     }
 
     @Test
@@ -277,7 +288,11 @@ public class InsuredControllerTest extends RestDocsTest {
                         "address": "서울시 강남구 테헤란로",
                         "category": "음식점",
                         "tenant": "임차인",
-                        "floor": "1층",
+                        "groundFloorYn": "Y",
+                        "groundFloor":5,
+                        "underGroundFloor":1,
+                        "subFloor":"1",
+                        "endSubFloor":"5",
                         "structure": "철근콘크리트",
                         "prctrNo": "PRC12345"
                     },
@@ -321,7 +336,12 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("insuredInfo.address").description("주소"),
                             fieldWithPath("insuredInfo.category").description("업종"),
                             fieldWithPath("insuredInfo.tenant").description("임차여부"),
-                            fieldWithPath("insuredInfo.floor").description("층수"),
+                            fieldWithPath("insuredInfo.groundFloorYn")
+                                .description("사업장 지하소재여부 코드(0: 지하, 1: 지상(1층), 2: 지상(그외)"),
+                            fieldWithPath("insuredInfo.groundFloor").description("건물 지상 층수 정보"),
+                            fieldWithPath("insuredInfo.underGroundFloor").description("건물 지하 층수 정보"),
+                            fieldWithPath("insuredInfo.subFloor").description("사업장 시작 층수"),
+                            fieldWithPath("insuredInfo.endSubFloor").description("사업장 끝 층수"),
                             fieldWithPath("insuredInfo.structure").description("건물구조"),
                             fieldWithPath("insuredInfo.prctrNo").description("질권번호"),
                             // contractInfo

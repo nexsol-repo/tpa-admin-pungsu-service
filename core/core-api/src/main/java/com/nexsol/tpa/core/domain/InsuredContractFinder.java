@@ -71,7 +71,11 @@ public class InsuredContractFinder {
             .address(entity.getAddress())
             .category(entity.getBizCategory())
             .structure(entity.getStructure())
-            .floor(entity.getFloor())
+            .groundFloorYn(entity.getGroundFloorYn())
+            .groundFloor(entity.getGroundFloor())
+            .underGroundFloor(entity.getUnderGroundFloor())
+            .subFloor(entity.getSubFloor())
+            .endSubFloor(entity.getEndSubFloor())
             .prctrNo(entity.getPrctrNo())
             .pnu(entity.getPnu())
             .build();
