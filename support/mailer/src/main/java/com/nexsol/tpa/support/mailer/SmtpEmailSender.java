@@ -41,7 +41,7 @@ public class SmtpEmailSender implements EmailSender {
     private String getHtmlTemplate(MailType type, String link, String name) {
         // role="presentation": 테이블을 레이아웃 용도로만 사용함을 명시 (시맨틱 웹 표준)
         // String.formatted() 사용 시 % 문자는 포맷 지정자로 인식되므로, 단순 문자 %를 표현하려면 %%로 이스케이프해야 합니다.
-        // width='100%' -> width='100%%' 로 수정됨
+        // width='100%%' -> width='100%%' 로 수정됨
         return """
                 <!DOCTYPE html>
                 <html lang="ko">
@@ -51,9 +51,9 @@ public class SmtpEmailSender implements EmailSender {
                   <title>TPA KOREA 풍수해</title>
                   <style>
                     /* 기본 초기화 및 웹 표준 스타일 */
-                    body { margin: 0; padding: 0; background-color: #eee; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+                    body { margin: 0; padding: 0; background-color: #eee; -webkit-text-size-adjust: 100%%; -ms-text-size-adjust: 100%%; }
                     table { border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-spacing: 0; }
-                    img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; display: block; }
+                    img { border: 0; height: auto; line-height: 100%%; outline: none; text-decoration: none; display: block; }
 
                     /* 링크 강조 스타일 */
                     .link-box:hover { text-decoration: underline; }
@@ -61,7 +61,7 @@ public class SmtpEmailSender implements EmailSender {
                 </head>
                 <body style="margin: 0; padding: 0; background-color: #eee; font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;">
 
-                <table role="presentation" style="width: 100%; background-color: #eee; border-collapse: collapse;">
+                <table role="presentation" style="width: 100%%; background-color: #eee; border-collapse: collapse;">
                   <tbody>
                   <tr>
                     <td style="padding: 30px 0; text-align: center;">
@@ -100,7 +100,7 @@ public class SmtpEmailSender implements EmailSender {
 
                         <tr>
                           <td colspan="2" style="padding: 30px 0;">
-                            <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                            <table role="presentation" style="width: 100%%; border-collapse: collapse;">
                               <tbody>
                               <tr>
                                 <td colspan="2" style="padding-bottom: 16px;">
