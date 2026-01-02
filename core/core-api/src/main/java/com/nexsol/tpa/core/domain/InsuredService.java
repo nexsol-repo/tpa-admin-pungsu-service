@@ -41,11 +41,11 @@ public class InsuredService {
         String token = getJwtToken();
 
         if (!diffs.isEmpty()) {
-            String systemMemo = "시스템 변경 로그: "
-                    + diffs.stream().map(ChangeDetail::toString).collect(Collectors.joining(", "));
+            String systemLogContent = "시스템 변경: " + diffs.stream()
+                    .map(ChangeDetail::toString)
+                    .collect(Collectors.joining(", "));
 
-            // memo-service의 'SYSTEM' 분류로 전송하기 위한 이벤트
-            eventPublisher.publishEvent(new InsuredModifiedEvent(id, systemMemo, String.valueOf(adminId), token));
+            eventPublisher.publishEvent(new InsuredSystemLogEvent(id, systemLogContent, String.valueOf(adminId), token));
         }
 
         // 3. 관리자가 직접 작성한 메모가 있다면 이벤트 발행
