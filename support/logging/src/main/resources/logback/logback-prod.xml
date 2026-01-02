@@ -20,6 +20,9 @@
     <logger name="org.springframework" level="WARN"/>
     <logger name="io.dodn.springboot" level="INFO"/>
 
+    <logger name="com.nexsol.tpa.client.aligo" level="DEBUG"/>
+    <logger name="feign" level="DEBUG"/>
+
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="SENTRY"/>
