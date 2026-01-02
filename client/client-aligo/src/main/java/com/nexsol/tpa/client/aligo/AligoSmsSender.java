@@ -40,11 +40,15 @@ public class AligoSmsSender implements SmsSender {
         try {
             Map<String, Object> response = aligoClient.sendSms(params);
             if (!"1".equals(String.valueOf(response.get("result_code")))) {
-                log.error("알리고 SMS 발송 실패: {}", response.get("message"));
+                String errorMsg = (String) response.get("message");
+                log.error("알리고 SMS 발송 실패: {}", errorMsg);
+                // [수정] 예외를 던져서 상위 로직이 성공으로 착각하지 않게 함
+                throw new RuntimeException("알리고 SMS 발송 실패: " + errorMsg);
             }
         }
         catch (Exception e) {
             log.error("SMS 발송 중 예외 발생: {}", phoneNumber, e);
+            throw new RuntimeException("SMS 발송 중 시스템 오류 발생", e);
         }
     }
 

@@ -32,6 +32,9 @@ public class TotalFormMemberEntity {
     @Column(name = "company")
     private String companyName; // 상호명
 
+    @Column(name="insured_email")
+    private String email;
+
     @Column(name = "insured_rr_no")
     private String birthDate;
 
@@ -108,10 +111,11 @@ public class TotalFormMemberEntity {
     /**
      * 가입자 기본 인적 사항 변경
      */
-    public void applyInsuredBasic(String companyName, String name, String businessNumber, String phoneNumber,
+    public void applyInsuredBasic(String companyName, String name, String businessNumber, String phoneNumber,String email,
             String birthDate) {
         this.companyName = companyName;
         this.name = name; // 계약자=피보험자 규칙 강제
+        this.email=email;
         this.businessNumber = businessNumber;
         this.phoneNumber = phoneNumber;
         this.birthDate = birthDate;
