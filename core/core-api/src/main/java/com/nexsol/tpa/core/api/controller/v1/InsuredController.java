@@ -1,9 +1,11 @@
 package com.nexsol.tpa.core.api.controller.v1;
 
 import com.nexsol.tpa.core.api.controller.v1.request.InsuredModifyRequest;
+import com.nexsol.tpa.core.api.controller.v1.request.NotificationSendRequest;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractDetailResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractResponse;
 import com.nexsol.tpa.core.domain.*;
+import com.nexsol.tpa.core.enums.MailType;
 import com.nexsol.tpa.core.support.DomainPage;
 import com.nexsol.tpa.core.support.OffsetLimit;
 import com.nexsol.tpa.core.support.response.ApiResponse;
@@ -75,6 +77,30 @@ public class InsuredController {
         insuredService.modify(id, request.insuredInfo(), request.contractInfo(), request.memoContent(), admin.id());
 
         return ApiResponse.success(ResultType.SUCCESS);
+    }
+
+    @PostMapping("/{id}/notification")
+    public ApiResponse<ResultType> sendNotification(@PathVariable Integer id,
+            @RequestBody NotificationSendRequest request, @LoginAdmin AdminUserProvider admin) {
+        // 1. 계약 상세 정보 조회 (Service 호출)
+        InsuredContractDetail detail = insuredService.getDetail(id);
+
+        // 2. 알림 유형에 따른 타겟 URL 결정 (Controller에서 조합)
+        String targetUrl = "";
+        if (request.type() == MailType.REJOIN) {
+            // 재가입 URL: referIdx 활용
+            targetUrl = "http://pungsu.tpakorea.com/rejoin/feeGuide?idx=" + detail.insuredInfo().referIdx();
+        }
+        else if (request.type() == MailType.CERTIFICATE) {
+            // 가입확인서 URL: MeritzService를 통해 rltLinkUrl4 조회 (getDetail과 동일 패턴)
+            targetUrl = meritzService.getLink4(detail.insuredInfo().prctrNo());
+        }
+
+        // 3. 취합된 정보로 알림 발송 명령 (Service 호출)
+        insuredService.send(detail, request.type(), targetUrl, admin.id());
+
+        return ApiResponse.success(ResultType.SUCCESS);
+
     }
 
 }

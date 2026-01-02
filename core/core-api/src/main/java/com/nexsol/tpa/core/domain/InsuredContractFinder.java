@@ -34,6 +34,7 @@ public class InsuredContractFinder {
             .stream()
             .map(entity -> InsuredContract.builder()
                 .id(entity.getId())
+                .referIdx(entity.getReferIdx())
                 .businessNumber(entity.getBusinessNumber())
                 .companyName(entity.getCompanyName())
                 .applicationDate(entity.getInsuranceStartDate())
@@ -78,6 +79,7 @@ public class InsuredContractFinder {
             .endSubFloor(entity.getEndSubFloor())
             .prctrNo(entity.getPrctrNo())
             .pnu(entity.getPnu())
+            .referIdx(entity.getReferIdx())
             .build();
     }
 

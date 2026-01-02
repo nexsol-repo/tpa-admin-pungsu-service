@@ -9,7 +9,7 @@ public record InsuredInfo(String companyName, String name, String businessNumber
         String category,
         // 임차여부
         String tenant, String structure, String prctrNo, String pnu, String groundFloorCd, int groundFloor,
-        int underGroundFloor, String subFloor, String endSubFloor
+        int underGroundFloor, String subFloor, String endSubFloor, String referIdx
 
 ) {
 }

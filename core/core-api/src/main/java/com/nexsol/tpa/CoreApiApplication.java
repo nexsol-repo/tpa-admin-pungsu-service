@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @ConfigurationPropertiesScan
-@EnableFeignClients(basePackages = "com.tpa.nexsol.client")
+@EnableFeignClients(basePackages = "com.nexsol.tpa.client")
 @SpringBootApplication
 public class CoreApiApplication {
 

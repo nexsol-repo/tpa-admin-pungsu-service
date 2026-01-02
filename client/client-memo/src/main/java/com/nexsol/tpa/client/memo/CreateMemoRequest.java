@@ -1,4 +1,4 @@
-package com.tpa.nexsol.client.memo;
+package com.nexsol.tpa.client.memo;
 
 import com.nexsol.tpa.core.enums.ServiceType;
 

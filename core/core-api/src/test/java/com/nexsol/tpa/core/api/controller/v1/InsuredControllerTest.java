@@ -32,9 +32,8 @@ import static org.mockito.Mockito.mock;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -90,6 +89,7 @@ public class InsuredControllerTest extends RestDocsTest {
             .account("TPA KOREA")
             .path("TPA KOREA")
             .payYn("Y")
+            .referIdx("20251217144520zmhadj")
             .build();
         DomainPage<InsuredContract> mockPage = new DomainPage<>(List.of(mockContract), true);
 
@@ -146,6 +146,8 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("data.content[].path").type(JsonFieldType.STRING).description("채널"),
                             fieldWithPath("data.content[].payYn").type(JsonFieldType.STRING)
                                 .description("가입유형 ? Y 유료 : 무료 "),
+                            fieldWithPath("data.content[].referIdx").type(JsonFieldType.STRING)
+                                .description("referIdx 재가입 url 시 사용"),
                             fieldWithPath("data.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 존재 여부"),
                             fieldWithPath("error").type(JsonFieldType.NULL).description("에러 정보 (성공 시 null)"))));
     }
@@ -177,6 +179,7 @@ public class InsuredControllerTest extends RestDocsTest {
                 .structure("철근콘크리트")
                 .prctrNo("PRC12345")
                 .pnu("24214214124124124")
+                .referIdx("20251217144520zmhadj")
                 .build())
             .contractInfo(InsuredContractInfo.builder()
                 .joinCk("가입완료")
@@ -231,6 +234,8 @@ public class InsuredControllerTest extends RestDocsTest {
                         fieldWithPath("data.insuredInfo.structure").type(JsonFieldType.STRING).description("건물구조"),
                         fieldWithPath("data.insuredInfo.prctrNo").type(JsonFieldType.STRING).description("질권번호"),
                         fieldWithPath("data.insuredInfo.pnu").type(JsonFieldType.STRING).description("PNU코드"),
+                        fieldWithPath("data.insuredInfo.referIdx").type(JsonFieldType.STRING)
+                            .description("재가입 url 시 사용"),
 
                         fieldWithPath("data.contractInfo.joinCk").type(JsonFieldType.STRING).description("가입 상태"),
                         fieldWithPath("data.contractInfo.payYn").type(JsonFieldType.STRING)
@@ -367,6 +372,47 @@ public class InsuredControllerTest extends RestDocsTest {
 
                             // [추가] 메모 필드 문서화
                             fieldWithPath("memoContent").description("관리자 메모 내용 (선택)").optional()),
+                    responseFields(
+                            fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (SUCCESS/FAIL)"),
+                            fieldWithPath("data").type(JsonFieldType.STRING).description("결과 데이터 (SUCCESS)"),
+                            fieldWithPath("error").type(JsonFieldType.NULL).description("에러 정보 (성공 시 null)"))));
+    }
+
+    @Test
+    @DisplayName("풍수해 알림(문자+메일) 발송 API 문서화")
+    void sendNotification() throws Exception {
+        // given
+        Integer id = 1;
+        Long adminId = 1L;
+
+        // objectMapper 대신 직접 JSON 문자열 작성
+        String requestJson = """
+                {
+                    "type": "REJOIN"
+                }
+                """;
+
+        // 1. 가입자 상세 정보 모킹 (referIdx 포함)
+        InsuredInfo mockInfo = InsuredInfo.builder()
+            .name("홍길동")
+            .email("test@nexsol.com")
+            .phoneNumber("01012345678")
+            .referIdx("REF12345") // 재가입 URL 생성용
+            .prctrNo("PRC99999") // 가입확인서 조회용
+            .build();
+
+        InsuredContractDetail mockDetail = new InsuredContractDetail(id, mockInfo, null);
+
+        given(insuredService.getDetail(id)).willReturn(mockDetail);
+
+        // when & then
+        mockMvc
+            .perform(post("/v1/admin/pungsu/{id}/notification", id).contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson))
+            .andExpect(status().isOk())
+            .andDo(document("admin-insured-notification-send", // 문서 식별자
+                    pathParameters(parameterWithName("id").description("계약 PK ID")),
+                    requestFields(fieldWithPath("type").description("알림 유형 (REJOIN: 재가입 안내, CERTIFICATE: 가입확인서 안내)")),
                     responseFields(
                             fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (SUCCESS/FAIL)"),
                             fieldWithPath("data").type(JsonFieldType.STRING).description("결과 데이터 (SUCCESS)"),

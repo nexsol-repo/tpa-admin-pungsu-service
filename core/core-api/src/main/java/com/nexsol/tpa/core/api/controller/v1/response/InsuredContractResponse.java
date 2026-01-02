@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public record InsuredContractResponse(Integer id, String businessNumber, String companyName, String address,
         String phoneNumber, LocalDateTime applicationDate, String insuranceCompany, LocalDateTime insuranceStartDate,
         LocalDateTime insuranceEndDate, boolean isRenewalTarget, String joinCk, String account, String path,
-        String payYn) {
+        String payYn, String referIdx) {
 
     public static InsuredContractResponse of(InsuredContract contract) {
         // 응답을 만드는 시점의 시간으로 비즈니스 로직 수행
@@ -30,6 +30,7 @@ public record InsuredContractResponse(Integer id, String businessNumber, String 
             .joinCk(contract.joinCk())
             .account(contract.account())
             .path(contract.path())
+            .referIdx(contract.referIdx())
             .build();
     }
 }

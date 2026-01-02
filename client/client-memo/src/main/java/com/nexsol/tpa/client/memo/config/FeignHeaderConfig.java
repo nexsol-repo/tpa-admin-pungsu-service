@@ -1,4 +1,4 @@
-package com.tpa.nexsol.client.memo.config;
+package com.nexsol.tpa.client.memo.config;
 
 import feign.RequestInterceptor;
 import jakarta.servlet.http.HttpServletRequest;

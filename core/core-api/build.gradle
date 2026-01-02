@@ -6,6 +6,8 @@ dependencies {
     implementation project(":support:logging")
     implementation project(":storage:db-core")
     implementation project(":client:client-memo")
+    implementation project(":client:client-aligo")
+    implementation project(":support:mailer")
 
 
     testImplementation project(":tests:api-docs")
