@@ -24,8 +24,8 @@ public class InsuredContractorWriter {
             .orElseThrow(() -> new CoreException(ErrorType.DEFAULT_ERROR));
 
         if (info != null) {
-            entity.applyInsuredBasic(info.companyName(), info.name(), info.businessNumber(), info.phoneNumber(),info.email(),
-                    info.birthDate());
+            entity.applyInsuredBasic(info.companyName(), info.name(), info.businessNumber(), info.phoneNumber(),
+                    info.email(), info.birthDate());
 
             entity.applyLocationInfo(info.address(), info.tenant(), info.category(), info.structure(), info.prctrNo(),
                     info.pnu(), info.groundFloorCd(), info.groundFloor(), info.underGroundFloor(), info.subFloor(),
@@ -65,8 +65,8 @@ public class InsuredContractorWriter {
 
         // 2. 실제 엔티티 상태 변경 (기존 로직 유지)
         if (info != null) {
-            entity.applyInsuredBasic(info.companyName(), info.name(), info.businessNumber(), info.phoneNumber(),info.email(),
-                    info.birthDate());
+            entity.applyInsuredBasic(info.companyName(), info.name(), info.businessNumber(), info.phoneNumber(),
+                    info.email(), info.birthDate());
             entity.applyLocationInfo(info.address(), info.tenant(), info.category(), info.structure(), info.prctrNo(),
                     info.pnu(), info.groundFloorCd(), info.groundFloor(), info.underGroundFloor(), info.subFloor(),
                     info.endSubFloor());
