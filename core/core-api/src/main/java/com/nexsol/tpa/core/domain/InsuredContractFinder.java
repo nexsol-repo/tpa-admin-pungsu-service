@@ -41,7 +41,7 @@ public class InsuredContractFinder {
                 .insuranceStartDate(entity.getInsuranceStartDate())
                 .insuranceEndDate(entity.getInsuranceEndDate())
                 .phoneNumber(entity.getPhoneNumber())
-                .payMethod(entity.getPayMethod())
+                .payYn(entity.getPayYn())
                 .address(entity.getAddress())
                 .joinCk(entity.getJoinCheck())
                 .account(entity.getAccount())

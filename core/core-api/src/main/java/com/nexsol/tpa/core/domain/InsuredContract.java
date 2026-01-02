@@ -5,9 +5,7 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Builder
-public record InsuredContract(
-        Integer id,
-        String payYn, // 결제 구분
+public record InsuredContract(Integer id, String payYn, // 결제 구분
         String businessNumber, // 사업자번호
         String companyName, // 사업장명
         String address, // 사업장 주소

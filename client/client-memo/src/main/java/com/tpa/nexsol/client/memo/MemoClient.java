@@ -12,8 +12,7 @@ public interface MemoClient {
 
     @PostMapping("/v1/admin/memo/{contractId}")
     void registerMemo(@PathVariable("contractId") Long contractId, @RequestBody CreateMemoRequest request,
-                      @RequestHeader("X-User-Id") String userId,
-            @RequestHeader("Authorization") String token);
+            @RequestHeader("X-User-Id") String userId, @RequestHeader("Authorization") String token);
     // @PostMapping("/v1/admin/memo/{contractId}")
     // void registerMemo(@PathVariable("contractId") Long contractId, @RequestBody
     // CreateMemoRequest request);

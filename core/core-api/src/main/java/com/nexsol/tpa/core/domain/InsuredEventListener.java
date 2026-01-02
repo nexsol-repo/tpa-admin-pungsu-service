@@ -25,8 +25,7 @@ public class InsuredEventListener {
 
             // 메모 서비스 호출
             memoClient.registerMemo(Long.valueOf(event.contractId()), // Integer -> Long
-                    new CreateMemoRequest(event.memoContent(), "PUNGSU"), event.writerId(),
-                    event.token());
+                    new CreateMemoRequest(event.memoContent(), "PUNGSU"), event.writerId(), event.token());
         }
         catch (Exception e) {
             log.error("메모 저장 실패 contractId={}", event.contractId(), e);

@@ -30,17 +30,21 @@ public class InsuredController {
 
     @GetMapping("/contract")
     public ApiResponse<PageResponse<InsuredContractResponse>> getContract(@RequestParam(required = false) String status,
-            @RequestParam(required = false) String payYn, @RequestParam(required = false) LocalDate startDate,
-            @RequestParam(required = false) LocalDate endDate, @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit,
-            @LoginAdmin AdminUserProvider admin) {
+            @RequestParam(required = false) String account, @RequestParam(required = false) String path,
+            @RequestParam(required = false) String payYn, @RequestParam(required = false) String insuranceCompany,
+            @RequestParam(required = false) LocalDate startDate, @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int limit, @LoginAdmin AdminUserProvider admin) {
 
         InsuredSearchCondition condition = InsuredSearchCondition.builder()
             .status(status)
             .payYn(payYn)
+            .insuranceCompany(insuranceCompany)
             .startDate(startDate)
             .endDate(endDate)
             .keyword(keyword)
+            .account(account)
+            .path(path)
             .build();
 
         OffsetLimit offsetLimit = new OffsetLimit(offset, limit);

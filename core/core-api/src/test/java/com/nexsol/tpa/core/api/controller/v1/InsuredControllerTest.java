@@ -77,7 +77,6 @@ public class InsuredControllerTest extends RestDocsTest {
         // given
         InsuredContract mockContract = InsuredContract.builder()
             .id(1)
-            .payMethod("CARD")
             .businessNumber("123-45-67890")
             .companyName("테스트 사업장")
             .address("서울시 강남구 테헤란로")
@@ -90,6 +89,7 @@ public class InsuredControllerTest extends RestDocsTest {
             .joinCk("Y")
             .account("TPA KOREA")
             .path("TPA KOREA")
+            .payYn("Y")
             .build();
         DomainPage<InsuredContract> mockPage = new DomainPage<>(List.of(mockContract), true);
 
@@ -99,24 +99,33 @@ public class InsuredControllerTest extends RestDocsTest {
         mockMvc
             .perform(get("/v1/admin/pungsu/contract").contentType(MediaType.APPLICATION_JSON)
                 .param("payYn", "Y")
+                .param("status", "Y")
+                .param("path", "TPA KOREA")
+                .param("account", "TPA KOREA")
                 .param("startDate", "2025-01-01")
                 .param("endDate", "2025-12-31")
+                .param("insuranceCompany", "메리츠")
                 .param("keyword", "테스트")
                 .param("offset", "0")
                 .param("limit", "10"))
             .andExpect(status().isOk())
-            .andDo(document("admin-insured-contract-list",
-                    queryParameters(parameterWithName("payYn").description("결제 여부 (Y/N, 선택)").optional(),
-                            parameterWithName("startDate").description("조회 시작일 (yyyy-MM-dd, 선택)").optional(),
-                            parameterWithName("endDate").description("조회 종료일 (yyyy-MM-dd, 선택)").optional(),
-                            parameterWithName("keyword").description("검색어 (사업자번호/명/연락처, 선택)").optional(),
-                            parameterWithName("offset").description("페이지 오프셋 (기본값 0)").optional(),
-                            parameterWithName("limit").description("페이지 크기 (기본값 10)").optional()),
+            .andDo(document("admin-insured-contract-list", queryParameters(
+                    parameterWithName("payYn").description("가입유형 ? Y 유료 : 무료 ").optional(),
+                    parameterWithName("status").description(
+                            "계약 진행상태(W:가입진행, N:보온접수완료, R: 보험사 접수, Y:가입완료(유효), D:가입반려(보험사 중복), E:가입반려(주소오류), F:결제실패(보험사), X:보험만료)")
+                        .optional(),
+                    parameterWithName("path").description("채널").optional(),
+                    parameterWithName("account").description("제휴사").optional(),
+                    parameterWithName("insuranceCompany").description("보험사").optional(),
+                    parameterWithName("startDate").description("조회 시작일 (yyyy-MM-dd, 선택)").optional(),
+                    parameterWithName("endDate").description("조회 종료일 (yyyy-MM-dd, 선택)").optional(),
+                    parameterWithName("keyword").description("검색어 (사업자번호/명/연락처, 선택)").optional(),
+                    parameterWithName("offset").description("페이지 오프셋 (기본값 0)").optional(),
+                    parameterWithName("limit").description("페이지 크기 (기본값 10)").optional()),
                     responseFields(
                             fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (SUCCESS/FAIL)"),
                             fieldWithPath("data.content").type(JsonFieldType.ARRAY).description("가입신청 내역 리스트"),
                             fieldWithPath("data.content[].id").type(JsonFieldType.NUMBER).description("계약 ID"),
-                            fieldWithPath("data.content[].payMethod").type(JsonFieldType.STRING).description("결제 구분"),
                             fieldWithPath("data.content[].businessNumber").type(JsonFieldType.STRING)
                                 .description("사업자 번호"),
                             fieldWithPath("data.content[].companyName").type(JsonFieldType.STRING).description("사업장명"),
@@ -135,7 +144,8 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("data.content[].joinCk").type(JsonFieldType.STRING).description("상태"),
                             fieldWithPath("data.content[].account").type(JsonFieldType.STRING).description("제휴사"),
                             fieldWithPath("data.content[].path").type(JsonFieldType.STRING).description("채널"),
-
+                            fieldWithPath("data.content[].payYn").type(JsonFieldType.STRING)
+                                .description("가입유형 ? Y 유료 : 무료 "),
                             fieldWithPath("data.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 존재 여부"),
                             fieldWithPath("error").type(JsonFieldType.NULL).description("에러 정보 (성공 시 null)"))));
     }

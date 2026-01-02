@@ -60,9 +60,6 @@ public class TotalFormMemberEntity {
     @Column(name = "pay_yn")
     private String payYn; // 결제 여부 (Y/N)
 
-    @Column(name = "pay_method")
-    private String payMethod; // 결제 수단
-
     @Column(name = "bizcategory")
     private String bizCategory;
 
