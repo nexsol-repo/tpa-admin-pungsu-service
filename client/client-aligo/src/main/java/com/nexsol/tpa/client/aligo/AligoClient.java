@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
-@FeignClient(name = "aligo-client", url = "https://apis.aligo.in")
+@FeignClient(name = "aligo-client", url = "https://apis.aligo.in", configuration = AligoFeignConfig.class)
 public interface AligoClient {
 
     @PostMapping(value = "/send/", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)

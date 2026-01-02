@@ -89,6 +89,7 @@ public class InsuredContractFinder {
     private InsuredContractInfo mapToContractInfo(TotalFormMemberEntity entity) {
         return InsuredContractInfo.builder()
             .joinCk(entity.getJoinCheck())
+                .payYn(entity.getPayYn())
             .insuranceStartDate(entity.getInsuranceStartDate())
             .insuranceEndDate(entity.getInsuranceEndDate())
             .insuranceCompany(entity.getInsuranceCompany())
