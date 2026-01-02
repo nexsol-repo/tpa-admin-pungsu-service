@@ -33,6 +33,7 @@ logging:
     org.hibernate.SQL: DEBUG
     org.springframework.security: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
+    com.nexsol.tpa.client.aligo: DEBUG
 jwt:
   secret: ${JWT_SECRET:default_secret_key_here} # .env의 값을 읽거나 기본값 사용
   expiration-seconds: 36000
