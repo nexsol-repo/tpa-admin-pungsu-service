@@ -5,7 +5,6 @@ import feign.codec.Encoder;
 import feign.form.spring.SpringFormEncoder;
 import org.springframework.beans.factory.ObjectProvider;
 
-
 import org.springframework.boot.http.converter.autoconfigure.ClientHttpMessageConvertersCustomizer;
 import org.springframework.boot.http.converter.autoconfigure.HttpMessageConvertersAutoConfiguration;
 import org.springframework.cloud.openfeign.support.FeignHttpMessageConverters;
@@ -38,7 +37,6 @@ public class AligoFeignConfig {
         };
     }
 
-
     @Bean
     public Encoder feignFormEncoder(ObjectProvider<FeignHttpMessageConverters> converters) {
         return new SpringFormEncoder(new SpringEncoder(converters));
@@ -48,4 +46,5 @@ public class AligoFeignConfig {
     Logger.Level feignLoggerLevel() {
         return Logger.Level.FULL;
     }
+
 }

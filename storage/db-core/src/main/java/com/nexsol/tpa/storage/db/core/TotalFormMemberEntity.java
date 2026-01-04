@@ -163,4 +163,17 @@ public class TotalFormMemberEntity {
         this.premium = premium;
     }
 
+    public void assignReferIdx(String referIdx) {
+        if (this.referIdx != null) {
+            throw new IllegalStateException("이미 식별자가 존재합니다.");
+        }
+        this.referIdx = referIdx;
+    }
+
+    // 채널 정보 할당 (ContractInfo에 포함된 경우)
+    public void applyChannelInfo(String account, String path) {
+        this.account = account;
+        this.path = path;
+    }
+
 }

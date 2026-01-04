@@ -71,7 +71,7 @@ public class InsuredContractFinder {
             .phoneNumber(entity.getPhoneNumber())
             .address(entity.getAddress())
             .email(entity.getEmail())
-                .birthDate(entity.getBirthDate())
+            .birthDate(entity.getBirthDate())
             .category(entity.getBizCategory())
             .structure(entity.getStructure())
             .tenant(entity.getTenant())
@@ -89,7 +89,7 @@ public class InsuredContractFinder {
     private InsuredContractInfo mapToContractInfo(TotalFormMemberEntity entity) {
         return InsuredContractInfo.builder()
             .joinCk(entity.getJoinCheck())
-                .payYn(entity.getPayYn())
+            .payYn(entity.getPayYn())
             .insuranceStartDate(entity.getInsuranceStartDate())
             .insuranceEndDate(entity.getInsuranceEndDate())
             .insuranceCompany(entity.getInsuranceCompany())

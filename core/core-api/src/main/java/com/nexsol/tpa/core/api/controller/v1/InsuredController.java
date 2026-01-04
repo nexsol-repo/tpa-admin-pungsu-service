@@ -1,6 +1,7 @@
 package com.nexsol.tpa.core.api.controller.v1;
 
 import com.nexsol.tpa.core.api.controller.v1.request.InsuredModifyRequest;
+import com.nexsol.tpa.core.api.controller.v1.request.InsuredRegisterRequest;
 import com.nexsol.tpa.core.api.controller.v1.request.NotificationSendRequest;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractDetailResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractResponse;
@@ -75,6 +76,16 @@ public class InsuredController {
         // 서비스 레이어에 수정을 위임
         // (ID와 함께 가입자/계약정보 Record를 전달)
         insuredService.modify(id, request.insuredInfo(), request.contractInfo(), request.memoContent(), admin.id());
+
+        return ApiResponse.success(ResultType.SUCCESS);
+    }
+
+    @PostMapping("/contract")
+    public ApiResponse<ResultType> register(@RequestBody InsuredRegisterRequest request,
+            @LoginAdmin AdminUserProvider admin) {
+
+        // Service는 비즈니스 흐름만 관장 (등록 -> 로그/이벤트 발행)
+        insuredService.register(request.insuredInfo(), request.contractInfo(), request.memoContent(), admin.id());
 
         return ApiResponse.success(ResultType.SUCCESS);
     }

@@ -12,7 +12,8 @@ import java.util.Map;
 @FeignClient(name = "aligo-client", url = "https://apis.aligo.in", configuration = AligoFeignConfig.class)
 public interface AligoClient {
 
-    @PostMapping(value = "/send/", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,headers = "Accept=application/json")
+    @PostMapping(value = "/send/", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+            headers = "Accept=application/json")
     Map<String, Object> sendSms(@RequestBody MultiValueMap<String, String> params);
 
 }

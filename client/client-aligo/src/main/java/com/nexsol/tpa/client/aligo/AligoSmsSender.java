@@ -34,7 +34,8 @@ public class AligoSmsSender implements SmsSender {
         params.add("sender", senderNumber);
         params.add("receiver", phoneNumber);
 
-        String msg = String.format("[TPA KOREA]\n안녕하세요, %s 고객님.\n재가입 신청을 위해 아래 링크를 클릭해주세요.\n\n링크: %s\n\n감사합니다.", name, link);
+        String msg = String.format("[TPA KOREA]\n안녕하세요, %s 고객님.\n재가입 신청을 위해 아래 링크를 클릭해주세요.\n\n링크: %s\n\n감사합니다.", name,
+                link);
         params.add("msg", msg);
 
         try {

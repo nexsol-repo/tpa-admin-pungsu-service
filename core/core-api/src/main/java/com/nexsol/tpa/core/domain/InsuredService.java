@@ -58,6 +58,29 @@ public class InsuredService {
         return id;
     }
 
+    @Transactional
+    public void register(InsuredInfo info, InsuredContractInfo contract, String memoContent, Long adminId) {
+        Integer contractId = insuredContractorWriter.create(info, contract);
+
+        String token = getJwtToken();
+
+        // 초기 메모가 있다면 이벤트 발행 (기존 이벤트 활용 또는 메모 전용 이벤트)
+        if (StringUtils.hasText(memoContent)) {
+            eventPublisher.publishEvent(new InsuredModifiedEvent(contractId, memoContent, // 또는
+                                                                                          // "등록
+                                                                                          // 시
+                                                                                          // 메모:
+                                                                                          // "
+                                                                                          // +
+                                                                                          // memoContent
+                    String.valueOf(adminId), token));
+        }
+
+        // 신규 등록 시스템 로그 이벤트 발행
+        eventPublisher
+            .publishEvent(new InsuredSystemLogEvent(contractId, "관리자 직접 등록(신규)", String.valueOf(adminId), token));
+    }
+
     // @Transactional(readOnly = true)
     // public void sendAllNotifications(Integer contractId, MailType type, Long adminId,
     // String token) {

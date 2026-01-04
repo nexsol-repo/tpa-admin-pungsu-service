@@ -1,5 +1,6 @@
 package com.nexsol.tpa.core.api.controller.v1;
 
+import com.nexsol.tpa.core.api.controller.v1.request.InsuredRegisterRequest;
 import com.nexsol.tpa.core.domain.*;
 
 import com.nexsol.tpa.core.support.DomainPage;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -20,7 +22,9 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import tools.jackson.databind.json.JsonMapper;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +32,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -184,6 +189,8 @@ public class InsuredControllerTest extends RestDocsTest {
             .contractInfo(InsuredContractInfo.builder()
                 .joinCk("가입완료")
                 .payYn("Y")
+                .account("TPA KOREA")
+                .path("TPA KOREA")
                 .isRenewalTarget(false)
                 .insuranceStartDate(LocalDateTime.of(2025, 1, 1, 0, 0))
                 .insuranceEndDate(LocalDateTime.of(2025, 12, 31, 23, 59))
@@ -240,6 +247,8 @@ public class InsuredControllerTest extends RestDocsTest {
                         fieldWithPath("data.contractInfo.joinCk").type(JsonFieldType.STRING).description("가입 상태"),
                         fieldWithPath("data.contractInfo.payYn").type(JsonFieldType.STRING)
                             .description("가입 유형 ? Y 유료 : 무료"),
+                        fieldWithPath("data.contractInfo.account").type(JsonFieldType.STRING).description("제휴사"),
+                        fieldWithPath("data.contractInfo.path").type(JsonFieldType.STRING).description("채널"),
                         fieldWithPath("data.contractInfo.isRenewalTarget").type(JsonFieldType.BOOLEAN)
                             .description("갱신 대상 여부"),
                         fieldWithPath("data.contractInfo.insuranceStartDate").type(JsonFieldType.STRING)
@@ -417,6 +426,117 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (SUCCESS/FAIL)"),
                             fieldWithPath("data").type(JsonFieldType.STRING).description("결과 데이터 (SUCCESS)"),
                             fieldWithPath("error").type(JsonFieldType.NULL).description("에러 정보 (성공 시 null)"))));
+    }
+
+    @Test
+    @DisplayName("관리자 직접 등록(신규) 성공")
+    void register_success() throws Exception {
+        // given
+        // 1. 직접 등록 시에는 '가입확인서(joinCk)', '증권번호(insuranceNumber)', '납입내역(payYn)'은 빈
+        // 값(null)입니다.
+        InsuredRegisterRequest request = InsuredRegisterRequest.builder()
+            .insuredInfo(InsuredInfo.builder()
+                .name("홍길동")
+                .companyName("넥솔")
+                .businessNumber("123-45-67890")
+                .phoneNumber("010-1234-5678")
+                .email("test@nexsol.co.kr")
+                .birthDate("19900101")
+                // 주소 정보
+                .address("부산광역시 해운대구")
+                .tenant("N")
+                .category("음식점")
+                .structure("철근콘크리트")
+                .groundFloor(1)
+                .underGroundFloor(0)
+                .build())
+            .contractInfo(InsuredContractInfo.builder()
+                // [제외 필드] 직접 등록 시점에는 아직 생성되지 않은 정보들
+                // .joinCk(null) // 가입확인서 (제외)
+                // .insuranceNumber(null) // 증권번호 (제외)
+                // .payYn(null) // 납입내역 (제외)
+
+                // [필수 필드] 계약 기간 및 금액 정보
+                .insuranceStartDate(LocalDate.of(2025, 1, 1).atStartOfDay())
+                .insuranceEndDate(LocalDate.of(2026, 1, 1).atStartOfDay())
+                .totalInsuranceCost(150000L) // 총 보험료
+                .totalGovernmentCost(100000L)
+                .totalLocalGovernmentCost(30000L)
+                .totalInsuranceMyCost(20000L)
+                // 보장 내역 (가입금액)
+                .insuranceCostBld(100000000L)
+                .insuranceCostFcl(50000000L)
+                .insuranceCostInven(20000000L)
+                .build())
+            .memoContent("관리자 직접 등록 건입니다.")
+            .build();
+
+        // service.register는 void 반환이므로 doNothing 처리
+        doNothing().when(insuredService).register(any(), any(), any(), any());
+
+        // when & then
+        mockMvc
+            .perform(post("/v1/admin/pungsu/contract").contentType(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer test-token")
+                // [수정 완료] 괄호 닫기 위치 수정 : writeValueAsString(request) 뒤에 ) 닫음
+                .content(JsonMapper.builder().build().writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andDo(document("insured-register-direct", requestFields(
+                    // InsuredInfo
+                    fieldWithPath("insuredInfo.name").description("피보험자 성명 (대표자명)"),
+                    fieldWithPath("insuredInfo.companyName").description("상호명").optional(),
+                    fieldWithPath("insuredInfo.businessNumber").description("사업자등록번호").optional(),
+                    fieldWithPath("insuredInfo.phoneNumber").description("휴대전화번호").optional(),
+                    fieldWithPath("insuredInfo.email").description("이메일").optional(),
+                    fieldWithPath("insuredInfo.birthDate").description("생년월일").optional(),
+                    fieldWithPath("insuredInfo.address").description("주소").optional(),
+                    fieldWithPath("insuredInfo.tenant").description("임차여부").optional(),
+                    fieldWithPath("insuredInfo.category").description("업종").optional(),
+                    fieldWithPath("insuredInfo.structure").description("건물구조").optional(),
+                    fieldWithPath("insuredInfo.groundFloor").description("지상층수").optional(),
+                    fieldWithPath("insuredInfo.underGroundFloor").description("지하층수").optional(),
+
+                    fieldWithPath("insuredInfo.referIdx").description("관리 번호 (신규 등록 시 null)").ignored(),
+
+                    // 나머지 InsuredInfo 필드들은 무시 (너무 많을 경우)
+                    fieldWithPath("insuredInfo.prctrNo").ignored(), fieldWithPath("insuredInfo.pnu").ignored(),
+                    fieldWithPath("insuredInfo.groundFloorCd").ignored(),
+                    fieldWithPath("insuredInfo.subFloor").ignored(), fieldWithPath("insuredInfo.endSubFloor").ignored(),
+
+                    // ContractInfo
+                    // [핵심] 제외된 필드는 description 대신 optional() 혹은 ignored() 처리
+                    fieldWithPath("contractInfo.insuranceNumber").description("증권번호 (신규 등록시 null)").optional(),
+                    fieldWithPath("contractInfo.joinCk").description("가입확인서 상태 (신규 등록시 null)").optional(),
+                    fieldWithPath("contractInfo.payYn").description("납입 상태 (신규 등록시 null)").optional(),
+
+                    // 필수 필드 문서화
+                    fieldWithPath("contractInfo.insuranceStartDate").description("보험 시작일"),
+                    fieldWithPath("contractInfo.insuranceEndDate").description("보험 종료일"),
+                    fieldWithPath("contractInfo.totalInsuranceCost").description("총 보험료"),
+                    fieldWithPath("contractInfo.totalGovernmentCost").description("정부지원금").optional(),
+                    fieldWithPath("contractInfo.totalLocalGovernmentCost").description("지자체지원금").optional(),
+                    fieldWithPath("contractInfo.totalInsuranceMyCost").description("자부담금").optional(),
+
+                    // 보장 내역
+                    fieldWithPath("contractInfo.insuranceCostBld").description("건물 가입금액").optional(),
+                    fieldWithPath("contractInfo.insuranceCostFcl").description("시설 가입금액").optional(),
+                    fieldWithPath("contractInfo.insuranceCostInven").description("재고자산 가입금액").optional(),
+
+                    fieldWithPath("contractInfo.isRenewalTarget").description("갱신 대상 여부 (기본값 false)").ignored(),
+                    fieldWithPath("contractInfo.insuranceCompany").description("보험사 코드 (신규 등록 시 미정일 수 있음)").ignored(),
+
+                    // 나머지 ContractInfo 필드 무시
+                    fieldWithPath("contractInfo.insuranceCostDeductible").ignored(),
+                    fieldWithPath("contractInfo.insuranceCostMach").ignored(),
+                    fieldWithPath("contractInfo.insuranceCostShopSign").ignored(),
+                    fieldWithPath("contractInfo.account").ignored(), // 필요시 추가
+                    fieldWithPath("contractInfo.path").ignored(), // 필요시 추가
+
+                    // Memo
+                    fieldWithPath("memoContent").description("관리자 메모")),
+                    responseFields(fieldWithPath("result").description("성공 여부 (SUCCESS)"),
+                            fieldWithPath("data").description("데이터 (null)").optional(),
+                            fieldWithPath("error").description("에러 정보 (null)").optional())));
     }
 
 }

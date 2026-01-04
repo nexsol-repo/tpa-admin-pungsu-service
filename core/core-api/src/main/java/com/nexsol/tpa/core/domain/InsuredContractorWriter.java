@@ -17,6 +17,10 @@ public class InsuredContractorWriter {
 
     private final TotalFormMemberRepository totalFormMemberRepository;
 
+    private final ContractKeyGenerator keyGenerator;
+
+    private final InsuredEntityMapper entityMapper;
+
     private final ContractChangeDetector changeDetector;
 
     public Integer write(Integer id, InsuredInfo info, InsuredContractInfo contract) {
@@ -94,6 +98,17 @@ public class InsuredContractorWriter {
         }
 
         return diffs; // 추출된 변경 내역 반환
+    }
+
+    public Integer create(InsuredInfo info, InsuredContractInfo contract) {
+        // 1. 키 생성 (KeyGenerator에게 위임)
+        String referIdx = keyGenerator.generate();
+
+        // 2. 엔티티 변환 (Mapper에게 위임)
+        TotalFormMemberEntity entity = entityMapper.toEntity(referIdx, info, contract);
+
+        // 3. 저장 (Repository에게 위임)
+        return totalFormMemberRepository.save(entity).getId();
     }
 
 }
