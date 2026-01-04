@@ -75,4 +75,17 @@ include::{snippets}/admin-insured-modify/response-fields.adoc[]
 관리자가 화면에서 입력한 정보를 바탕으로 새로운 보험 계약을 직접 생성합니다.
 (기존 계약 수정이 아닌 완전한 신규 등록입니다.)
 
-operation::insured-register[snippets='http-request,request-fields,http-response,response-fields']
+==== Curl Request
+include::{snippets}/insured-register-direct/curl-request.adoc[]
+
+==== HTTP Request
+include::{snippets}/insured-register-direct/http-request.adoc[]
+
+==== Request Fields
+include::{snippets}/insured-register-direct/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/insured-register-direct/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/insured-register-direct/response-fields.adoc[]
