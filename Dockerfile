@@ -21,20 +21,13 @@ COPY support/logging/build.gradle ./support/logging/
 COPY tests/api-docs/build.gradle ./tests/api-docs/
 
 RUN chmod +x ./gradlew
-RUN ./gradlew dependencies --no-daemon \
-    -PNEXUS_URL=${NEXUS_URL} \
-    -PNEXUS_USERNAME=${NEXUS_USERNAME} \
-    -PNEXUS_PASSWORD=${NEXUS_PASSWORD} || true
-
+RUN ./gradlew dependencies --no-daemon
 
 COPY . .
 
 RUN chmod +x ./gradlew
 RUN ./gradlew :core:core-api:clean :core:core-api:bootJar \
-    -x unitTest -x contextTest -x developTest --no-daemon \
-    -PNEXUS_URL=${NEXUS_URL} \
-    -PNEXUS_USERNAME=${NEXUS_USERNAME} \
-    -PNEXUS_PASSWORD=${NEXUS_PASSWORD} || true
+    -x unitTest -x contextTest -x developTest --no-daemon
 
 # 2. Runtime Stage
 FROM eclipse-temurin:25-jre

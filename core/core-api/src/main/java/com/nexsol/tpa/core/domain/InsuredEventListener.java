@@ -33,7 +33,7 @@ public class InsuredEventListener {
 
             // 메모 서비스 호출
             memoClient.registerMemo(Long.valueOf(event.contractId()), // Integer -> Long
-                    new CreateMemoRequest(event.memoContent(), ServiceType.PUNGSU), event.writerId(), event.token());
+                    new CreateMemoRequest(event.memoContent(), ServiceType.PUNGSU), event.writerId());
         }
         catch (Exception e) {
             log.error("메모 저장 실패 contractId={}", event.contractId(), e);
@@ -47,7 +47,7 @@ public class InsuredEventListener {
     public void handleSystemLog(InsuredSystemLogEvent event) {
         try {
             memoClient.registerSystemLog(Long.valueOf(event.contractId()),
-                    new CreateSystemLogRequest(event.content(), ServiceType.PUNGSU), event.writerId(), event.token());
+                    new CreateSystemLogRequest(event.content(), ServiceType.PUNGSU), event.writerId());
         }
         catch (Exception e) {
             log.error("시스템 변경 로그 저장 실패 contractId={}", event.contractId(), e);
@@ -74,7 +74,7 @@ public class InsuredEventListener {
             emailSender.send(event.email(), event.type(), event.link(), event.name());
             memoClient.recordNotification(cId,
                     new CreateNotificationRequest("MAIL", event.type().getTitleSuffix() + " 발송 완료", ServiceType.PUNGSU),
-                    adminId, token);
+                    adminId);
         }
         catch (Exception e) {
             log.error("메일 발송/이력저장 실패: {}", event.contractId(), e);
@@ -85,7 +85,7 @@ public class InsuredEventListener {
             smsSender.sendSms(event.phoneNumber(), message);
             memoClient.recordNotification(cId,
                     new CreateNotificationRequest("SMS", event.type().getTitle() + " 발송 완료", ServiceType.PUNGSU),
-                    adminId, token);
+                    adminId);
         }
         catch (Exception e) {
             log.error("문자 발송/이력저장 실패: {}", event.contractId(), e);
