@@ -18,9 +18,9 @@ import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 
 import java.util.List;
 
-@Configuration
+//@Configuration
 // [핵심] Customizer가 실제로 동작하여 HttpMessageConverters 빈을 만들도록 AutoConfig를 가져옵니다.
-@Import(HttpMessageConvertersAutoConfiguration.class)
+//@Import(HttpMessageConvertersAutoConfiguration.class)
 public class AligoFeignConfig {
 
     @Bean
