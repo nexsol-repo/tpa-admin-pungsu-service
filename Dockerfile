@@ -1,13 +1,9 @@
-# syntax=docker/dockerfile:1
-# check=skip=SecretsUsedInArgOrEnv
+
 
 # 1. Builder Stage
 FROM eclipse-temurin:25-jdk AS builder
 WORKDIR /app
 
-ARG NEXUS_URL
-ARG NEXUS_USERNAME
-ARG NEXUS_PASSWORD
 
 # Gradle 설정 및 래퍼 복사
 COPY gradlew .

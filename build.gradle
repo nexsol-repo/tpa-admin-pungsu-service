@@ -13,14 +13,14 @@ allprojects {
     version = "${applicationVersion}"
 
     repositories {
-        maven {
-            url = project.findProperty('NEXUS_URL') ?: "http://211.220.195.12:5001/repository/nexsol-repo/"
-            allowInsecureProtocol = true // HTTP 허용 설정
-            credentials {
-                username = project.findProperty('NEXUS_USERNAME')
-                password = project.findProperty('NEXUS_PASSWORD')
-            }
-        }
+//        maven {
+//            url = project.findProperty('NEXUS_URL') ?: "http://211.220.195.12:5001/repository/nexsol-repo/"
+//            allowInsecureProtocol = true // HTTP 허용 설정
+//            credentials {
+//                username = project.findProperty('NEXUS_USERNAME')
+//                password = project.findProperty('NEXUS_PASSWORD')
+//            }
+//        }
         mavenCentral()
     }
 }

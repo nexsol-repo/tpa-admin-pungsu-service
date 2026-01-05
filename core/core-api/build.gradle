@@ -14,6 +14,6 @@ dependencies {
     
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 
-    implementation 'com.nexsol.tpa:web-auth:0.0.1-SNAPSHOT'
+//    implementation 'com.nexsol.tpa:web-auth:0.0.1-SNAPSHOT'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 }

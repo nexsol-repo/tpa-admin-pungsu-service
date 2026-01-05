@@ -13,8 +13,6 @@ import com.nexsol.tpa.core.support.response.ApiResponse;
 
 import com.nexsol.tpa.core.support.response.PageResponse;
 import com.nexsol.tpa.core.support.response.ResultType;
-import com.nexsol.tpa.web.auth.AdminUserProvider;
-import com.nexsol.tpa.web.auth.LoginAdmin;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +35,7 @@ public class InsuredController {
             @RequestParam(required = false) String payYn, @RequestParam(required = false) String insuranceCompany,
             @RequestParam(required = false) LocalDate startDate, @RequestParam(required = false) LocalDate endDate,
             @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "0") int offset,
-            @RequestParam(defaultValue = "10") int limit, @LoginAdmin AdminUserProvider admin) {
+            @RequestParam(defaultValue = "10") int limit, @LoginAdmin AdminUser admin) {
 
         InsuredSearchCondition condition = InsuredSearchCondition.builder()
             .status(status)
@@ -72,29 +70,29 @@ public class InsuredController {
 
     @PutMapping("/{id}")
     public ApiResponse<ResultType> modify(@PathVariable Integer id, @RequestBody InsuredModifyRequest request,
-            @LoginAdmin AdminUserProvider admin) {
+                                          @LoginAdmin AdminUser admin) {
         // 서비스 레이어에 수정을 위임
         // (ID와 함께 가입자/계약정보 Record를 전달)
         insuredService.modify(id, request.insuredInfo(), request.contract(), request.location(), request.subscription(),
-                request.memoContent(), admin.id());
+                request.memoContent(), admin.userId());
 
         return ApiResponse.success(ResultType.SUCCESS);
     }
 
     @PostMapping("/contract")
     public ApiResponse<ResultType> register(@RequestBody InsuredRegisterRequest request,
-            @LoginAdmin AdminUserProvider admin) {
+            @LoginAdmin AdminUser admin) {
 
         // Service는 비즈니스 흐름만 관장 (등록 -> 로그/이벤트 발행)
         insuredService.register(request.insuredInfo(), request.contractInfo(), request.location(),
-                request.subscription(), request.memoContent(), admin.id());
+                request.subscription(), request.memoContent(), admin.userId());
 
         return ApiResponse.success(ResultType.SUCCESS);
     }
 
     @PostMapping("/{id}/notification")
     public ApiResponse<ResultType> sendNotification(@PathVariable Integer id,
-            @RequestBody NotificationSendRequest request, @LoginAdmin AdminUserProvider admin) {
+            @RequestBody NotificationSendRequest request, @LoginAdmin AdminUser admin) {
         // 1. 계약 상세 정보 조회 (Service 호출)
         InsuredContractDetail detail = insuredService.getDetail(id);
 
@@ -110,7 +108,7 @@ public class InsuredController {
         }
 
         // 3. 취합된 정보로 알림 발송 명령 (Service 호출)
-        insuredService.send(detail, request.type(), targetUrl, admin.id());
+        insuredService.send(detail, request.type(), targetUrl, admin.userId());
 
         return ApiResponse.success(ResultType.SUCCESS);
 
