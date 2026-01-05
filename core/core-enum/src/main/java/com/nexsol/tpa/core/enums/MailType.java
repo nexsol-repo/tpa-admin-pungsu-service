@@ -24,7 +24,9 @@ public enum MailType {
         return targetName;
     }
 
-    public String getTitleSuffix(){return titleSuffix;}
+    public String getTitleSuffix() {
+        return titleSuffix;
+    }
 
     public String getLinkText() {
         return linkText;

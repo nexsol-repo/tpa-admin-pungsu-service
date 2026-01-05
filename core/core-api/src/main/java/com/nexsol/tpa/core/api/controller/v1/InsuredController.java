@@ -70,7 +70,7 @@ public class InsuredController {
 
     @PutMapping("/{id}")
     public ApiResponse<ResultType> modify(@PathVariable Integer id, @RequestBody InsuredModifyRequest request,
-                                          @LoginAdmin AdminUser admin) {
+            @LoginAdmin AdminUser admin) {
         // 서비스 레이어에 수정을 위임
         // (ID와 함께 가입자/계약정보 Record를 전달)
         insuredService.modify(id, request.insuredInfo(), request.contract(), request.location(), request.subscription(),
@@ -80,8 +80,7 @@ public class InsuredController {
     }
 
     @PostMapping("/contract")
-    public ApiResponse<ResultType> register(@RequestBody InsuredRegisterRequest request,
-            @LoginAdmin AdminUser admin) {
+    public ApiResponse<ResultType> register(@RequestBody InsuredRegisterRequest request, @LoginAdmin AdminUser admin) {
 
         // Service는 비즈니스 흐름만 관장 (등록 -> 로그/이벤트 발행)
         insuredService.register(request.insuredInfo(), request.contractInfo(), request.location(),

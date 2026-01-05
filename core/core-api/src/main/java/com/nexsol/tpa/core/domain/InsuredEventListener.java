@@ -67,7 +67,7 @@ public class InsuredEventListener {
 
                 링크: %s
 
-                감사합니다.""".formatted(event.name(),event.type().getTitle() ,event.link());
+                감사합니다.""".formatted(event.name(), event.type().getTitle(), event.link());
 
         // 1. 메일 발송 및 이력 저장
         try {

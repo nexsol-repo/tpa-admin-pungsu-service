@@ -5,19 +5,17 @@ import com.nexsol.tpa.core.api.controller.v1.request.InsuredRegisterRequest;
 import com.nexsol.tpa.core.api.controller.v1.request.NotificationSendRequest;
 import com.nexsol.tpa.core.domain.*;
 
+import com.nexsol.tpa.core.domain.LoginAdmin;
 import com.nexsol.tpa.core.enums.MailType;
-import com.nexsol.tpa.core.enums.ServiceType;
 import com.nexsol.tpa.core.support.DomainPage;
 import com.nexsol.tpa.core.support.OffsetLimit;
 import com.nexsol.tpa.test.api.RestDocsTest;
-import com.nexsol.tpa.web.auth.AdminUserProvider;
-import com.nexsol.tpa.web.auth.LoginAdmin;
+
 import org.junit.jupiter.api.BeforeEach;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.payload.FieldDescriptor;
@@ -29,7 +27,6 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import tools.jackson.databind.json.JsonMapper;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,7 +69,7 @@ public class InsuredControllerTest extends RestDocsTest {
             public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                     NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
                 // 테스트용 관리자 정보 (ID: 1L) 반환
-                return new AdminUserProvider(1L, "MASTER", Collections.emptySet());
+                return new AdminUser(1L, "MASTER");
             }
         };
 
