@@ -8,51 +8,61 @@ import org.springframework.stereotype.Component;
 @Component
 public class InsuredEntityMapper {
 
-    // 식별자와 DTO들을 받아 완성된 Entity를 반환
-    public TotalFormMemberEntity toEntity(String referIdx, InsuredInfo info, InsuredContractInfo contract) {
+    public TotalFormMemberEntity toEntity(String referIdx, InsuredInfo insured, ContractInfo contract,
+            BusinessLocationInfo location, InsuredSubscriptionInfo subscription) {
         TotalFormMemberEntity entity = new TotalFormMemberEntity();
-
-        // 도메인 객체에게 식별자 할당 요청
         entity.assignReferIdx(referIdx);
+        updateEntity(entity, insured, contract, location, subscription);
+        return entity;
+    }
 
-        if (info != null) {
-            entity.applyInsuredBasic(info.companyName(), info.name(), info.businessNumber(), info.phoneNumber(),
-                    info.email(), info.birthDate());
+    public void updateEntity(TotalFormMemberEntity entity, InsuredInfo insured, ContractInfo contract,
+            BusinessLocationInfo location, InsuredSubscriptionInfo subscription) {
 
-            entity.applyLocationInfo(info.address(), info.tenant(), info.category(), info.structure(),
-                    info.pnu(), info.prctrNo(),info.groundFloorCd(), info.groundFloor(), info.underGroundFloor(), info.subFloor(),
-                    info.endSubFloor());
+        if (insured != null) {
+            entity.applyInsuredBasic(insured.name(), insured.businessNumber(), insured.phoneNumber(), insured.email(),
+                    insured.birthDate());
         }
 
         if (contract != null) {
-            entity.applyContractInfo(contract.contractName(),contract.contractBusinessNumber(),contract.contractAddress());
-
-            entity.applyContractStatus(contract.joinCk(), contract.insuranceStartDate(), contract.insuranceEndDate(),
-                    contract.insuranceNumber(), contract.payYn());
-
-            entity.applyCoverage(CoverageAmount.builder()
-                .insuranceCostDeductible(contract.insuranceCostDeductible())
-                .insuranceCostBld(contract.insuranceCostBld())
-                .insuranceCostFcl(contract.insuranceCostFcl())
-                .insuranceCostMach(contract.insuranceCostMach())
-                .insuranceCostInven(contract.insuranceCostInven())
-                .insuranceCostShopSign(contract.insuranceCostShopSign())
-                .build());
-
-            entity.applyPremium(PremiumAmount.builder()
-                .totalInsuranceCost(contract.totalInsuranceCost())
-                .totalGovernmentCost(contract.totalGovernmentCost())
-                .totalLocalGovernmentCost(contract.totalLocalGovernmentCost())
-                .totalInsuranceMyCost(contract.totalInsuranceMyCost())
-                .build());
-
-            entity.applyChannelInfo(contract.account(), contract.path());
-
-            // 필요 시 채널 정보 매핑 추가
-            entity.applyChannelInfo(contract.account(), contract.path());
+            entity.applyContractInfo(contract.contractName(), contract.contractBusinessNumber(),
+                    contract.contractAddress());
         }
 
-        return entity;
+        if (location != null) {
+            entity.applyLocationInfo(location.companyName(), location.address(), location.category(), location.tenant(),
+                    location.structure(), location.pnu(), location.prctrNo(), location.groundFloorCd(),
+                    location.groundFloor(), location.underGroundFloor(), location.subFloor(), location.endSubFloor(),
+                    location.tmYn(), location.groundFloorYn());
+        }
+
+        if (subscription != null) {
+            // 상태 및 기간
+            entity.applyContractStatus(subscription.joinCk(), subscription.insuranceStartDate(),
+                    subscription.insuranceEndDate(), subscription.insuranceNumber(), subscription.payYn());
+
+            // 가입 금액 (Embedded)
+            entity.applyCoverage(CoverageAmount.builder()
+                .insuranceCostDeductible(subscription.insuranceCostDeductible())
+                .insuranceCostBld(subscription.insuranceCostBld())
+                .insuranceCostFcl(subscription.insuranceCostFcl())
+                .insuranceCostMach(subscription.insuranceCostMach())
+                .insuranceCostInven(subscription.insuranceCostInven())
+                .insuranceCostShopSign(subscription.insuranceCostShopSign())
+                .build());
+
+            // 보험료 (Embedded)
+            entity.applyPremium(PremiumAmount.builder()
+                .totalInsuranceCost(subscription.totalInsuranceCost())
+                .totalGovernmentCost(subscription.totalGovernmentCost())
+                .totalLocalGovernmentCost(subscription.totalLocalGovernmentCost())
+                .totalInsuranceMyCost(subscription.totalInsuranceMyCost())
+                .build());
+
+            // 채널 정보
+            entity.applyChannelInfo(subscription.account(), subscription.path());
+        }
+
     }
 
 }

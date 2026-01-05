@@ -1,5 +1,7 @@
 package com.nexsol.tpa.core.domain;
 
+import com.nexsol.tpa.storage.db.core.CoverageAmount;
+import com.nexsol.tpa.storage.db.core.PremiumAmount;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberEntity;
 import org.springframework.stereotype.Component;
 
@@ -10,56 +12,67 @@ import java.util.Objects;
 @Component
 public class ContractChangeDetector {
 
-    public List<ChangeDetail> detect(TotalFormMemberEntity entity, InsuredInfo info, InsuredContractInfo contract) {
+    public List<ChangeDetail> detect(TotalFormMemberEntity entity, InsuredInfo insured, ContractInfo contract,
+            BusinessLocationInfo location, InsuredSubscriptionInfo subscription) {
         List<ChangeDetail> changes = new ArrayList<>();
 
-        if (info != null) {
-            compare("상호명", entity.getCompanyName(), info.companyName(), changes);
-            compare("생년월일", entity.getBirthDate(), info.birthDate(), changes);
-            compare("피보험자명", entity.getName(), info.name(), changes);
-            compare("사업자번호", entity.getBusinessNumber(), info.businessNumber(), changes);
-            compare("연락처", entity.getPhoneNumber(), info.phoneNumber(), changes);
-            compare("주소", entity.getAddress(), info.address(), changes);
-            compare("업종", entity.getBizCategory(), info.category(), changes);
-            compare("건물구조", entity.getStructure(), info.structure(), changes);
-            compare("임차여부", entity.getTenant(), info.tenant(), changes);
-            compare("지하소재여부", entity.getGroundFloorCd(), info.groundFloorCd(), changes);
-            compare("건물 지상 층수 정보", entity.getGroundFloor(), info.groundFloor(), changes);
-            compare("건물 지하 층수 정보", entity.getUnderGroundFloor(), info.underGroundFloor(), changes);
-            compare("사업장 시작 층수", entity.getSubFloor(), info.subFloor(), changes);
-            compare("사업장 끝 층수", entity.getEndSubFloor(), info.endSubFloor(), changes);
-
+        if (insured != null) {
+            compare("피보험자명", entity.getName(), insured.name(), changes);
+            compare("사업자번호", entity.getBusinessNumber(), insured.businessNumber(), changes);
+            compare("연락처", entity.getPhoneNumber(), insured.phoneNumber(), changes);
+            compare("이메일", entity.getEmail(), insured.email(), changes);
+            compare("생년월일", entity.getBirthDate(), insured.birthDate(), changes);
         }
 
         if (contract != null) {
-            compare("진행상태", entity.getJoinCheck(), contract.joinCk(), changes);
-            compare("보험사", entity.getInsuranceCompany(), contract.insuranceCompany(), changes);
-            compare("증권번호", entity.getInsuranceNumber(), contract.insuranceNumber(), changes);
-            compare("보험시작일", entity.getInsuranceStartDate(), contract.insuranceStartDate(), changes);
-            compare("보험종료일", entity.getInsuranceEndDate(), contract.insuranceEndDate(), changes);
+            compare("계약자명", entity.getContractName(), contract.contractName(), changes);
+            compare("계약자 사업자번호", entity.getContractBusinessNumber(), contract.contractBusinessNumber(), changes);
+            compare("계약자 주소", entity.getContractAddress(), contract.contractAddress(), changes);
+        }
 
-            // 가입금액 및 보험료 비교 (필요 시 추가)
-            if (entity.getCoverage() != null) {
-                compare("건물 가입 금액", entity.getCoverage().getInsuranceCostBld(), contract.insuranceCostBld(), changes);
-                compare("시설/집기 금액", entity.getCoverage().getInsuranceCostFcl(), contract.insuranceCostFcl(), changes);
-                compare("기계 가입 금액", entity.getCoverage().getInsuranceCostMach(), contract.insuranceCostMach(), changes);
-                compare("재고자산 가입 금액", entity.getCoverage().getInsuranceCostInven(), contract.insuranceCostInven(),
+        if (location != null) {
+            compare("상호명(사업장명)", entity.getCompanyName(), location.companyName(), changes);
+            compare("사업장 주소", entity.getAddress(), location.address(), changes);
+            compare("업종", entity.getBizCategory(), location.category(), changes);
+            compare("임차여부", entity.getTenant(), location.tenant(), changes);
+            compare("건물구조", entity.getStructure(), location.structure(), changes);
+            compare("지하소재여부", entity.getGroundFloorCd(), location.groundFloorCd(), changes);
+            compare("전통시장 여부", entity.getTmYn(), location.tmYn(), changes);
+            compare("지하층/1층 여부", entity.getGroundFloorYn(), location.groundFloorYn(), changes);
+            compare("지상층수", entity.getGroundFloor(), location.groundFloor(), changes);
+            compare("지하층수", entity.getUnderGroundFloor(), location.underGroundFloor(), changes);
+            compare("시작호수", entity.getSubFloor(), location.subFloor(), changes);
+            compare("종료호수", entity.getEndSubFloor(), location.endSubFloor(), changes);
+            compare("전통시장 여부", entity.getTmYn(), location.tmYn(), changes);
+        }
+        if (subscription != null) {
+            CoverageAmount coverage = entity.getCoverage();
+            compare("진행상태", entity.getJoinCheck(), subscription.joinCk(), changes);
+            compare("보험사", entity.getInsuranceCompany(), subscription.insuranceCompany(), changes);
+            compare("보험시작일", entity.getInsuranceStartDate(), subscription.insuranceStartDate(), changes);
+            compare("보험종료일", entity.getInsuranceEndDate(), subscription.insuranceEndDate(), changes);
+
+            if (coverage != null) {
+                compare("건물 가입금액", coverage.getInsuranceCostBld(), subscription.insuranceCostBld(), changes);
+                compare("시설 가입금액", coverage.getInsuranceCostFcl(), subscription.insuranceCostFcl(), changes);
+                compare("기계 가입금액", coverage.getInsuranceCostMach(), subscription.insuranceCostMach(), changes);
+                compare("재고 가입금액", coverage.getInsuranceCostInven(), subscription.insuranceCostInven(), changes);
+                compare("간판 가입금액", coverage.getInsuranceCostShopSign(), subscription.insuranceCostShopSign(), changes);
+                compare("자기부담금", coverage.getInsuranceCostDeductible(), subscription.insuranceCostDeductible(),
                         changes);
-                compare("야외간판 가입 금액", entity.getCoverage().getInsuranceCostShopSign(), contract.insuranceCostShopSign(),
-                        changes);
-                compare("자기부담금 가입 금액", entity.getCoverage().getInsuranceCostDeductible(),
-                        contract.insuranceCostDeductible(), changes);
             }
 
-            if (entity.getPremium() != null) {
-                compare("총보험료", entity.getPremium().getTotalInsuranceCost(), contract.totalInsuranceCost(), changes);
-                compare("본인부담 보험료", entity.getPremium().getTotalInsuranceMyCost(), contract.totalInsuranceMyCost(),
+            PremiumAmount premium = entity.getPremium();
+            if (premium != null) {
+                compare("총 보험료", premium.getTotalInsuranceCost(), subscription.totalInsuranceCost(), changes);
+                compare("정부지원금", premium.getTotalGovernmentCost(), subscription.totalGovernmentCost(), changes);
+                compare("지자체지원금", premium.getTotalLocalGovernmentCost(), subscription.totalLocalGovernmentCost(),
                         changes);
-                compare("정부지원 보험료", entity.getPremium().getTotalGovernmentCost(), contract.totalGovernmentCost(),
-                        changes);
-                compare("지자체지원 보험료", entity.getPremium().getTotalLocalGovernmentCost(),
-                        contract.totalLocalGovernmentCost(), changes);
+                compare("자부담 보험료", premium.getTotalInsuranceMyCost(), subscription.totalInsuranceMyCost(), changes);
             }
+
+            compare("진행상태", entity.getJoinCheck(), subscription.joinCk(), changes);
+            compare("결제여부", entity.getPayYn(), subscription.payYn(), changes);
         }
 
         return changes;

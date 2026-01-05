@@ -3,7 +3,6 @@ package com.nexsol.tpa.core.domain;
 import com.nexsol.tpa.core.enums.MailType;
 import com.nexsol.tpa.core.support.DomainPage;
 import com.nexsol.tpa.core.support.OffsetLimit;
-import com.nexsol.tpa.support.mailer.EmailSender;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -36,10 +35,11 @@ public class InsuredService {
     }
 
     @Transactional
-    public Integer modify(Integer id, InsuredInfo info, InsuredContractInfo contract, String memoContent,
-            Long adminId) {
+    public Integer modify(Integer id, InsuredInfo insured, ContractInfo contract, BusinessLocationInfo location,
+            InsuredSubscriptionInfo subscription, String memoContent, Long adminId) {
 
-        List<ChangeDetail> diffs = insuredContractorWriter.writeAndGetDiff(id, info, contract);
+        List<ChangeDetail> diffs = insuredContractorWriter.writeAndGetDiff(id, insured, contract, location,
+                subscription);
         String token = getJwtToken();
 
         if (!diffs.isEmpty()) {
@@ -59,50 +59,22 @@ public class InsuredService {
     }
 
     @Transactional
-    public void register(InsuredInfo info, InsuredContractInfo contract, String memoContent, Long adminId) {
-        Integer contractId = insuredContractorWriter.create(info, contract);
+    public void register(InsuredInfo insured, ContractInfo contract, BusinessLocationInfo location,
+            InsuredSubscriptionInfo subscription, String memoContent, Long adminId) {
+        Integer contractId = insuredContractorWriter.create(insured, contract, location, subscription);
 
         String token = getJwtToken();
 
         // 초기 메모가 있다면 이벤트 발행 (기존 이벤트 활용 또는 메모 전용 이벤트)
         if (StringUtils.hasText(memoContent)) {
-            eventPublisher.publishEvent(new InsuredModifiedEvent(contractId, memoContent, // 또는
-                                                                                          // "등록
-                                                                                          // 시
-                                                                                          // 메모:
-                                                                                          // "
-                                                                                          // +
-                                                                                          // memoContent
-                    String.valueOf(adminId), token));
+            eventPublisher
+                .publishEvent(new InsuredModifiedEvent(contractId, memoContent, String.valueOf(adminId), token));
         }
 
         // 신규 등록 시스템 로그 이벤트 발행
         eventPublisher
             .publishEvent(new InsuredSystemLogEvent(contractId, "관리자 직접 등록(신규)", String.valueOf(adminId), token));
     }
-
-    // @Transactional(readOnly = true)
-    // public void sendAllNotifications(Integer contractId, MailType type, Long adminId,
-    // String token) {
-    // // 1. 필요한 데이터 조회
-    // InsuredContractDetail detail = insuredContractFinder.findDetail(contractId);
-    // String referIdx = detail.insuredInfo().referIdx();
-    //
-    // // 2. 비즈니스 로직에 따른 링크 생성 (예: 재가입 URL)
-    // String rejoinUrl = "http://pungsu.tpakorea.com/rejoin/feeGuide?idx=" + referIdx;
-    //
-    // // 3. 통합 이벤트 발행 (리스너에서 문자/메일 동시 처리)
-    // eventPublisher.publishEvent(new InsuredIntegratedNotificationEvent(
-    // contractId,
-    // detail.insuredInfo().name(),
-    // detail.insuredInfo().email(),
-    // detail.insuredInfo().phoneNumber(),
-    // type,
-    // rejoinUrl,
-    // String.valueOf(adminId),
-    // token
-    // ));
-    // }
 
     public void send(InsuredContractDetail detail, MailType type, String targetUrl, Long adminId) {
         String token = getJwtToken();

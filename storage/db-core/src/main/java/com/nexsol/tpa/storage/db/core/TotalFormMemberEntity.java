@@ -32,13 +32,13 @@ public class TotalFormMemberEntity {
     @Column(name = "company")
     private String companyName; // 상호명
 
-    @Column(name="contract_name")
+    @Column(name = "contract_name")
     private String contractName;
 
-    @Column(name="contract_business_number")
+    @Column(name = "contract_business_number")
     private String contractBusinessNumber;
 
-    @Column(name="contract_address")
+    @Column(name = "contract_address")
     private String contractAddress;
 
     @Column(name = "insured_email")
@@ -87,6 +87,9 @@ public class TotalFormMemberEntity {
     @Column(name = "ground_floor_cd")
     private String groundFloorCd;
 
+    @Column(name = "ground_floor_yn")
+    private String groundFloorYn;
+
     @Column(name = "grnd_flr_cnt")
     private int groundFloor;
 
@@ -111,7 +114,7 @@ public class TotalFormMemberEntity {
     @Column(name = "pnu")
     private String pnu;
 
-    @Column(name="tm_yn")
+    @Column(name = "tm_yn")
     private String tmYn;
 
     @Embedded
@@ -123,22 +126,29 @@ public class TotalFormMemberEntity {
     /**
      * 가입자 기본 인적 사항 변경
      */
-    public void applyInsuredBasic(String companyName, String name, String businessNumber, String phoneNumber,
-            String email, String birthDate) {
-        this.companyName = companyName;
-        this.name = name; // 계약자=피보험자 규칙 강제
-        this.email = email;
+    public void applyInsuredBasic(String name, String businessNumber, String phoneNumber, String email,
+            String birthDate) {
+        this.name = name;
         this.businessNumber = businessNumber;
-        this.phoneNumber = phoneNumber;
         this.birthDate = birthDate;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+
+    }
+
+    public void applyContractInfo(String contractName, String contractBusinessNumber, String contractAddress) {
+        this.contractName = contractName;
+        this.contractBusinessNumber = contractBusinessNumber;
+        this.contractAddress = contractAddress;
     }
 
     /**
      * 사업장 정보 변경
      */
-    public void applyLocationInfo(String address, String tenant, String category, String structure, String pnu,
-            String prctrNo, String groundFloorCd, int groundFloor, int underGroundFloor, String subFloor,
-            String endSubFloor) {
+    public void applyLocationInfo(String companyName, String address, String tenant, String category, String structure,
+            String pnu, String prctrNo, String groundFloorCd, int groundFloor, int underGroundFloor, String subFloor,
+            String endSubFloor, String tmYn, String groundFloorYn) {
+        this.companyName = companyName;
         this.address = address;
         this.bizCategory = category;
         this.tenant = tenant;
@@ -150,13 +160,8 @@ public class TotalFormMemberEntity {
         this.endSubFloor = endSubFloor;
         this.prctrNo = prctrNo;
         this.pnu = pnu;
-    }
-
-
-    public void applyContractInfo(String contractName,String contractBusinessNumber,String contractAddress){
-        this.contractName=contractName;
-        this.contractBusinessNumber=contractBusinessNumber;
-        this.contractAddress=contractAddress;
+        this.tmYn = tmYn;
+        this.groundFloorYn = groundFloorYn;
     }
 
     public void applyContractStatus(String joinCheck, LocalDateTime insuranceStartDate, LocalDateTime insuranceEndDate,

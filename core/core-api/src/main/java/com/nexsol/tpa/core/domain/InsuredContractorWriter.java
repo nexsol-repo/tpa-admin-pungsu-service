@@ -2,8 +2,6 @@ package com.nexsol.tpa.core.domain;
 
 import com.nexsol.tpa.core.support.error.CoreException;
 import com.nexsol.tpa.core.support.error.ErrorType;
-import com.nexsol.tpa.storage.db.core.CoverageAmount;
-import com.nexsol.tpa.storage.db.core.PremiumAmount;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberEntity;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,91 +21,39 @@ public class InsuredContractorWriter {
 
     private final ContractChangeDetector changeDetector;
 
-    public Integer write(Integer id, InsuredInfo info, InsuredContractInfo contract) {
-        TotalFormMemberEntity entity = totalFormMemberRepository.findById(id)
-            .orElseThrow(() -> new CoreException(ErrorType.DEFAULT_ERROR));
-
-        if (info != null) {
-            entity.applyInsuredBasic(info.companyName(), info.name(), info.businessNumber(), info.phoneNumber(),
-                    info.email(), info.birthDate());
-
-            entity.applyLocationInfo(info.address(), info.tenant(), info.category(), info.structure(), info.prctrNo(),
-                    info.pnu(), info.groundFloorCd(), info.groundFloor(), info.underGroundFloor(), info.subFloor(),
-                    info.endSubFloor());
-        }
-
-        if (contract != null) {
-            // 보험 기본 정보 업데이트 (상태, 보험사, 기간 등 누락된 메서드 추가 필요 시)
-            entity.applyContractStatus(contract.joinCk(), contract.insuranceStartDate(), contract.insuranceEndDate(),
-                    contract.insuranceNumber(), contract.payYn());
-
-            entity.applyCoverage(CoverageAmount.builder()
-                .insuranceCostDeductible(contract.insuranceCostDeductible())
-                .insuranceCostBld(contract.insuranceCostBld())
-                .insuranceCostFcl(contract.insuranceCostFcl())
-                .insuranceCostMach(contract.insuranceCostMach())
-                .insuranceCostInven(contract.insuranceCostInven())
-                .insuranceCostShopSign(contract.insuranceCostShopSign())
-                .build());
-
-            entity.applyPremium(PremiumAmount.builder()
-                .totalInsuranceCost(contract.totalInsuranceCost())
-                .totalGovernmentCost(contract.totalGovernmentCost())
-                .totalLocalGovernmentCost(contract.totalLocalGovernmentCost())
-                .totalInsuranceMyCost(contract.totalInsuranceMyCost())
-                .build());
-        }
-        return entity.getId();
-    }
-
-    public List<ChangeDetail> writeAndGetDiff(Integer id, InsuredInfo info, InsuredContractInfo contract) {
+    public Integer write(Integer id, InsuredInfo insured, ContractInfo contract, BusinessLocationInfo location,
+            InsuredSubscriptionInfo subscription) {
         TotalFormMemberEntity entity = totalFormMemberRepository.findById(id)
             .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND_DATA));
 
-        // 1. 엔티티 수정 전, 요청 데이터와 비교하여 변경 내역 추출 (Implement Layer 도구 활용)
-        List<ChangeDetail> diffs = changeDetector.detect(entity, info, contract);
+        // 매핑 책임은 Mapper에게 격벽으로 분리
+        entityMapper.updateEntity(entity, insured, contract, location, subscription);
 
-        // 2. 실제 엔티티 상태 변경 (기존 로직 유지)
-        if (info != null) {
-            entity.applyInsuredBasic(info.companyName(), info.name(), info.businessNumber(), info.phoneNumber(),
-                    info.email(), info.birthDate());
-            entity.applyLocationInfo(info.address(), info.tenant(), info.category(), info.structure(), info.prctrNo(),
-                    info.pnu(), info.groundFloorCd(), info.groundFloor(), info.underGroundFloor(), info.subFloor(),
-                    info.endSubFloor());
-        }
-
-        if (contract != null) {
-            entity.applyContractStatus(contract.joinCk(), contract.insuranceStartDate(), contract.insuranceEndDate(),
-                    contract.insuranceNumber(), contract.payYn());
-
-            entity.applyCoverage(CoverageAmount.builder()
-                .insuranceCostDeductible(contract.insuranceCostDeductible())
-                .insuranceCostBld(contract.insuranceCostBld())
-                .insuranceCostFcl(contract.insuranceCostFcl())
-                .insuranceCostMach(contract.insuranceCostMach())
-                .insuranceCostInven(contract.insuranceCostInven())
-                .insuranceCostShopSign(contract.insuranceCostShopSign())
-                .build());
-
-            entity.applyPremium(PremiumAmount.builder()
-                .totalInsuranceCost(contract.totalInsuranceCost())
-                .totalGovernmentCost(contract.totalGovernmentCost())
-                .totalLocalGovernmentCost(contract.totalLocalGovernmentCost())
-                .totalInsuranceMyCost(contract.totalInsuranceMyCost())
-                .build());
-        }
-
-        return diffs; // 추출된 변경 내역 반환
+        return entity.getId();
     }
 
-    public Integer create(InsuredInfo info, InsuredContractInfo contract) {
-        // 1. 키 생성 (KeyGenerator에게 위임)
+    public List<ChangeDetail> writeAndGetDiff(Integer id, InsuredInfo insured, ContractInfo contract,
+            BusinessLocationInfo location, InsuredSubscriptionInfo subscription) {
+        TotalFormMemberEntity entity = totalFormMemberRepository.findById(id)
+            .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND_DATA));
+
+        // 1. 수정 전 상태와 새로운 개념 객체들을 비교하여 변경 사항 추출
+        List<ChangeDetail> diffs = changeDetector.detect(entity, insured, contract, location, subscription);
+
+        // 2. 실제 엔티티 업데이트
+        entityMapper.updateEntity(entity, insured, contract, location, subscription);
+
+        return diffs;
+    }
+
+    public Integer create(InsuredInfo insured, ContractInfo contract, BusinessLocationInfo location,
+            InsuredSubscriptionInfo subscription) {
+        // 1. 키 생성
         String referIdx = keyGenerator.generate();
 
-        // 2. 엔티티 변환 (Mapper에게 위임)
-        TotalFormMemberEntity entity = entityMapper.toEntity(referIdx, info, contract);
+        // 2. 엔티티 변환 및 저장 (Mapper 활용)
+        TotalFormMemberEntity entity = entityMapper.toEntity(referIdx, insured, contract, location, subscription);
 
-        // 3. 저장 (Repository에게 위임)
         return totalFormMemberRepository.save(entity).getId();
     }
 

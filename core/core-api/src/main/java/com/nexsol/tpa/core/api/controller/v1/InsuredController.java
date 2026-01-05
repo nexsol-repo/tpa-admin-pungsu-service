@@ -65,7 +65,7 @@ public class InsuredController {
 
         InsuredContractDetail detail = insuredService.getDetail(id);
 
-        String certificateUrl = meritzService.getLink4(detail.insuredInfo().prctrNo());
+        String certificateUrl = meritzService.getLink4(detail.prctrNo());
 
         return ApiResponse.success(InsuredContractDetailResponse.of(detail, certificateUrl));
     }
@@ -75,7 +75,8 @@ public class InsuredController {
             @LoginAdmin AdminUserProvider admin) {
         // 서비스 레이어에 수정을 위임
         // (ID와 함께 가입자/계약정보 Record를 전달)
-        insuredService.modify(id, request.insuredInfo(), request.contractInfo(), request.memoContent(), admin.id());
+        insuredService.modify(id, request.insuredInfo(), request.contract(), request.location(), request.subscription(),
+                request.memoContent(), admin.id());
 
         return ApiResponse.success(ResultType.SUCCESS);
     }
@@ -85,7 +86,8 @@ public class InsuredController {
             @LoginAdmin AdminUserProvider admin) {
 
         // Service는 비즈니스 흐름만 관장 (등록 -> 로그/이벤트 발행)
-        insuredService.register(request.insuredInfo(), request.contractInfo(), request.memoContent(), admin.id());
+        insuredService.register(request.insuredInfo(), request.contractInfo(), request.location(),
+                request.subscription(), request.memoContent(), admin.id());
 
         return ApiResponse.success(ResultType.SUCCESS);
     }
@@ -100,11 +102,11 @@ public class InsuredController {
         String targetUrl = "";
         if (request.type() == MailType.REJOIN) {
             // 재가입 URL: referIdx 활용
-            targetUrl = "http://pungsu.tpakorea.com/rejoin/feeGuide?idx=" + detail.insuredInfo().referIdx();
+            targetUrl = "http://pungsu.tpakorea.com/rejoin/feeGuide?idx=" + detail.referIdx();
         }
         else if (request.type() == MailType.CERTIFICATE) {
             // 가입확인서 URL: MeritzService를 통해 rltLinkUrl4 조회 (getDetail과 동일 패턴)
-            targetUrl = meritzService.getLink4(detail.insuredInfo().prctrNo());
+            targetUrl = meritzService.getLink4(detail.prctrNo());
         }
 
         // 3. 취합된 정보로 알림 발송 명령 (Service 호출)
