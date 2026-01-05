@@ -397,7 +397,9 @@ public class InsuredControllerTest extends RestDocsTest {
         // objectMapper 대신 직접 JSON 문자열 작성
         String requestJson = """
                 {
-                    "type": "REJOIN"
+                    "type": "REJOIN",
+                       "content": "재가입 안내 문자 발송 완료",
+                        "serviceType": "PUNGSU"
                 }
                 """;
 
@@ -421,7 +423,12 @@ public class InsuredControllerTest extends RestDocsTest {
             .andExpect(status().isOk())
             .andDo(document("admin-insured-notification-send", // 문서 식별자
                     pathParameters(parameterWithName("id").description("계약 PK ID")),
-                    requestFields(fieldWithPath("type").description("알림 유형 (REJOIN: 재가입 안내, CERTIFICATE: 가입확인서 안내)")),
+                    requestFields(
+                            fieldWithPath("type").description("알림 유형 (REJOIN: 재가입 안내, CERTIFICATE: 가입확인서 안내)"),
+                            fieldWithPath("content").description("메모 내용"),
+                            fieldWithPath("serviceType").description("서비스 타입(PUNGSU,SOLAR,TRAVEL)")
+
+                    ),
                     responseFields(
                             fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (SUCCESS/FAIL)"),
                             fieldWithPath("data").type(JsonFieldType.STRING).description("결과 데이터 (SUCCESS)"),

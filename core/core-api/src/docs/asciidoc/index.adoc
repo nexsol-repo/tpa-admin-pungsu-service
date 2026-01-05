@@ -89,3 +89,20 @@ include::{snippets}/insured-register-direct/http-response.adoc[]
 
 ==== Response Fields
 include::{snippets}/insured-register-direct/response-fields.adoc[]
+
+=== 풍수해 알림(문자+메일) 발송 API 문서화
+문자,메일 보내기
+==== Curl Request
+include::{snippets}/admin-insured-notification-send/curl-request.adoc[]
+
+==== HTTP Request
+include::{snippets}/admin-insured-notification-send/http-request.adoc[]
+
+==== Request Fields
+include::{snippets}/admin-insured-notification-send/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/admin-insured-notification-send/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/admin-insured-notification-send/response-fields.adoc[]
