@@ -60,6 +60,14 @@ public class InsuredEventListener {
         String token = event.token();
         String adminId = event.writerId();
         Long cId = Long.valueOf(event.contractId());
+        String message = """
+                [TPA KOREA]
+                안녕하세요, %s 고객님.
+                재가입 신청을 위해 아래 링크를 클릭해주세요.
+
+                링크: %s
+
+                감사합니다.""".formatted(event.name(), event.link());
 
         // 1. 메일 발송 및 이력 저장
         try {
@@ -74,7 +82,7 @@ public class InsuredEventListener {
 
         // 2. 문자 발송 및 이력 저장
         try {
-            smsSender.sendSms(event.phoneNumber(), event.name(), event.link());
+            smsSender.sendSms(event.phoneNumber(), message);
             memoClient.recordNotification(cId,
                     new CreateNotificationRequest("SMS", event.type().getTitle() + " 발송 완료", ServiceType.PUNGSU),
                     adminId, token);

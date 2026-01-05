@@ -26,23 +26,19 @@ public class AligoSmsSender implements SmsSender {
     private String senderNumber;
 
     @Override
-    public void sendSms(String phoneNumber, String name, String link) {
+    public void sendSms(String phoneNumber, String message) {
         // [수정] HashMap -> LinkedMultiValueMap 변경
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("key", apiKey);
         params.add("user_id", userId);
         params.add("sender", senderNumber);
         params.add("receiver", phoneNumber);
-
-        String msg = String.format("[TPA KOREA]\n안녕하세요, %s 고객님.\n재가입 신청을 위해 아래 링크를 클릭해주세요.\n\n링크: %s\n\n감사합니다.", name,
-                link);
-        params.add("msg", msg);
+        params.add("msg", message);
 
         try {
-            // [수정] MultiValueMap을 넘김
             Map<String, Object> response = aligoClient.sendSms(params);
 
-            // (이전 턴에서 수정한 에러 핸들링 로직 유지)
+            // 응답 처리 로직 유지
             if (!"1".equals(String.valueOf(response.get("result_code")))) {
                 String errorMsg = (String) response.get("message");
                 log.error("알리고 SMS 발송 실패: {}", errorMsg);
