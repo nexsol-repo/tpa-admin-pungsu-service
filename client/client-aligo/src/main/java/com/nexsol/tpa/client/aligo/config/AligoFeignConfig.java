@@ -7,11 +7,9 @@ import feign.codec.Encoder;
 import feign.form.spring.SpringFormEncoder;
 import org.springframework.beans.factory.ObjectProvider;
 
-
 import org.springframework.boot.http.converter.autoconfigure.ClientHttpMessageConvertersCustomizer;
 import org.springframework.boot.http.converter.autoconfigure.HttpMessageConvertersAutoConfiguration;
 import org.springframework.cloud.openfeign.support.FeignHttpMessageConverters;
-
 
 import org.springframework.cloud.openfeign.support.SpringEncoder;
 import org.springframework.context.annotation.Bean;
@@ -31,30 +29,32 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-
 //@Configuration
 //
 //@Import(HttpMessageConvertersAutoConfiguration.class)
 public class AligoFeignConfig {
 
-//    @Bean
-//    public ClientHttpMessageConvertersCustomizer aligoHtmlResponseCustomizer() {
-//        return builder -> {
-//            // 1. Jackson 3 컨버터 생성
-//            JacksonJsonHttpMessageConverter jacksonConverter = new JacksonJsonHttpMessageConverter();
-//
-//            // 2. 알리고의 "text/html" 응답도 JSON으로 처리하도록 설정
-//            jacksonConverter.setSupportedMediaTypes(List.of(MediaType.APPLICATION_JSON, MediaType.TEXT_HTML));
-//
-//            // 3. 문서에 나온대로 builder.withJsonConverter() 사용
-//            builder.withJsonConverter(jacksonConverter);
-//        };
-//    }
+    // @Bean
+    // public ClientHttpMessageConvertersCustomizer aligoHtmlResponseCustomizer() {
+    // return builder -> {
+    // // 1. Jackson 3 컨버터 생성
+    // JacksonJsonHttpMessageConverter jacksonConverter = new
+    // JacksonJsonHttpMessageConverter();
+    //
+    // // 2. 알리고의 "text/html" 응답도 JSON으로 처리하도록 설정
+    // jacksonConverter.setSupportedMediaTypes(List.of(MediaType.APPLICATION_JSON,
+    // MediaType.TEXT_HTML));
+    //
+    // // 3. 문서에 나온대로 builder.withJsonConverter() 사용
+    // builder.withJsonConverter(jacksonConverter);
+    // };
+    // }
 
     @Bean
     public Decoder feignDecoder() {
         return (response, type) -> {
-            if (response.body() == null) return null;
+            if (response.body() == null)
+                return null;
 
             // 1. Jackson 컨버터 생성
             JacksonJsonHttpMessageConverter jacksonConverter = new JacksonJsonHttpMessageConverter();
@@ -79,7 +79,8 @@ public class AligoFeignConfig {
             };
 
             // 3. [핵심 수정] Feign의 Type을 Spring ResolvableType으로 변환하여 전달
-            // read(ResolvableType type, HttpInputMessage inputMessage, Map<String, Object> hints)
+            // read(ResolvableType type, HttpInputMessage inputMessage, Map<String,
+            // Object> hints)
             return jacksonConverter.read(ResolvableType.forType(type), inputMessage, null);
         };
     }
