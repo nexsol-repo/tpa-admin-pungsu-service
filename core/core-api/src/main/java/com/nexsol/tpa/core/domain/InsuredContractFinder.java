@@ -31,80 +31,81 @@ public class InsuredContractFinder {
         Page<TotalFormMemberEntity> result = totalFormMemberRepository.findAll(specification, pageable);
 
         List<InsuredContract> contracts = result.getContent()
-            .stream()
-            .map(entity -> InsuredContract.builder()
-                .id(entity.getId())
-                .referIdx(entity.getReferIdx())
-                .businessNumber(entity.getBusinessNumber())
-                .companyName(entity.getCompanyName())
-                .applicationDate(entity.getInsuranceStartDate())
-                .insuranceCompany(entity.getInsuranceCompany())
-                .insuranceStartDate(entity.getInsuranceStartDate())
-                .insuranceEndDate(entity.getInsuranceEndDate())
-                .phoneNumber(entity.getPhoneNumber())
-                .payYn(entity.getPayYn())
-                .address(entity.getAddress())
-                .joinCk(entity.getJoinCheck())
-                .account(entity.getAccount())
-                .path(entity.getPath())
-                .build())
-            .toList();
+                .stream()
+                .map(entity -> InsuredContract.builder()
+                        .id(entity.getId())
+                        .referIdx(entity.getReferIdx())
+                        .businessNumber(entity.getBusinessNumber())
+                        .companyName(entity.getCompanyName())
+                        .applicationDate(entity.getInsuranceStartDate())
+                        .insuranceCompany(entity.getInsuranceCompany())
+                        .insuranceStartDate(entity.getInsuranceStartDate())
+                        .insuranceEndDate(entity.getInsuranceEndDate())
+                        .phoneNumber(entity.getPhoneNumber())
+                        .payYn(entity.getPayYn())
+                        .address(entity.getAddress())
+                        .joinCk(entity.getJoinCheck())
+                        .account(entity.getAccount())
+                        .path(entity.getPath())
+                        .build())
+                .toList();
 
         return new DomainPage<>(contracts, result.hasNext());
     }
 
     public InsuredContractDetail findDetail(Integer id) {
         TotalFormMemberEntity entity = totalFormMemberRepository.findById(id)
-            .orElseThrow(() -> new CoreException(ErrorType.DEFAULT_ERROR));
+                .orElseThrow(() -> new CoreException(ErrorType.DEFAULT_ERROR));
 
         return InsuredContractDetail.builder()
-            .id(entity.getId())
-            .insuredInfo(mapToInsuredInfo(entity))
-            .contractInfo(mapToContractInfo(entity))
-            .build();
+                .id(entity.getId())
+                .insuredInfo(mapToInsuredInfo(entity))
+                .contractInfo(mapToContractInfo(entity))
+                .build();
     }
 
     private InsuredInfo mapToInsuredInfo(TotalFormMemberEntity entity) {
         return InsuredInfo.builder()
-            .companyName(entity.getCompanyName())
-            .businessNumber(entity.getBusinessNumber())
-            .phoneNumber(entity.getPhoneNumber())
-            .address(entity.getAddress())
-            .email(entity.getEmail())
-            .birthDate(entity.getBirthDate())
-            .category(entity.getBizCategory())
-            .structure(entity.getStructure())
-            .tenant(entity.getTenant())
-            .groundFloorCd(entity.getGroundFloorCd())
-            .groundFloor(entity.getGroundFloor())
-            .underGroundFloor(entity.getUnderGroundFloor())
-            .subFloor(entity.getSubFloor())
-            .endSubFloor(entity.getEndSubFloor())
-            .prctrNo(entity.getPrctrNo())
-            .pnu(entity.getPnu())
-            .referIdx(entity.getReferIdx())
-            .build();
+                .companyName(entity.getCompanyName())
+                .name(entity.getName())
+                .businessNumber(entity.getBusinessNumber())
+                .phoneNumber(entity.getPhoneNumber())
+                .address(entity.getAddress())
+                .email(entity.getEmail())
+                .birthDate(entity.getBirthDate())
+                .category(entity.getBizCategory())
+                .structure(entity.getStructure())
+                .tenant(entity.getTenant())
+                .groundFloorCd(entity.getGroundFloorCd())
+                .groundFloor(entity.getGroundFloor())
+                .underGroundFloor(entity.getUnderGroundFloor())
+                .subFloor(entity.getSubFloor())
+                .endSubFloor(entity.getEndSubFloor())
+                .prctrNo(entity.getPrctrNo())
+                .pnu(entity.getPnu())
+                .referIdx(entity.getReferIdx())
+                .build();
     }
 
     private InsuredContractInfo mapToContractInfo(TotalFormMemberEntity entity) {
         return InsuredContractInfo.builder()
-            .joinCk(entity.getJoinCheck())
-            .payYn(entity.getPayYn())
-            .insuranceStartDate(entity.getInsuranceStartDate())
-            .insuranceEndDate(entity.getInsuranceEndDate())
-            .insuranceCompany(entity.getInsuranceCompany())
-            .insuranceNumber(entity.getInsuranceNumber())
-            .insuranceCostBld(entity.getCoverage().getInsuranceCostBld())
-            .insuranceCostFcl(entity.getCoverage().getInsuranceCostFcl())
-            .insuranceCostMach(entity.getCoverage().getInsuranceCostMach())
-            .insuranceCostInven(entity.getCoverage().getInsuranceCostInven())
-            .insuranceCostShopSign(entity.getCoverage().getInsuranceCostShopSign())
-            .insuranceCostDeductible(entity.getCoverage().getInsuranceCostDeductible())
-            .totalInsuranceCost(entity.getPremium().getTotalInsuranceCost())
-            .totalInsuranceMyCost(entity.getPremium().getTotalInsuranceMyCost())
-            .totalGovernmentCost(entity.getPremium().getTotalGovernmentCost())
-            .totalLocalGovernmentCost(entity.getPremium().getTotalLocalGovernmentCost())
-            .build();
+                .joinCk(entity.getJoinCheck())
+                .payYn(entity.getPayYn())
+                .insuranceStartDate(entity.getInsuranceStartDate())
+                .insuranceEndDate(entity.getInsuranceEndDate())
+                .insuranceCompany(entity.getInsuranceCompany())
+                .insuranceNumber(entity.getInsuranceNumber())
+                .insuranceCostBld(entity.getCoverage().getInsuranceCostBld())
+                .insuranceCostFcl(entity.getCoverage().getInsuranceCostFcl())
+                .insuranceCostMach(entity.getCoverage().getInsuranceCostMach())
+                .insuranceCostInven(entity.getCoverage().getInsuranceCostInven())
+                .insuranceCostShopSign(entity.getCoverage().getInsuranceCostShopSign())
+                .insuranceCostDeductible(entity.getCoverage().getInsuranceCostDeductible())
+                .totalInsuranceCost(entity.getPremium().getTotalInsuranceCost())
+                .totalInsuranceMyCost(entity.getPremium().getTotalInsuranceMyCost())
+                .totalGovernmentCost(entity.getPremium().getTotalGovernmentCost())
+                .totalLocalGovernmentCost(entity.getPremium().getTotalLocalGovernmentCost())
+                .build();
     }
 
 }

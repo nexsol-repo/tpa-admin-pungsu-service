@@ -19,12 +19,14 @@ public class InsuredEntityMapper {
             entity.applyInsuredBasic(info.companyName(), info.name(), info.businessNumber(), info.phoneNumber(),
                     info.email(), info.birthDate());
 
-            entity.applyLocationInfo(info.address(), info.tenant(), info.category(), info.structure(), info.prctrNo(),
-                    info.pnu(), info.groundFloorCd(), info.groundFloor(), info.underGroundFloor(), info.subFloor(),
+            entity.applyLocationInfo(info.address(), info.tenant(), info.category(), info.structure(),
+                    info.pnu(), info.prctrNo(),info.groundFloorCd(), info.groundFloor(), info.underGroundFloor(), info.subFloor(),
                     info.endSubFloor());
         }
 
         if (contract != null) {
+            entity.applyContractInfo(contract.contractName(),contract.contractBusinessNumber(),contract.contractAddress());
+
             entity.applyContractStatus(contract.joinCk(), contract.insuranceStartDate(), contract.insuranceEndDate(),
                     contract.insuranceNumber(), contract.payYn());
 
