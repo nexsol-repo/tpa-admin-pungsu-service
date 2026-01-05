@@ -63,11 +63,11 @@ public class InsuredEventListener {
         String message = """
                 [TPA KOREA]
                 안녕하세요, %s 고객님.
-                재가입 신청을 위해 아래 링크를 클릭해주세요.
+                %s을 위해 아래 링크를 클릭해주세요.
 
                 링크: %s
 
-                감사합니다.""".formatted(event.name(), event.link());
+                감사합니다.""".formatted(event.name(),event.type().getTitle() ,event.link());
 
         // 1. 메일 발송 및 이력 저장
         try {
