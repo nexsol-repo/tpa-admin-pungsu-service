@@ -73,7 +73,7 @@ public class InsuredEventListener {
         try {
             emailSender.send(event.email(), event.type(), event.link(), event.name());
             memoClient.recordNotification(cId,
-                    new CreateNotificationRequest("MAIL", event.type().getTitle() + " 발송 완료", ServiceType.PUNGSU),
+                    new CreateNotificationRequest("MAIL", event.type().getTitleSuffix() + " 발송 완료", ServiceType.PUNGSU),
                     adminId, token);
         }
         catch (Exception e) {
