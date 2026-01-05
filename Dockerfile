@@ -16,8 +16,11 @@ COPY lint.gradle .
 # 멀티 모듈 의존성 캐싱 (이 부분이 빠지면 매번 수분씩 소요됨)
 COPY core/core-api/build.gradle ./core/core-api/
 COPY core/core-enum/build.gradle ./core/core-enum/
+COPY client/client-aligo/build.gradle ./client/client-aligo/
+COPY client/client-memo/build.gradle ./client/client-memo/
 COPY storage/db-core/build.gradle ./storage/db-core/
 COPY support/logging/build.gradle ./support/logging/
+COPY support/mailer/build.gradle ./support/mailer/
 COPY tests/api-docs/build.gradle ./tests/api-docs/
 
 RUN chmod +x ./gradlew
