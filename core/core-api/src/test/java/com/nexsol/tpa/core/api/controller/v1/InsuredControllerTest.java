@@ -2,8 +2,11 @@ package com.nexsol.tpa.core.api.controller.v1;
 
 import com.nexsol.tpa.core.api.controller.v1.request.InsuredModifyRequest;
 import com.nexsol.tpa.core.api.controller.v1.request.InsuredRegisterRequest;
+import com.nexsol.tpa.core.api.controller.v1.request.NotificationSendRequest;
 import com.nexsol.tpa.core.domain.*;
 
+import com.nexsol.tpa.core.enums.MailType;
+import com.nexsol.tpa.core.enums.ServiceType;
 import com.nexsol.tpa.core.support.DomainPage;
 import com.nexsol.tpa.core.support.OffsetLimit;
 import com.nexsol.tpa.test.api.RestDocsTest;
@@ -196,14 +199,12 @@ public class InsuredControllerTest extends RestDocsTest {
 
         mockMvc.perform(get("/v1/admin/pungsu/{id}", id).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andDo(document("admin-insured-detail",
+            .andDo(document("admin-insured-detail", pathParameters(parameterWithName("id").description("계약 PK ID")),
                     responseFields(flatten(fieldWithPath("result").description("결과"),
                             fieldWithPath("data.id").description("ID"),
                             fieldWithPath("data.referIdx").description("참조번호").optional(),
                             insuredFields("data.insuredInfo."), contractFields("data.contractInfo."),
-                            locationFields("data.location."), subscriptionFields("data.subscription.", true), // Response는
-                                                                                                              // 갱신대상여부
-                                                                                                              // 포함
+                            locationFields("data.location."), subscriptionFields("data.subscription."),
                             fieldWithPath("data.certificateUrl").description("증권 URL").optional(),
                             fieldWithPath("error").description("에러").optional()))));
     }
@@ -259,13 +260,45 @@ public class InsuredControllerTest extends RestDocsTest {
             .perform(put("/v1/admin/pungsu/{id}", id).contentType(MediaType.APPLICATION_JSON)
                 .content(jsonMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
-            .andDo(document("admin-insured-modify",
-                    requestFields(flatten(insuredFields("insuredInfo."), contractFields("contract."),
-                            locationFields("location."), subscriptionFields("subscription.", false), // Request는
-                                                                                                     // 갱신대상여부
-                                                                                                     // 수정
-                                                                                                     // 불가(ignored)
-                            fieldWithPath("memoContent").description("메모").optional()))));
+            .andDo(document("admin-insured-modify", pathParameters(parameterWithName("id").description("계약 PK ID")),
+                    requestFields(flatten(insuredFields("insuredInfo."), contractFields("contract."), // 컨트롤러
+                                                                                                      // 필드명
+                                                                                                      // 매칭
+                            locationFields("location."), // 컨트롤러 필드명 매칭
+                            subscriptionFields("subscription."), // 컨트롤러 필드명 매칭
+                            fieldWithPath("memoContent").description("메모").optional())),
+                    responseFields(fieldWithPath("result").description("성공 여부"),
+                            fieldWithPath("data").description("결과 타입"),
+                            fieldWithPath("error").description("에러 정보").optional())));
+    }
+
+    @Test
+    @DisplayName("풍수해 알림(문자+메일) 발송 API 문서화")
+    void sendNotification() throws Exception {
+        Integer id = 1;
+        // 수정됨: NotificationSendRequest 생성자가 MailType type 하나만 받는다고 하셨으므로 수정
+        NotificationSendRequest request = new NotificationSendRequest(MailType.REJOIN);
+
+        InsuredContractDetail mockDetail = InsuredContractDetail.builder()
+            .id(id)
+            .referIdx("REF-123")
+            .insuredInfo(new InsuredInfo("홍길동", "123-45-67890", "19900101", "test@co.kr", "010-1234-5678"))
+            .build();
+
+        given(insuredService.getDetail(id)).willReturn(mockDetail);
+
+        mockMvc
+            .perform(post("/v1/admin/pungsu/{id}/notification", id).contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andDo(document("admin-insured-notification-send",
+                    pathParameters(parameterWithName("id").description("계약 PK ID")),
+                    requestFields(fieldWithPath("type").description("알림 유형 (REJOIN, CERTIFICATE)")
+                    // record 필드가 type 하나뿐이므로 content, serviceType 제거
+                    ),
+                    responseFields(fieldWithPath("result").description("성공 여부"),
+                            fieldWithPath("data").description("결과 데이터").optional(),
+                            fieldWithPath("error").description("에러 정보").optional())));
     }
 
     @Test
@@ -310,13 +343,13 @@ public class InsuredControllerTest extends RestDocsTest {
             .andExpect(status().isOk())
             .andDo(document("insured-register-direct",
                     requestFields(flatten(insuredFields("insuredInfo."), contractFields("contractInfo."),
-                            locationFields("location."), subscriptionFields("subscription.", false),
+                            locationFields("location."), subscriptionFields("subscription."),
                             fieldWithPath("memoContent").description("메모")))));
 
         verify(insuredService).register(any(), any(), any(), any(), any(), any());
     }
 
-    // --- 헬퍼 메서드 (갱신대상 필드의 조회/수정 권한 격벽화) ---
+    // --- 헬퍼 메서드 ---
 
     private FieldDescriptor[] locationFields(String prefix) {
         return new FieldDescriptor[] { fieldWithPath(prefix + "companyName").description("상호명"),
@@ -335,39 +368,28 @@ public class InsuredControllerTest extends RestDocsTest {
                 fieldWithPath(prefix + "prctrNo").description("질권번호").optional() };
     }
 
-    private FieldDescriptor[] subscriptionFields(String prefix, boolean isResponse) {
-        List<FieldDescriptor> fields = new ArrayList<>(
-                Arrays.asList(fieldWithPath(prefix + "joinCk").description("상태").optional(),
-                        fieldWithPath(prefix + "insuranceStartDate").description("시작일").optional(),
-                        fieldWithPath(prefix + "insuranceEndDate").description("종료일").optional(),
-                        fieldWithPath(prefix + "insuranceCompany").description("보험사").optional(),
-                        fieldWithPath(prefix + "insuranceNumber").description("증권번호").optional(),
-                        fieldWithPath(prefix + "payYn").description("납입여부").optional(),
-                        fieldWithPath(prefix + "account").description("제휴사").optional(),
-                        fieldWithPath(prefix + "path").description("채널").optional(),
-                        fieldWithPath(prefix + "insuranceCostBld").description("건물 가입금액").optional(),
-                        fieldWithPath(prefix + "insuranceCostFcl").description("시설 가입금액").optional(),
-                        fieldWithPath(prefix + "insuranceCostMach").description("기계 가입금액").optional(),
-                        fieldWithPath(prefix + "insuranceCostInven").description("재고 가입금액").optional(),
-                        fieldWithPath(prefix + "insuranceCostShopSign").description("간판 가입금액").optional(),
-                        fieldWithPath(prefix + "insuranceCostDeductible").description("자기부담금").optional(),
-                        fieldWithPath(prefix + "totalInsuranceCost").description("총 보험료").optional(),
-                        fieldWithPath(prefix + "totalInsuranceMyCost").description("자부담 보험료").optional(),
-                        fieldWithPath(prefix + "totalGovernmentCost").description("정부지원금").optional(),
-                        fieldWithPath(prefix + "totalLocalGovernmentCost").description("지자체지원금").optional()));
-
-        if (isResponse) {
-            // 조회 시에는 갱신대상여부를 보여줌
-            fields.add(fieldWithPath(prefix + "isRenewalTarget").description("갱신대상여부")
-                .type(JsonFieldType.BOOLEAN)
-                .optional());
-        }
-        else {
-            // 수정 시에는 해당 필드를 무시(수정 불가) 처리하여 RestDocs 오류 방지
-            fields.add(fieldWithPath(prefix + "isRenewalTarget").description("갱신대상여부 (수정 불가 필드)").ignored());
-        }
-
-        return fields.toArray(new FieldDescriptor[0]);
+    private FieldDescriptor[] subscriptionFields(String prefix) {
+        return new FieldDescriptor[] { fieldWithPath(prefix + "joinCk").description("상태").optional(),
+                fieldWithPath(prefix + "insuranceStartDate").description("시작일").optional(),
+                fieldWithPath(prefix + "insuranceEndDate").description("종료일").optional(),
+                fieldWithPath(prefix + "insuranceCompany").description("보험사").optional(),
+                fieldWithPath(prefix + "insuranceNumber").description("증권번호").optional(),
+                fieldWithPath(prefix + "payYn").description("납입여부").optional(),
+                fieldWithPath(prefix + "account").description("제휴사").optional(),
+                fieldWithPath(prefix + "path").description("채널").optional(),
+                fieldWithPath(prefix + "isRenewalTarget").description("갱신대상여부 (조회전용, 수정불가)")
+                    .type(JsonFieldType.BOOLEAN)
+                    .optional(),
+                fieldWithPath(prefix + "insuranceCostBld").description("건물 가입금액").optional(),
+                fieldWithPath(prefix + "insuranceCostFcl").description("시설 가입금액").optional(),
+                fieldWithPath(prefix + "insuranceCostMach").description("기계 가입금액").optional(),
+                fieldWithPath(prefix + "insuranceCostInven").description("재고 가입금액").optional(),
+                fieldWithPath(prefix + "insuranceCostShopSign").description("간판 가입금액").optional(),
+                fieldWithPath(prefix + "insuranceCostDeductible").description("자기부담금").optional(),
+                fieldWithPath(prefix + "totalInsuranceCost").description("총 보험료").optional(),
+                fieldWithPath(prefix + "totalInsuranceMyCost").description("자부담 보험료").optional(),
+                fieldWithPath(prefix + "totalGovernmentCost").description("정부지원금").optional(),
+                fieldWithPath(prefix + "totalLocalGovernmentCost").description("지자체지원금").optional() };
     }
 
     private List<FieldDescriptor> flatten(Object... descriptors) {

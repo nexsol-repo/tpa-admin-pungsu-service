@@ -1,6 +1,7 @@
 package com.nexsol.tpa.storage.db.core;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -145,7 +146,9 @@ public class TotalFormMemberEntity {
     /**
      * 사업장 정보 변경
      */
-    public void applyLocationInfo(String companyName, String address, String tenant, String category, String structure,
+
+    @Builder
+    public void applyLocationInfo(String companyName, String address, String category, String tenant, String structure,
             String pnu, String prctrNo, String groundFloorCd, int groundFloor, int underGroundFloor, String subFloor,
             String endSubFloor, String tmYn, String groundFloorYn) {
         this.companyName = companyName;
