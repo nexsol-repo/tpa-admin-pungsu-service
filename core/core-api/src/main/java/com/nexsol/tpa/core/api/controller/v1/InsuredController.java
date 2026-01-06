@@ -64,7 +64,7 @@ public class InsuredController {
         InsuredContractDetail detail = insuredService.getDetail(id);
 
         String certificateUrl = null;
-        if ("Y".equals(detail.subscription().payYn())) {
+        if ("Y".equals(detail.subscription().payYn()) || detail.prctrNo()!=null) {
             certificateUrl = meritzService.getLink4(detail.prctrNo());
         }
 
