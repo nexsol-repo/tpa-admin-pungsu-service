@@ -63,7 +63,10 @@ public class InsuredController {
 
         InsuredContractDetail detail = insuredService.getDetail(id);
 
-        String certificateUrl = meritzService.getLink4(detail.prctrNo());
+        String certificateUrl = null;
+        if ("Y".equals(detail.subscription().payYn())) {
+            certificateUrl = meritzService.getLink4(detail.prctrNo());
+        }
 
         return ApiResponse.success(InsuredContractDetailResponse.of(detail, certificateUrl));
     }

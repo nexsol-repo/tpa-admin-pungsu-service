@@ -84,6 +84,12 @@ echo "🛑 이전 버전 제거: ${OLD_PROJECT_NAME}"
 docker compose -p $OLD_PROJECT_NAME down || true
 
 
-# 7. 현재 포트 정보 업데이트
+# 7. 미사용 리소스 정리
+echo "🧹 미사용 이미지 및 빌드 캐시 정리 중..."
+# 최근 24시간 이내에 생성된 것은 제외하고 지우고 싶다면 --filter 사용 가능
+docker image prune -f
+docker builder prune -f
+
+# 8. 현재 포트 정보 업데이트
 echo "$TARGET_PORT" > "$CURRENT_PORT_FILE"
 echo "🎉 배포 성공! 현재 서비스 포트: ${TARGET_PORT}"
