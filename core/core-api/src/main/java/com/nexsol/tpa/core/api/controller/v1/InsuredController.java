@@ -15,6 +15,7 @@ import com.nexsol.tpa.core.support.response.PageResponse;
 import com.nexsol.tpa.core.support.response.ResultType;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -64,7 +65,7 @@ public class InsuredController {
         InsuredContractDetail detail = insuredService.getDetail(id);
 
         String certificateUrl = null;
-        if ("Y".equals(detail.subscription().payYn()) || (detail.prctrNo() != null && !detail.prctrNo().isEmpty())) {
+        if ("Y".equals(detail.subscription().payYn()) && StringUtils.hasText(detail.prctrNo())) {
             certificateUrl = meritzService.getLink4(detail.prctrNo());
         }
 
