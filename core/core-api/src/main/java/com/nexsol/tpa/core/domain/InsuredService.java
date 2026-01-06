@@ -79,7 +79,7 @@ public class InsuredService {
     @Transactional
     public void sendRenewalNotifications(int days) {
         // 1. 7일 뒤 만료 대상자 조회 (Implement Layer에 위임)
-        List<InsuredContractDetail> targets = insuredContractFinder.findExpiringContracts(7);
+        List<InsuredContractDetail> targets = insuredContractFinder.findExpiringContracts(days);
 
         // 2. 비즈니스 흐름 중계
         targets.forEach(detail -> {
