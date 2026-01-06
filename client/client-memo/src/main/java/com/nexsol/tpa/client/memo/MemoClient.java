@@ -11,14 +11,14 @@ public interface MemoClient {
 
     @PostMapping("/v1/admin/memo/{contractId}")
     void registerMemo(@PathVariable("contractId") Long contractId, @RequestBody CreateMemoRequest request,
-                      @RequestHeader("X-User-Id") String userId);
+            @RequestHeader("X-User-Id") String userId);
 
     @PostMapping("/v1/admin/memo/{contractId}/system-log")
     void registerSystemLog(@PathVariable("contractId") Long contractId, @RequestBody CreateSystemLogRequest request,
-                           @RequestHeader("X-User-Id") String userId);
+            @RequestHeader("X-User-Id") String userId);
 
     @PostMapping("/v1/admin/memo/{contractId}/notification")
     void recordNotification(@PathVariable("contractId") Long contractId, @RequestBody CreateNotificationRequest request,
-                            @RequestHeader("X-User-Id") String userId);
+            @RequestHeader("X-User-Id") String userId);
 
 }

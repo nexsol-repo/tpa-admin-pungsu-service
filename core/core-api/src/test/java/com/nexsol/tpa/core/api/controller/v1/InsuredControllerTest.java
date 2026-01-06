@@ -134,7 +134,8 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("data.content[].insuranceStartDate").description("보험시작일"),
                             fieldWithPath("data.content[].insuranceEndDate").description("보험종료일"),
                             fieldWithPath("data.content[].isRenewalTarget").description("갱신대상여부"),
-                            fieldWithPath("data.content[].joinCk").description("진행상태"),
+                            fieldWithPath("data.content[].joinCk").description(
+                                    "계약 진행상태(W:가입진행, N:보온접수완료, R: 보험사 접수, Y:가입완료(유효), D:가입반려(보험사 중복), E:가입반려(주소오류), F:결제실패(보험사), X:보험만료)"),
                             fieldWithPath("data.content[].account").description("제휴사"),
                             fieldWithPath("data.content[].path").description("채널"),
                             fieldWithPath("data.content[].payYn").description("결제여부"),
@@ -366,8 +367,9 @@ public class InsuredControllerTest extends RestDocsTest {
     }
 
     private FieldDescriptor[] subscriptionFields(String prefix) {
-        return new FieldDescriptor[] { fieldWithPath(prefix + "joinCk").description("상태").optional(),
-                fieldWithPath(prefix + "insuranceStartDate").description("시작일").optional(),
+        return new FieldDescriptor[] { fieldWithPath(prefix + "joinCk").description(
+                "계약 진행상태(W:가입진행, N:보온접수완료, R: 보험사 접수, Y:가입완료(유효), D:가입반려(보험사 중복), E:가입반려(주소오류), F:결제실패(보험사), X:보험만료)")
+            .optional(), fieldWithPath(prefix + "insuranceStartDate").description("시작일").optional(),
                 fieldWithPath(prefix + "insuranceEndDate").description("종료일").optional(),
                 fieldWithPath(prefix + "insuranceCompany").description("보험사").optional(),
                 fieldWithPath(prefix + "insuranceNumber").description("증권번호").optional(),

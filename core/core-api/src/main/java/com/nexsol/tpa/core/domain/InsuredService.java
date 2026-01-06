@@ -76,6 +76,21 @@ public class InsuredService {
             .publishEvent(new InsuredSystemLogEvent(contractId, "관리자 직접 등록(신규)", String.valueOf(adminId), token));
     }
 
+    @Transactional
+    public void sendRenewalNotifications(int days) {
+        // 1. 7일 뒤 만료 대상자 조회 (Implement Layer에 위임)
+        List<InsuredContractDetail> targets = insuredContractFinder.findExpiringContracts(7);
+
+        // 2. 비즈니스 흐름 중계
+        targets.forEach(detail -> {
+            // 재가입 URL 생성 (비즈니스 정책상 필요한 URL 조합)
+            String rejoinUrl = "http://pungsu.tpakorea.com/rejoin/feeGuide?idx=" + detail.referIdx();
+
+            // 알림 발송 명령 (기존 send 메서드 재사용하여 이벤트 발행)
+            this.send(detail, MailType.REJOIN, rejoinUrl, 0L); // 시스템 자동 발송은 adminId 0 처리
+        });
+    }
+
     public void send(InsuredContractDetail detail, MailType type, String targetUrl, Long adminId) {
         String token = getJwtToken();
         eventPublisher.publishEvent(new InsuredIntegratedNotificationEvent(detail.id(), detail.insuredInfo().name(),

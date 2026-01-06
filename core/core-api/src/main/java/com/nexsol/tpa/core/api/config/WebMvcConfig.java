@@ -23,7 +23,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     }
 
-
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         // 만든 Resolver 등록

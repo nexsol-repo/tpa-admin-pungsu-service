@@ -116,4 +116,18 @@ public class InsuredController {
 
     }
 
+    // 1. 자유로운 날짜 테스트용 (D-Day를 파라미터로 받음)
+    @PostMapping("/trigger-renewal-check")
+    public ApiResponse<String> triggerAny(@RequestParam int days) {
+        insuredService.sendRenewalNotifications(days);
+        return ApiResponse.success(days + "일 전 대상자 발송 트리거 완료");
+    }
+
+    // 2. 실제 운영 규칙(7일) 테스트용
+    @PostMapping("/trigger-renewal-check-seven")
+    public ApiResponse<String> triggerSeven() {
+        insuredService.sendRenewalNotifications(7); // 비즈니스 규칙인 '7'을 명시
+        return ApiResponse.success("7일 전 대상자(운영 규칙) 발송 트리거 완료");
+    }
+
 }

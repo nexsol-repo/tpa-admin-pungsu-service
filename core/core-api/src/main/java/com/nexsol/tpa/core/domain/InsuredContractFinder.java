@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -63,6 +64,17 @@ public class InsuredContractFinder {
         return new InsuredContractDetail(entity.getId(), entity.getReferIdx(), entity.getPrctrNo(),
                 mapToInsuredInfo(entity), mapToContractorInfo(entity), mapToBusinessLocationInfo(entity),
                 mapToInsuranceSubscriptionInfo(entity));
+    }
+
+    public List<InsuredContractDetail> findExpiringContracts(int days) {
+        LocalDateTime start = LocalDate.now().plusDays(days).atStartOfDay();
+        LocalDateTime end = start.plusDays(1).minusNanos(1);
+
+        // Specification을 활용하거나 Repository 직접 호출 (Implement -> Data Access)
+        return totalFormMemberRepository.findAllByInsuranceEndDateBetween(start, end)
+            .stream()
+            .map(this::mapToDetail) // 기존 매핑 로직 재사용
+            .toList();
     }
 
     // [개념 1] 피보험자 정보 매핑
@@ -131,6 +143,15 @@ public class InsuredContractFinder {
             .totalInsuranceMyCost(premium != null ? premium.getTotalInsuranceMyCost() : 0L)
             .isRenewalTarget(InsuredSubscriptionInfo.calculateRenewalTarget(entity.getInsuranceEndDate(), now))
             .build();
+    }
+
+    private InsuredContractDetail mapToDetail(TotalFormMemberEntity entity) {
+        return new InsuredContractDetail(entity.getId(), entity.getReferIdx(), entity.getPrctrNo(),
+                mapToInsuredInfo(entity), // 피보험자 정보 매핑
+                mapToContractorInfo(entity), // 계약자 정보 매핑
+                mapToBusinessLocationInfo(entity), // 사업장 정보 매핑
+                mapToInsuranceSubscriptionInfo(entity) // 보험 가입 정보 매핑
+        );
     }
 
 }
