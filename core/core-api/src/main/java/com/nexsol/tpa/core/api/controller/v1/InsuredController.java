@@ -70,7 +70,19 @@ public class InsuredController {
         InsuredContractDetail detail = insuredService.getDetail(id);
 
         String certificateUrl = null;
-        if ("Y".equals(detail.subscription().payYn()) && StringUtils.hasText(detail.prctrNo())) {
+        InsuredSubscriptionInfo subscription = detail.subscription();
+        String joinCheck = subscription.joinCheck();
+        String insuranceCompany = subscription.insuranceCompany();
+
+        // 1. 결제 완료('Y')
+        // 2. 질권번호(prctrNo) 존재
+        // 3. 계약 상태가 가입완료('Y') 또는 보험만료('X')
+        // 4. 보험사가 '메리츠'인 경우
+        if ("Y".equals(subscription.payYn()) &&
+                StringUtils.hasText(detail.prctrNo()) &&
+                ("Y".equals(joinCheck) || "X".equals(joinCheck)) &&
+                (insuranceCompany != null && insuranceCompany.contains("메리츠"))) {
+
             certificateUrl = meritzService.getLink4(detail.prctrNo());
         }
 
@@ -122,13 +134,7 @@ public class InsuredController {
 
     }
 
-    @PostMapping(value = "/certificate/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<CertificateUploadResponse> uploadCertificate(@RequestPart("file") MultipartFile file,
-            @LoginAdmin AdminUser admin) {
 
-        File data = insuredService.uploadCertificate(file);
-        return ApiResponse.success(CertificateUploadResponse.of(data));
-    }
 
     // 1. 자유로운 날짜 테스트용 (D-Day를 파라미터로 받음)
     @PostMapping("/trigger-renewal-check")
