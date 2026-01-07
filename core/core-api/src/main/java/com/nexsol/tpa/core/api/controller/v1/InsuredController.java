@@ -78,10 +78,9 @@ public class InsuredController {
         // 2. 질권번호(prctrNo) 존재
         // 3. 계약 상태가 가입완료('Y') 또는 보험만료('X')
         // 4. 보험사가 '메리츠'인 경우
-        if ("Y".equals(subscription.payYn()) &&
-                StringUtils.hasText(detail.prctrNo()) &&
-                ("Y".equals(joinCheck) || "X".equals(joinCheck)) &&
-                (insuranceCompany != null && insuranceCompany.contains("메리츠"))) {
+        if ("Y".equals(subscription.payYn()) && StringUtils.hasText(detail.prctrNo())
+                && ("Y".equals(joinCheck) || "X".equals(joinCheck))
+                && (insuranceCompany != null && insuranceCompany.contains("메리츠"))) {
 
             certificateUrl = meritzService.getLink4(detail.prctrNo());
         }
@@ -133,8 +132,6 @@ public class InsuredController {
         return ApiResponse.success(ResultType.SUCCESS);
 
     }
-
-
 
     // 1. 자유로운 날짜 테스트용 (D-Day를 파라미터로 받음)
     @PostMapping("/trigger-renewal-check")

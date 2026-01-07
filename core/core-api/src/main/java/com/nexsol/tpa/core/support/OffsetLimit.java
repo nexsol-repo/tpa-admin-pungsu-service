@@ -13,11 +13,12 @@ public record OffsetLimit(int offset, int limit, String sortBy, String direction
     }
 
     public Pageable toPageable() {
-        Sort sort = Sort.unsorted();
+        // 1. sortBy가 없으면 기본값으로 "id" (또는 "createdAt") 사용
+        String sortProperty = StringUtils.hasText(sortBy) ? sortBy : "id";
 
-        if (StringUtils.hasText(sortBy)) {
-            sort = "DESC".equalsIgnoreCase(direction) ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-        }
+        // 2. direction이 없거나 "DESC"일 경우 내림차순, 그 외는 오름차순
+        Sort sort = "ASC".equalsIgnoreCase(direction) ? Sort.by(sortProperty).ascending()
+                : Sort.by(sortProperty).descending();
 
         return PageRequest.of(offset / limit, limit, sort);
     }
