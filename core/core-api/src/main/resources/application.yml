@@ -45,6 +45,13 @@ external:
     key: ${ALIGO_API_KEY}
     user-id: ${ALIGO_USER_ID}
     sender: ${ALIGO_PHONE}
+s3:
+  storage:
+    endpoint: ${S3_ENDPOINT}     # 예: http://192.168.0.100:8080
+    access-key: ${S3_ACCESS_KEY}
+    secret-key: ${S3_SECRET_KEY}
+  bucket-name: tpa-admin-pungsu
+  region: us-east-1
 ---
 spring.config.activate.on-profile: local
 
