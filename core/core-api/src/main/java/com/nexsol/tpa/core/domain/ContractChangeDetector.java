@@ -47,7 +47,7 @@ public class ContractChangeDetector {
         }
         if (subscription != null) {
             CoverageAmount coverage = entity.getCoverage();
-            compare("진행상태", entity.getJoinCheck(), subscription.joinCk(), changes);
+            compare("진행상태", entity.getJoinCheck(), subscription.joinCheck(), changes);
             compare("보험사", entity.getInsuranceCompany(), subscription.insuranceCompany(), changes);
             compare("보험시작일", entity.getInsuranceStartDate(), subscription.insuranceStartDate(), changes);
             compare("보험종료일", entity.getInsuranceEndDate(), subscription.insuranceEndDate(), changes);
@@ -71,7 +71,7 @@ public class ContractChangeDetector {
                 compare("자부담 보험료", premium.getTotalInsuranceMyCost(), subscription.totalInsuranceMyCost(), changes);
             }
 
-            compare("진행상태", entity.getJoinCheck(), subscription.joinCk(), changes);
+            compare("진행상태", entity.getJoinCheck(), subscription.joinCheck(), changes);
             compare("결제여부", entity.getPayYn(), subscription.payYn(), changes);
         }
 

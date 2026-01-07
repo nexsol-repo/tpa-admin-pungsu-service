@@ -6,17 +6,17 @@ import java.time.LocalDateTime;
 
 @Builder
 public record InsuredContract(Integer id, String referIdx, String payYn, // 결제 구분
-        String businessNumber, // 사업자번호
-        String companyName, // 사업장명
-        String address, // 사업장 주소
-        String phoneNumber, // 전화번호
-        LocalDateTime applicationDate, // 가입일
-        String insuranceCompany, // 보험사
-        LocalDateTime insuranceStartDate, // 보험기간 시작
-        LocalDateTime insuranceEndDate, // 보험기간 종료
-        String joinCk, boolean isRenewalTarget, // 갱신대상 여부,
-        String account, // 제휴사
-        String path // 채널,
+                              String businessNumber, // 사업자번호
+                              String companyName, // 사업장명
+                              String address, // 사업장 주소
+                              String phoneNumber, // 전화번호
+                              LocalDateTime applicationDate, // 가입일
+                              String insuranceCompany, // 보험사
+                              LocalDateTime insuranceStartDate, // 보험기간 시작
+                              LocalDateTime insuranceEndDate, // 보험기간 종료
+                              String joinCheck, boolean isRenewalTarget, // 갱신대상 여부,
+                              String account, // 제휴사
+                              String path // 채널,
 
 ) {
 

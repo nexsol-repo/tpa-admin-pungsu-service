@@ -18,7 +18,7 @@ public class InsuredContractQueryGenerator {
 
             // 상태
             if (StringUtils.hasText(condition.status())) {
-                predicates.add(cb.equal(root.get("joinCk"), condition.status()));
+                predicates.add(cb.equal(root.get("joinCheck"), condition.status()));
             }
 
             // 제휴사
@@ -27,12 +27,12 @@ public class InsuredContractQueryGenerator {
             }
             // 채널
             if (StringUtils.hasText(condition.account())) {
-                predicates.add(cb.equal(root.get("account"), condition.path()));
+                predicates.add(cb.equal(root.get("account"), condition.account()));
             }
 
             // 보험사
             if (StringUtils.hasText(condition.insuranceCompany())) {
-                predicates.add(cb.equal(root.get("insuranceCompany"), condition.path()));
+                predicates.add(cb.equal(root.get("insuranceCompany"), condition.insuranceCompany()));
             }
 
             // 결제 여부

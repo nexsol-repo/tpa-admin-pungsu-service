@@ -48,7 +48,7 @@ public class InsuredContractFinder {
                 .phoneNumber(entity.getPhoneNumber())
                 .payYn(entity.getPayYn())
                 .address(entity.getAddress())
-                .joinCk(entity.getJoinCheck())
+                .joinCheck(entity.getJoinCheck())
                 .account(entity.getAccount())
                 .path(entity.getPath())
                 .build())
@@ -121,7 +121,7 @@ public class InsuredContractFinder {
         LocalDateTime now = LocalDateTime.now();
 
         return InsuredSubscriptionInfo.builder()
-            .joinCk(entity.getJoinCheck())
+            .joinCheck(entity.getJoinCheck())
             .insuranceStartDate(entity.getInsuranceStartDate())
             .insuranceEndDate(entity.getInsuranceEndDate())
             .insuranceCompany(entity.getInsuranceCompany())

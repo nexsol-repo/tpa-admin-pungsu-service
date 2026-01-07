@@ -38,7 +38,7 @@ public class InsuredEntityMapper {
 
         if (subscription != null) {
             // 상태 및 기간
-            entity.applyContractStatus(subscription.joinCk(), subscription.insuranceStartDate(),
+            entity.applyContractStatus(subscription.joinCheck(), subscription.insuranceStartDate(),
                     subscription.insuranceEndDate(), subscription.insuranceNumber(), subscription.payYn(),subscription.insuranceCompany());
 
             // 가입 금액 (Embedded)

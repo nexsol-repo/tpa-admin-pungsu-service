@@ -30,7 +30,6 @@ import tools.jackson.databind.json.JsonMapper;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -94,7 +93,7 @@ public class InsuredControllerTest extends RestDocsTest {
             .insuranceStartDate(LocalDateTime.of(2025, 12, 1, 0, 0))
             .insuranceEndDate(LocalDateTime.of(2026, 11, 30, 23, 59))
             .isRenewalTarget(false)
-            .joinCk("Y")
+            .joinCheck("Y")
             .account("TPA KOREA")
             .path("TPA KOREA")
             .payYn("Y")
@@ -134,7 +133,7 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("data.content[].insuranceStartDate").description("보험시작일"),
                             fieldWithPath("data.content[].insuranceEndDate").description("보험종료일"),
                             fieldWithPath("data.content[].isRenewalTarget").description("갱신대상여부"),
-                            fieldWithPath("data.content[].joinCk").description(
+                            fieldWithPath("data.content[].joinCheck").description(
                                     "계약 진행상태(W:가입진행, N:보온접수완료, R: 보험사 접수, Y:가입완료(유효), D:가입반려(보험사 중복), E:가입반려(주소오류), F:결제실패(보험사), X:보험만료)"),
                             fieldWithPath("data.content[].account").description("제휴사"),
                             fieldWithPath("data.content[].path").description("채널"),
@@ -170,7 +169,7 @@ public class InsuredControllerTest extends RestDocsTest {
                 .prctrNo("PRC12345")
                 .build())
             .subscription(InsuredSubscriptionInfo.builder()
-                .joinCk("가입완료")
+                .joinCheck("가입완료")
                 .payYn("Y")
                 .insuranceCompany("메리츠화재")
                 .insuranceNumber("POL-123")
@@ -233,7 +232,7 @@ public class InsuredControllerTest extends RestDocsTest {
                     .prctrNo("ABC")
                     .build(),
                 InsuredSubscriptionInfo.builder()
-                    .joinCk("가입완료")
+                    .joinCheck("가입완료")
                     .payYn("Y")
                     .insuranceCompany("메리츠")
                     .insuranceNumber("POL-123")
@@ -367,7 +366,7 @@ public class InsuredControllerTest extends RestDocsTest {
     }
 
     private FieldDescriptor[] subscriptionFields(String prefix) {
-        return new FieldDescriptor[] { fieldWithPath(prefix + "joinCk").description(
+        return new FieldDescriptor[] { fieldWithPath(prefix + "joinCheck").description(
                 "계약 진행상태(W:가입진행, N:보온접수완료, R: 보험사 접수, Y:가입완료(유효), D:가입반려(보험사 중복), E:가입반려(주소오류), F:결제실패(보험사), X:보험만료)")
             .optional(), fieldWithPath(prefix + "insuranceStartDate").description("시작일").optional(),
                 fieldWithPath(prefix + "insuranceEndDate").description("종료일").optional(),
