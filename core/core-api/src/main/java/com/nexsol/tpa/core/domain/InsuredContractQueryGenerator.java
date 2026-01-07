@@ -19,6 +19,7 @@ public class InsuredContractQueryGenerator {
             // 상태
             if (StringUtils.hasText(condition.status())) {
                 predicates.add(cb.equal(root.get("joinCheck"), condition.status()));
+
             }
 
             // 제휴사

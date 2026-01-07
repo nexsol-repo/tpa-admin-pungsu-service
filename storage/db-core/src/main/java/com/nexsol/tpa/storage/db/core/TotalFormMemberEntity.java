@@ -51,9 +51,6 @@ public class TotalFormMemberEntity {
     @Column(name = "phone")
     private String phoneNumber; // 휴대폰번호
 
-    @Column(name = "name")
-    private String applicantName; // 신청자명
-
     // --- 주소 정보 (리스트 노출) ---
     @Column(name = "address")
     private String address;
