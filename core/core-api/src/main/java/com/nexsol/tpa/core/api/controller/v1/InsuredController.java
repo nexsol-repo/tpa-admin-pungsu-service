@@ -32,24 +32,27 @@ public class InsuredController {
 
     @GetMapping("/contract")
     public ApiResponse<PageResponse<InsuredContractResponse>> getContract(@RequestParam(required = false) String status,
-            @RequestParam(required = false) String account, @RequestParam(required = false) String path,
-            @RequestParam(required = false) String payYn, @RequestParam(required = false) String insuranceCompany,
-            @RequestParam(required = false) LocalDate startDate, @RequestParam(required = false) LocalDate endDate,
-            @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "0") int offset,
-            @RequestParam(defaultValue = "10") int limit, @LoginAdmin AdminUser admin) {
+                                                                          @RequestParam(required = false) String account, @RequestParam(required = false) String path,
+                                                                          @RequestParam(required = false) String payYn, @RequestParam(required = false) String insuranceCompany,
+                                                                          @RequestParam(required = false) LocalDate startDate, @RequestParam(required = false) LocalDate endDate,
+                                                                          @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "0") int offset,
+                                                                          @RequestParam(defaultValue = "10") int limit,
+                                                                          @RequestParam(required = false) String sortBy,      // 추가: 정렬 기준 필드 (예: id, insuranceStartDate)
+                                                                          @RequestParam(required = false) String direction,
+                                                                          @LoginAdmin AdminUser admin) {
 
         InsuredSearchCondition condition = InsuredSearchCondition.builder()
-            .status(status)
-            .payYn(payYn)
-            .insuranceCompany(insuranceCompany)
-            .startDate(startDate)
-            .endDate(endDate)
-            .keyword(keyword)
-            .account(account)
-            .path(path)
-            .build();
+                .status(status)
+                .payYn(payYn)
+                .insuranceCompany(insuranceCompany)
+                .startDate(startDate)
+                .endDate(endDate)
+                .keyword(keyword)
+                .account(account)
+                .path(path)
+                .build();
 
-        OffsetLimit offsetLimit = new OffsetLimit(offset, limit);
+        OffsetLimit offsetLimit = new OffsetLimit(offset, limit,sortBy,direction);
 
         DomainPage<InsuredContract> contract = insuredService.getList(condition, offsetLimit);
 
@@ -75,7 +78,7 @@ public class InsuredController {
 
     @PutMapping("/{id}")
     public ApiResponse<ResultType> modify(@PathVariable Integer id, @RequestBody InsuredModifyRequest request,
-            @LoginAdmin AdminUser admin) {
+                                          @LoginAdmin AdminUser admin) {
         // 서비스 레이어에 수정을 위임
         // (ID와 함께 가입자/계약정보 Record를 전달)
         insuredService.modify(id, request.insuredInfo(), request.contract(), request.location(), request.subscription(),
@@ -96,7 +99,7 @@ public class InsuredController {
 
     @PostMapping("/{id}/notification")
     public ApiResponse<ResultType> sendNotification(@PathVariable Integer id,
-            @RequestBody NotificationSendRequest request, @LoginAdmin AdminUser admin) {
+                                                    @RequestBody NotificationSendRequest request, @LoginAdmin AdminUser admin) {
         // 1. 계약 상세 정보 조회 (Service 호출)
         InsuredContractDetail detail = insuredService.getDetail(id);
 
@@ -105,8 +108,7 @@ public class InsuredController {
         if (request.type() == MailType.REJOIN) {
             // 재가입 URL: referIdx 활용
             targetUrl = "http://pungsu.tpakorea.com/rejoin/feeGuide?idx=" + detail.referIdx();
-        }
-        else if (request.type() == MailType.CERTIFICATE) {
+        } else if (request.type() == MailType.CERTIFICATE) {
             // 가입확인서 URL: MeritzService를 통해 rltLinkUrl4 조회 (getDetail과 동일 패턴)
             targetUrl = meritzService.getLink4(detail.prctrNo());
         }
