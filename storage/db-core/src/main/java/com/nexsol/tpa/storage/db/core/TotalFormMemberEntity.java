@@ -165,9 +165,9 @@ public class TotalFormMemberEntity {
     }
 
     public void applyContractStatus(String joinCheck, LocalDateTime insuranceStartDate, LocalDateTime insuranceEndDate,
-            String insuranceNumber, String payYn,String insuranceCompany) {
+            String insuranceNumber, String payYn, String insuranceCompany) {
         this.joinCheck = joinCheck;
-        this.insuranceCompany=insuranceCompany;
+        this.insuranceCompany = insuranceCompany;
         this.insuranceStartDate = insuranceStartDate;
         this.insuranceEndDate = insuranceEndDate;
         this.insuranceNumber = insuranceNumber;

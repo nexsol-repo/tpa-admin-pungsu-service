@@ -7,9 +7,9 @@ import java.time.LocalDateTime;
 
 @Builder
 public record InsuredContractResponse(Integer id, String businessNumber, String companyName, String address,
-                                      String phoneNumber, LocalDateTime applicationDate, String insuranceCompany, LocalDateTime insuranceStartDate,
-                                      LocalDateTime insuranceEndDate, boolean isRenewalTarget, String joinCheck, String account, String path,
-                                      String payYn, String referIdx) {
+        String phoneNumber, LocalDateTime applicationDate, String insuranceCompany, LocalDateTime insuranceStartDate,
+        LocalDateTime insuranceEndDate, boolean isRenewalTarget, String joinCheck, String account, String path,
+        String payYn, String referIdx) {
 
     public static InsuredContractResponse of(InsuredContract contract) {
         // 응답을 만드는 시점의 시간으로 비즈니스 로직 수행

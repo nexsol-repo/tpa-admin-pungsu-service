@@ -55,7 +55,8 @@ public class InsuredController {
 
         List<InsuredContractResponse> responses = contract.content().stream().map(InsuredContractResponse::of).toList();
 
-        return ApiResponse.success(new PageResponse<>(responses, contract.hasNext(),contract.totalElements()));
+        return ApiResponse.success(
+                new PageResponse<>(responses, contract.hasNext(), contract.totalElements(), contract.totalPages()));
 
     }
 

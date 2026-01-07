@@ -99,7 +99,7 @@ public class InsuredControllerTest extends RestDocsTest {
             .payYn("Y")
             .referIdx("20251217144520zmhadj")
             .build();
-        DomainPage<InsuredContract> mockPage = new DomainPage<>(List.of(mockContract), true);
+        DomainPage<InsuredContract> mockPage = new DomainPage<>(List.of(mockContract), true, 20, 2);
 
         given(insuredService.getList(any(InsuredSearchCondition.class), any(OffsetLimit.class))).willReturn(mockPage);
 
@@ -140,6 +140,8 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("data.content[].payYn").description("결제여부"),
                             fieldWithPath("data.content[].referIdx").description("참조번호"),
                             fieldWithPath("data.hasNext").description("다음 페이지 여부"),
+                            fieldWithPath("data.totalElements").description("총 item 수"),
+                            fieldWithPath("data.totalPages").description("총 page 수"),
                             fieldWithPath("error").description("에러 정보").optional())));
     }
 

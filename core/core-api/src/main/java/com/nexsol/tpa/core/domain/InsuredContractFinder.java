@@ -54,7 +54,7 @@ public class InsuredContractFinder {
                 .build())
             .toList();
 
-        return new DomainPage<>(contracts, result.hasNext(),result.getTotalPages());
+        return new DomainPage<>(contracts, result.hasNext(), result.getTotalElements(), result.getTotalPages());
     }
 
     public InsuredContractDetail findDetail(Integer id) {
