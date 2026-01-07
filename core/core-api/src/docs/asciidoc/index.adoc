@@ -105,3 +105,40 @@ include::{snippets}/admin-insured-notification-send/http-response.adoc[]
 
 ==== Response Fields
 include::{snippets}/admin-insured-notification-send/response-fields.adoc[]
+
+
+=== 가입확인서 파일 업로드
+가입확인서 PDF 파일을 서버에 업로드하고, 저장된 파일의 경로(Key)를 반환받습니다.
+
+==== Curl Request
+include::{snippets}/file-upload/curl-request.adoc[]
+
+==== HTTP Request
+include::{snippets}/file-upload/http-request.adoc[]
+
+==== Request Parts
+include::{snippets}/file-upload/request-parts.adoc[]
+
+==== HTTP Response
+include::{snippets}/file-upload/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/file-upload/response-fields.adoc[]
+
+=== 가입확인서 다운로드 URL 조회
+저장된 파일의 경로(Key)를 이용하여 10분간 유효한 임시 다운로드(Presigned) URL을 생성합니다.
+
+==== Curl Request
+include::{snippets}/file-presigned-url/curl-request.adoc[]
+
+==== HTTP Request
+include::{snippets}/file-presigned-url/http-request.adoc[]
+
+==== Query Parameters
+include::{snippets}/file-presigned-url/query-parameters.adoc[]
+
+==== HTTP Response
+include::{snippets}/file-presigned-url/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/file-presigned-url/response-fields.adoc[]
