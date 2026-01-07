@@ -8,10 +8,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class InsuredEntityMapper {
 
-    public TotalFormMemberEntity toEntity(String referIdx, InsuredInfo insured, ContractInfo contract,
+    public TotalFormMemberEntity toEntity(String referIdx, String entryDiv, InsuredInfo insured, ContractInfo contract,
             BusinessLocationInfo location, InsuredSubscriptionInfo subscription) {
         TotalFormMemberEntity entity = new TotalFormMemberEntity();
         entity.assignReferIdx(referIdx);
+        entity.applyEntryDiv(entryDiv);
         updateEntity(entity, insured, contract, location, subscription);
         return entity;
     }

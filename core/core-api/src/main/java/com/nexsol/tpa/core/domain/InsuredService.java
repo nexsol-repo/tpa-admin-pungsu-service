@@ -3,6 +3,9 @@ package com.nexsol.tpa.core.domain;
 import com.nexsol.tpa.core.enums.MailType;
 import com.nexsol.tpa.core.support.DomainPage;
 import com.nexsol.tpa.core.support.OffsetLimit;
+import com.nexsol.tpa.core.support.error.CoreException;
+import com.nexsol.tpa.core.support.error.ErrorType;
+import com.nexsol.tpa.storage.file.core.FileStorageClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -10,8 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,6 +29,8 @@ public class InsuredService {
     private final InsuredContractFinder insuredContractFinder;
 
     private final InsuredContractorWriter insuredContractorWriter;
+
+    private final FileStorageClient fileStorageClient;
 
     private final ApplicationEventPublisher eventPublisher;
 
@@ -104,6 +114,27 @@ public class InsuredService {
             return attributes.getRequest().getHeader("Authorization");
         }
         return null;
+    }
+
+    public File uploadCertificate(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new CoreException(ErrorType.INVALID_REQUEST, "파일이 비어있습니다.");
+        }
+
+        // 1. 저장 경로(Key) 생성: pungsu/certificates/yyyyMMdd/UUID_파일명.pdf
+        String dateDir = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String fileName = file.getOriginalFilename();
+        String objectKey = String.format("pungsu/certificates/%s/%s_%s", dateDir, UUID.randomUUID(), fileName);
+
+        try {
+            // 2. S3 업로드 실행
+            fileStorageClient.upload(file.getInputStream(), objectKey, file.getSize(), file.getContentType());
+
+            return new File(objectKey, fileName);
+        }
+        catch (IOException e) {
+            throw new CoreException(ErrorType.DEFAULT_ERROR, "파일 읽기 중 오류가 발생했습니다.");
+        }
     }
 
 }

@@ -1,6 +1,5 @@
 package com.nexsol.tpa.storage.file.core;
 
-import com.nexsol.tpa.core.domain.FileStorageClient;
 import com.nexsol.tpa.storage.file.core.config.S3Properties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

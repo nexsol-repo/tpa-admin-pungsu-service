@@ -52,7 +52,8 @@ public class InsuredContractorWriter {
         String referIdx = keyGenerator.generate();
 
         // 2. 엔티티 변환 및 저장 (Mapper 활용)
-        TotalFormMemberEntity entity = entityMapper.toEntity(referIdx, insured, contract, location, subscription);
+        TotalFormMemberEntity entity = entityMapper.toEntity(referIdx, "OFFLINE", insured, contract, location,
+                subscription);
 
         return totalFormMemberRepository.save(entity).getId();
     }

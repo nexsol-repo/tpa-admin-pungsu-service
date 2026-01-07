@@ -1,5 +1,5 @@
 dependencies {
-    compileOnly project(":core:core-api")
+
 
     implementation platform('software.amazon.awssdk:bom:2.38.9')
     implementation 'software.amazon.awssdk:s3'

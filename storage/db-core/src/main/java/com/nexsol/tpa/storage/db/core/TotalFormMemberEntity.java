@@ -115,6 +115,9 @@ public class TotalFormMemberEntity {
     @Column(name = "tm_yn")
     private String tmYn;
 
+    @Column(name = "entry_div")
+    private String entryDiv;
+
     @Embedded
     private CoverageAmount coverage;
 
@@ -199,6 +202,10 @@ public class TotalFormMemberEntity {
     public void applyChannelInfo(String account, String path) {
         this.account = account;
         this.path = path;
+    }
+
+    public void applyEntryDiv(String entryDiv) {
+        this.entryDiv = entryDiv;
     }
 
 }

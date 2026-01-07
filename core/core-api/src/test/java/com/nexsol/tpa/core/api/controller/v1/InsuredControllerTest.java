@@ -108,7 +108,11 @@ public class InsuredControllerTest extends RestDocsTest {
                 .param("payYn", "Y")
                 .param("keyword", "테스트")
                 .param("offset", "0")
-                .param("limit", "10"))
+                .param("limit", "10")
+                .param("limit", "10")
+                .param("sortBy", "insuranceStartDate")
+                .param("direction", "ASC"))
+
             .andExpect(status().isOk())
             .andDo(document("admin-insured-contract-list",
                     queryParameters(parameterWithName("payYn").description("가입유형 (Y:유료, N:무료)").optional(),
@@ -116,7 +120,10 @@ public class InsuredControllerTest extends RestDocsTest {
                             parameterWithName("keyword").description("검색어").optional(),
                             parameterWithName("offset").description("오프셋").optional(),
                             parameterWithName("limit").description("리미트").optional(),
-                            parameterWithName("account").description("제휴사").optional(),
+                            parameterWithName("limit").description("리미트").optional(),
+                            parameterWithName("limit").description("리미트").optional(),
+                            parameterWithName("sortBy").description("예:insuranceStartDate").optional(),
+                            parameterWithName("direction").description("ASC 또는 DESC").optional(),
                             parameterWithName("path").description("채널").optional(),
                             parameterWithName("insuranceCompany").description("보험사").optional(),
                             parameterWithName("startDate").description("시작일").optional(),

@@ -19,6 +19,7 @@ COPY core/core-enum/build.gradle ./core/core-enum/
 COPY client/client-aligo/build.gradle ./client/client-aligo/
 COPY client/client-memo/build.gradle ./client/client-memo/
 COPY storage/db-core/build.gradle ./storage/db-core/
+COPY storage/file-core/build.gradle ./storage/file-core/
 COPY support/logging/build.gradle ./support/logging/
 COPY support/mailer/build.gradle ./support/mailer/
 COPY tests/api-docs/build.gradle ./tests/api-docs/

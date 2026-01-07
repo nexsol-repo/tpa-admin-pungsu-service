@@ -3,6 +3,7 @@ package com.nexsol.tpa.core.api.controller.v1;
 import com.nexsol.tpa.core.api.controller.v1.request.InsuredModifyRequest;
 import com.nexsol.tpa.core.api.controller.v1.request.InsuredRegisterRequest;
 import com.nexsol.tpa.core.api.controller.v1.request.NotificationSendRequest;
+import com.nexsol.tpa.core.api.controller.v1.response.CertificateUploadResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractDetailResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractResponse;
 import com.nexsol.tpa.core.domain.*;
@@ -15,8 +16,10 @@ import com.nexsol.tpa.core.support.response.PageResponse;
 import com.nexsol.tpa.core.support.response.ResultType;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -32,27 +35,25 @@ public class InsuredController {
 
     @GetMapping("/contract")
     public ApiResponse<PageResponse<InsuredContractResponse>> getContract(@RequestParam(required = false) String status,
-                                                                          @RequestParam(required = false) String account, @RequestParam(required = false) String path,
-                                                                          @RequestParam(required = false) String payYn, @RequestParam(required = false) String insuranceCompany,
-                                                                          @RequestParam(required = false) LocalDate startDate, @RequestParam(required = false) LocalDate endDate,
-                                                                          @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "0") int offset,
-                                                                          @RequestParam(defaultValue = "10") int limit,
-                                                                          @RequestParam(required = false) String sortBy,      // 추가: 정렬 기준 필드 (예: id, insuranceStartDate)
-                                                                          @RequestParam(required = false) String direction,
-                                                                          @LoginAdmin AdminUser admin) {
+            @RequestParam(required = false) String account, @RequestParam(required = false) String path,
+            @RequestParam(required = false) String payYn, @RequestParam(required = false) String insuranceCompany,
+            @RequestParam(required = false) LocalDate startDate, @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int limit, @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String direction, @LoginAdmin AdminUser admin) {
 
         InsuredSearchCondition condition = InsuredSearchCondition.builder()
-                .status(status)
-                .payYn(payYn)
-                .insuranceCompany(insuranceCompany)
-                .startDate(startDate)
-                .endDate(endDate)
-                .keyword(keyword)
-                .account(account)
-                .path(path)
-                .build();
+            .status(status)
+            .payYn(payYn)
+            .insuranceCompany(insuranceCompany)
+            .startDate(startDate)
+            .endDate(endDate)
+            .keyword(keyword)
+            .account(account)
+            .path(path)
+            .build();
 
-        OffsetLimit offsetLimit = new OffsetLimit(offset, limit,sortBy,direction);
+        OffsetLimit offsetLimit = new OffsetLimit(offset, limit, sortBy, direction);
 
         DomainPage<InsuredContract> contract = insuredService.getList(condition, offsetLimit);
 
@@ -78,7 +79,7 @@ public class InsuredController {
 
     @PutMapping("/{id}")
     public ApiResponse<ResultType> modify(@PathVariable Integer id, @RequestBody InsuredModifyRequest request,
-                                          @LoginAdmin AdminUser admin) {
+            @LoginAdmin AdminUser admin) {
         // 서비스 레이어에 수정을 위임
         // (ID와 함께 가입자/계약정보 Record를 전달)
         insuredService.modify(id, request.insuredInfo(), request.contract(), request.location(), request.subscription(),
@@ -99,7 +100,7 @@ public class InsuredController {
 
     @PostMapping("/{id}/notification")
     public ApiResponse<ResultType> sendNotification(@PathVariable Integer id,
-                                                    @RequestBody NotificationSendRequest request, @LoginAdmin AdminUser admin) {
+            @RequestBody NotificationSendRequest request, @LoginAdmin AdminUser admin) {
         // 1. 계약 상세 정보 조회 (Service 호출)
         InsuredContractDetail detail = insuredService.getDetail(id);
 
@@ -108,7 +109,8 @@ public class InsuredController {
         if (request.type() == MailType.REJOIN) {
             // 재가입 URL: referIdx 활용
             targetUrl = "http://pungsu.tpakorea.com/rejoin/feeGuide?idx=" + detail.referIdx();
-        } else if (request.type() == MailType.CERTIFICATE) {
+        }
+        else if (request.type() == MailType.CERTIFICATE) {
             // 가입확인서 URL: MeritzService를 통해 rltLinkUrl4 조회 (getDetail과 동일 패턴)
             targetUrl = meritzService.getLink4(detail.prctrNo());
         }
@@ -118,6 +120,14 @@ public class InsuredController {
 
         return ApiResponse.success(ResultType.SUCCESS);
 
+    }
+
+    @PostMapping(value = "/certificate/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<CertificateUploadResponse> uploadCertificate(@RequestPart("file") MultipartFile file,
+            @LoginAdmin AdminUser admin) {
+
+        File data = insuredService.uploadCertificate(file);
+        return ApiResponse.success(CertificateUploadResponse.of(data));
     }
 
     // 1. 자유로운 날짜 테스트용 (D-Day를 파라미터로 받음)

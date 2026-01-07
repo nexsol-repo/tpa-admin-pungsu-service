@@ -1,4 +1,4 @@
-package com.nexsol.tpa.core.domain;
+package com.nexsol.tpa.storage.file.core;
 
 import java.io.InputStream;
 

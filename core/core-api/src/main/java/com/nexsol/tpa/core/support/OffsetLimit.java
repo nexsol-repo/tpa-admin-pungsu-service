@@ -16,9 +16,7 @@ public record OffsetLimit(int offset, int limit, String sortBy, String direction
         Sort sort = Sort.unsorted();
 
         if (StringUtils.hasText(sortBy)) {
-            sort = "DESC".equalsIgnoreCase(direction)
-                    ? Sort.by(sortBy).descending()
-                    : Sort.by(sortBy).ascending();
+            sort = "DESC".equalsIgnoreCase(direction) ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         }
 
         return PageRequest.of(offset / limit, limit, sort);
