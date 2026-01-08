@@ -18,4 +18,7 @@ public class MeritzSixEntity {
     @Column(name = "prctr_no")
     private String prctrNo;
 
+    @Column(name = "err_cd")
+    private String errCd;
+
 }

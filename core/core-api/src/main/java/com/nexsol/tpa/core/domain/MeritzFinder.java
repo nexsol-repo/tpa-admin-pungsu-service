@@ -17,9 +17,9 @@ public class MeritzFinder {
         if (prctrNo == null) {
             return null;
         }
-        return meritzSixRepository.findByPrctrNo(prctrNo)
-            .map(MeritzSixEntity::getRltLinkUrl4)
-            .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND_DATA));
+        return meritzSixRepository.findByPrctrNoAndErrCd(prctrNo, "00001")
+                .map(MeritzSixEntity::getRltLinkUrl4)
+                .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND_DATA));
     }
 
 }
