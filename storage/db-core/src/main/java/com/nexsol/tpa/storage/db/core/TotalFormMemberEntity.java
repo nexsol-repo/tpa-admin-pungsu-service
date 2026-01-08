@@ -55,6 +55,9 @@ public class TotalFormMemberEntity {
     @Column(name = "address")
     private String address;
 
+    @Column(name = "zonecode")
+    private String zipCode;
+
     // --- 보험 계약 정보 (정렬/필터 대상) ---
     @Column(name = "ins_com")
     private String insuranceCompany; // 보험사
@@ -75,6 +78,9 @@ public class TotalFormMemberEntity {
 
     @Column(name = "bizcategory")
     private String bizCategory;
+
+    @Column(name = "biztype")
+    private String biztype;
 
     @Column(name = "structure")
     private String structure;
@@ -118,6 +124,9 @@ public class TotalFormMemberEntity {
     @Column(name = "entry_div")
     private String entryDiv;
 
+    @Column
+    private LocalDateTime createdAt;
+
     @Embedded
     private CoverageAmount coverage;
 
@@ -148,12 +157,14 @@ public class TotalFormMemberEntity {
      */
 
     @Builder
-    public void applyLocationInfo(String companyName, String address, String category, String tenant, String structure,
-            String pnu, String prctrNo, String groundFloorCd, int groundFloor, int underGroundFloor, String subFloor,
-            String endSubFloor, String tmYn, String groundFloorYn) {
+    public void applyLocationInfo(String companyName, String zipCode, String address, String category, String biztype,
+            String tenant, String structure, String pnu, String prctrNo, String groundFloorCd, int groundFloor,
+            int underGroundFloor, String subFloor, String endSubFloor, String tmYn, String groundFloorYn) {
         this.companyName = companyName;
+        this.zipCode = zipCode;
         this.address = address;
         this.bizCategory = category;
+        this.biztype = biztype;
         this.tenant = tenant;
         this.groundFloorCd = groundFloorCd;
         this.groundFloor = groundFloor;
@@ -167,10 +178,11 @@ public class TotalFormMemberEntity {
         this.groundFloorYn = groundFloorYn;
     }
 
-    public void applyContractStatus(String joinCheck, LocalDateTime insuranceStartDate, LocalDateTime insuranceEndDate,
-            String insuranceNumber, String payYn, String insuranceCompany) {
+    public void applyContractStatus(String joinCheck, LocalDateTime createdAt, LocalDateTime insuranceStartDate,
+            LocalDateTime insuranceEndDate, String insuranceNumber, String payYn, String insuranceCompany) {
         this.joinCheck = joinCheck;
         this.insuranceCompany = insuranceCompany;
+        this.createdAt = createdAt;
         this.insuranceStartDate = insuranceStartDate;
         this.insuranceEndDate = insuranceEndDate;
         this.insuranceNumber = insuranceNumber;

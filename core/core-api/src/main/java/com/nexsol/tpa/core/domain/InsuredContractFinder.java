@@ -51,6 +51,7 @@ public class InsuredContractFinder {
                 .joinCheck(entity.getJoinCheck())
                 .account(entity.getAccount())
                 .path(entity.getPath())
+                .createdAt(entity.getCreatedAt())
                 .build())
             .toList();
 

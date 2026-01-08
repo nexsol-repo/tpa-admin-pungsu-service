@@ -3,7 +3,6 @@ package com.nexsol.tpa.core.api.controller.v1;
 import com.nexsol.tpa.core.api.controller.v1.request.InsuredModifyRequest;
 import com.nexsol.tpa.core.api.controller.v1.request.InsuredRegisterRequest;
 import com.nexsol.tpa.core.api.controller.v1.request.NotificationSendRequest;
-import com.nexsol.tpa.core.api.controller.v1.response.CertificateUploadResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractDetailResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractResponse;
 import com.nexsol.tpa.core.domain.*;
@@ -16,7 +15,6 @@ import com.nexsol.tpa.core.support.response.PageResponse;
 import com.nexsol.tpa.core.support.response.ResultType;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -132,6 +130,18 @@ public class InsuredController {
         return ApiResponse.success(ResultType.SUCCESS);
 
     }
+
+    // @PostMapping("/bulk-update/paid-conversion")
+    // public ApiResponse<String> bulkUpdateToPaid(@RequestPart("file") MultipartFile
+    // file) {
+    // // 1. 파일 검증 (확장자 등)
+    //
+    // // 2. 비동기 서비스 호출 (결과를 기다리지 않고 즉시 리턴)
+    // insuredService.processBulkUpdateAsync(file);
+    //
+    // // 3. 즉시 응답 반환
+    // return ApiResponse.success("파일이 업로드되었습니다. 처리가 완료되면 알림을 드립니다.");
+    // }
 
     // 1. 자유로운 날짜 테스트용 (D-Day를 파라미터로 받음)
     @PostMapping("/trigger-renewal-check")

@@ -3,7 +3,8 @@ package com.nexsol.tpa.core.domain;
 import lombok.Builder;
 
 @Builder
-public record BusinessLocationInfo(String companyName, String address, String category, // 업종
+public record BusinessLocationInfo(String companyName, String zipCode, String address, String category, // 업종
+        String biztype, // 소상인 구분
         String tenant, // 임차여부
         String structure, // 건물구조
         String pnu, String prctrNo, // 질권번호

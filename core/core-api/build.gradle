@@ -17,4 +17,6 @@ dependencies {
 
 //    implementation 'com.nexsol.tpa:web-auth:0.0.1-SNAPSHOT'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
+    implementation 'org.apache.poi:poi-ooxml:5.5.1'
 }
