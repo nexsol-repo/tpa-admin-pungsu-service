@@ -48,7 +48,7 @@ public class InsuredContractQueryGenerator {
             }
             if (condition.endDate() != null) {
                 predicates
-                    .add(cb.lessThanOrEqualTo(root.get("insuranceStartDate"), condition.endDate().atTime(23, 59, 59)));
+                    .add(cb.lessThanOrEqualTo(root.get("insuranceEndDate"), condition.endDate().atTime(23, 59, 59)));
             }
 
             // 키워드 검색
