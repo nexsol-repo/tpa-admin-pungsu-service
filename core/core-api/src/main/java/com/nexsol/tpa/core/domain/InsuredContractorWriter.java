@@ -2,6 +2,8 @@ package com.nexsol.tpa.core.domain;
 
 import com.nexsol.tpa.core.support.error.CoreException;
 import com.nexsol.tpa.core.support.error.ErrorType;
+import com.nexsol.tpa.storage.db.core.MeritzAreaCodeEntity;
+import com.nexsol.tpa.storage.db.core.MeritzAreaCodeRepository;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberEntity;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,22 +17,13 @@ public class InsuredContractorWriter {
 
     private final TotalFormMemberRepository totalFormMemberRepository;
 
+    private final DirectRegistration directRegistration;
+
     private final ContractKeyGenerator keyGenerator;
 
     private final InsuredEntityMapper entityMapper;
 
     private final ContractChangeDetector changeDetector;
-
-    public Integer write(Integer id, InsuredInfo insured, ContractInfo contract, BusinessLocationInfo location,
-            InsuredSubscriptionInfo subscription) {
-        TotalFormMemberEntity entity = totalFormMemberRepository.findById(id)
-            .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND_DATA));
-
-        // 매핑 책임은 Mapper에게 격벽으로 분리
-        entityMapper.updateEntity(entity, insured, contract, location, subscription);
-
-        return entity.getId();
-    }
 
     public List<ChangeDetail> writeAndGetDiff(Integer id, InsuredInfo insured, ContractInfo contract,
             BusinessLocationInfo location, InsuredSubscriptionInfo subscription) {
@@ -46,7 +39,7 @@ public class InsuredContractorWriter {
         return diffs;
     }
 
-    public Integer create(InsuredInfo insured, ContractInfo contract, BusinessLocationInfo location,
+    public Integer write(InsuredInfo insured, ContractInfo contract, BusinessLocationInfo location,
             InsuredSubscriptionInfo subscription) {
         // 1. 키 생성
         String referIdx = keyGenerator.generate();
@@ -54,6 +47,9 @@ public class InsuredContractorWriter {
         // 2. 엔티티 변환 및 저장 (Mapper 활용)
         TotalFormMemberEntity entity = entityMapper.toEntity(referIdx, "OFFLINE", insured, contract, location,
                 subscription);
+
+        // 3. 건물급수,지역코드 계산 및 적용
+        directRegistration.applyDerivedFields(entity, location);
 
         return totalFormMemberRepository.save(entity).getId();
     }

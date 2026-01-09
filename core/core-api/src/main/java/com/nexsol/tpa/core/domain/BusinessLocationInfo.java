@@ -3,11 +3,18 @@ package com.nexsol.tpa.core.domain;
 import lombok.Builder;
 
 @Builder
-public record BusinessLocationInfo(String companyName, String address, String category, // 업종
+public record BusinessLocationInfo(String companyName, String zipCode, String address, String category, // 업종
+        String biztype, // 소상인 구분
         String tenant, // 임차여부
-        String structure, // 건물구조
+        String mainStrctType, // 기둥 구조
+        String mainStrctGrade, // 기동 구조 급수
+        String roofStrctType, // 지붕 구조
+        String roofStrctGrade, // 지붕구조 급수
+        String bldGrade, // 건물급수
         String pnu, String prctrNo, // 질권번호
         String groundFloorCd, // 지하소재여부 (Y/N 또는 코드)
-        String groundFloorYn, // 지하층/1층 여부 (Y: 지하/1층, N: 2층이상)
-        int groundFloor, int underGroundFloor, String subFloor, String endSubFloor, String tmYn) {
+        String groundFloorYn, // 지하층/1층 여부 (Y: 지하/1층, N: 2층이상),
+        int groundFloor, int underGroundFloor, String subFloor, String cityCode, // 시티 코드
+        String district, // 시도 구군
+        String endSubFloor, String tmYn) {
 }

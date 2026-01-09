@@ -31,17 +31,18 @@ public class InsuredEntityMapper {
         }
 
         if (location != null) {
-            entity.applyLocationInfo(location.companyName(), location.address(), location.category(), location.tenant(),
-                    location.structure(), location.pnu(), location.prctrNo(), location.groundFloorCd(),
-                    location.groundFloor(), location.underGroundFloor(), location.subFloor(), location.endSubFloor(),
-                    location.tmYn(), location.groundFloorYn());
+            entity.applyLocationInfo(location.companyName(), location.zipCode(), location.address(),
+                    location.category(), location.biztype(), location.tenant(), location.pnu(), location.prctrNo(),
+                    location.groundFloorCd(), location.groundFloor(), location.underGroundFloor(), location.subFloor(),
+                    location.endSubFloor(), location.tmYn(), location.groundFloorYn(), location.mainStrctType(),
+                    location.roofStrctType());
         }
 
         if (subscription != null) {
             // 상태 및 기간
-            entity.applyContractStatus(subscription.joinCheck(), subscription.insuranceStartDate(),
-                    subscription.insuranceEndDate(), subscription.insuranceNumber(), subscription.payYn(),
-                    subscription.insuranceCompany());
+            entity.applyContractStatus(subscription.joinCheck(), subscription.createdAt(),
+                    subscription.insuranceStartDate(), subscription.insuranceEndDate(), subscription.insuranceNumber(),
+                    subscription.payYn(), subscription.insuranceCompany());
 
             // 가입 금액 (Embedded)
             entity.applyCoverage(CoverageAmount.builder()

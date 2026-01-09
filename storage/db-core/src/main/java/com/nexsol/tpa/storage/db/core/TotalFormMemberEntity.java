@@ -55,6 +55,9 @@ public class TotalFormMemberEntity {
     @Column(name = "address")
     private String address;
 
+    @Column(name = "zonecode")
+    private String zipCode;
+
     // --- 보험 계약 정보 (정렬/필터 대상) ---
     @Column(name = "ins_com")
     private String insuranceCompany; // 보험사
@@ -76,8 +79,8 @@ public class TotalFormMemberEntity {
     @Column(name = "bizcategory")
     private String bizCategory;
 
-    @Column(name = "structure")
-    private String structure;
+    @Column(name = "biztype")
+    private String biztype;
 
     @Column(name = "tenant")
     private String tenant;
@@ -118,6 +121,27 @@ public class TotalFormMemberEntity {
     @Column(name = "entry_div")
     private String entryDiv;
 
+    @Column(name = "main_strct_type")
+    private String mainStrctType;
+
+    @Column(name = "roof_strct_type")
+    private String roofStrctType;
+
+    @Column(name = "bld_grade")
+    private String bldGrade;
+
+    @Column(name = "citycode")
+    private String cityCode; // 지역 코드
+
+    @Column(name = "city_text_1")
+    private String cityText1; // 시도
+
+    @Column(name = "city_text_2")
+    private String cityText2; // 시군구
+
+    @Column
+    private LocalDateTime createdAt;
+
     @Embedded
     private CoverageAmount coverage;
 
@@ -148,29 +172,34 @@ public class TotalFormMemberEntity {
      */
 
     @Builder
-    public void applyLocationInfo(String companyName, String address, String category, String tenant, String structure,
-            String pnu, String prctrNo, String groundFloorCd, int groundFloor, int underGroundFloor, String subFloor,
-            String endSubFloor, String tmYn, String groundFloorYn) {
+    public void applyLocationInfo(String companyName, String zipCode, String address, String category, String biztype,
+            String tenant, String pnu, String prctrNo, String groundFloorCd, int groundFloor, int underGroundFloor,
+            String subFloor, String endSubFloor, String tmYn, String groundFloorYn, String mainStrctType,
+            String roofStrctType) {
         this.companyName = companyName;
+        this.zipCode = zipCode;
         this.address = address;
         this.bizCategory = category;
+        this.biztype = biztype;
         this.tenant = tenant;
         this.groundFloorCd = groundFloorCd;
         this.groundFloor = groundFloor;
         this.underGroundFloor = underGroundFloor;
-        this.structure = structure;
         this.subFloor = subFloor;
         this.endSubFloor = endSubFloor;
         this.prctrNo = prctrNo;
         this.pnu = pnu;
         this.tmYn = tmYn;
         this.groundFloorYn = groundFloorYn;
+        this.mainStrctType = mainStrctType;
+        this.roofStrctType = roofStrctType;
     }
 
-    public void applyContractStatus(String joinCheck, LocalDateTime insuranceStartDate, LocalDateTime insuranceEndDate,
-            String insuranceNumber, String payYn, String insuranceCompany) {
+    public void applyContractStatus(String joinCheck, LocalDateTime createdAt, LocalDateTime insuranceStartDate,
+            LocalDateTime insuranceEndDate, String insuranceNumber, String payYn, String insuranceCompany) {
         this.joinCheck = joinCheck;
         this.insuranceCompany = insuranceCompany;
+        this.createdAt = createdAt;
         this.insuranceStartDate = insuranceStartDate;
         this.insuranceEndDate = insuranceEndDate;
         this.insuranceNumber = insuranceNumber;
@@ -206,6 +235,18 @@ public class TotalFormMemberEntity {
 
     public void applyEntryDiv(String entryDiv) {
         this.entryDiv = entryDiv;
+    }
+
+    public void applyBuildingStructure(String mainStrctType, String roofStrctType, String bldGrade) {
+        this.mainStrctType = mainStrctType;
+        this.roofStrctType = roofStrctType;
+        this.bldGrade = bldGrade;
+    }
+
+    public void applyCityInfo(String cityCode, String cityText1, String cityText2) {
+        this.cityCode = cityCode;
+        this.cityText1 = cityText1;
+        this.cityText2 = cityText2;
     }
 
 }
