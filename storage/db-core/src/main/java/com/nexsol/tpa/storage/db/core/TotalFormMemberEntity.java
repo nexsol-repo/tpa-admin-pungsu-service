@@ -139,7 +139,7 @@ public class TotalFormMemberEntity {
     @Column(name = "city_text_2")
     private String cityText2; // 시군구
 
-    @Column
+    @Column(name = "createdAt")
     private LocalDateTime createdAt;
 
     @Embedded
