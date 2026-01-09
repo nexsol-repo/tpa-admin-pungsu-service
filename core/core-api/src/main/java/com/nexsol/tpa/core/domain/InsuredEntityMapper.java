@@ -5,6 +5,8 @@ import com.nexsol.tpa.storage.db.core.PremiumAmount;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberEntity;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 public class InsuredEntityMapper {
 
@@ -39,6 +41,9 @@ public class InsuredEntityMapper {
         }
 
         if (subscription != null) {
+
+            LocalDateTime createdAt = subscription.createdAt() != null ?
+                    subscription.createdAt() : LocalDateTime.now();
             // 상태 및 기간
             entity.applyContractStatus(subscription.joinCheck(), subscription.createdAt(),
                     subscription.insuranceStartDate(), subscription.insuranceEndDate(), subscription.insuranceNumber(),
