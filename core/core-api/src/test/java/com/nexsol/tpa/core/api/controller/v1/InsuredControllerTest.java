@@ -146,6 +146,7 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("data.content[].path").description("채널"),
                             fieldWithPath("data.content[].payYn").description("결제여부"),
                             fieldWithPath("data.content[].referIdx").description("참조번호"),
+                            fieldWithPath("data.content[].createdAt").description("생성일시").optional(),
                             fieldWithPath("data.hasNext").description("다음 페이지 여부"),
                             fieldWithPath("data.totalElements").description("총 item 수"),
                             fieldWithPath("data.totalPages").description("총 page 수"),
@@ -357,9 +358,19 @@ public class InsuredControllerTest extends RestDocsTest {
 
     private FieldDescriptor[] locationFields(String prefix) {
         return new FieldDescriptor[] { fieldWithPath(prefix + "companyName").description("상호명"),
+                fieldWithPath(prefix + "companyName").description("상호명"),
+                fieldWithPath(prefix + "zipCode").description("우편번호").optional(), // 추가
                 fieldWithPath(prefix + "address").description("주소"),
                 fieldWithPath(prefix + "category").description("업종").optional(),
+                fieldWithPath(prefix + "biztype").description("소상인 구분").optional(), // 추가
                 fieldWithPath(prefix + "tenant").description("임차여부").optional(),
+                fieldWithPath(prefix + "mainStrctType").description("기둥 구조").optional(), // 추가
+                fieldWithPath(prefix + "mainStrctGrade").description("기둥 구조 등급").optional(), // 추가
+                fieldWithPath(prefix + "roofStrctType").description("지붕 구조").optional(), // 추가
+                fieldWithPath(prefix + "roofStrctGrade").description("지붕 구조 등급").optional(), // 추가
+                fieldWithPath(prefix + "bldGrade").description("건물급수").optional(), // 추가
+                fieldWithPath(prefix + "cityCode").description("시티 코드").optional(), // 추가
+                fieldWithPath(prefix + "district").description("시도 구군").optional(), // 추가
                 fieldWithPath(prefix + "tmYn").description("전통시장 여부").optional(),
                 fieldWithPath(prefix + "groundFloorYn").description("지하/1층 여부").optional(),
                 fieldWithPath(prefix + "groundFloorCd").description("지하소재코드").optional(),
@@ -367,7 +378,6 @@ public class InsuredControllerTest extends RestDocsTest {
                 fieldWithPath(prefix + "underGroundFloor").description("지하층수").optional(),
                 fieldWithPath(prefix + "subFloor").description("시작호수").optional(),
                 fieldWithPath(prefix + "endSubFloor").description("종료호수").optional(),
-                fieldWithPath(prefix + "structure").description("구조").optional(),
                 fieldWithPath(prefix + "pnu").description("PNU").optional(),
                 fieldWithPath(prefix + "prctrNo").description("질권번호").optional() };
     }
@@ -379,6 +389,7 @@ public class InsuredControllerTest extends RestDocsTest {
                 fieldWithPath(prefix + "insuranceEndDate").description("종료일").optional(),
                 fieldWithPath(prefix + "insuranceCompany").description("보험사").optional(),
                 fieldWithPath(prefix + "insuranceNumber").description("증권번호").optional(),
+                fieldWithPath(prefix + "createdAt").description("생성일시").optional(), // 추가
                 fieldWithPath(prefix + "payYn").description("납입여부").optional(),
                 fieldWithPath(prefix + "account").description("제휴사").optional(),
                 fieldWithPath(prefix + "path").description("채널").optional(),
