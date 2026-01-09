@@ -92,10 +92,10 @@ public class TotalFormMemberEntity {
     private String groundFloorYn;
 
     @Column(name = "grnd_flr_cnt")
-    private int groundFloor;
+    private Integer groundFloor;
 
     @Column(name = "ugrnd_flr_cnt")
-    private int underGroundFloor;
+    private Integer underGroundFloor;
 
     @Column(name = "subfloor")
     private String subFloor;
@@ -173,7 +173,7 @@ public class TotalFormMemberEntity {
 
     @Builder
     public void applyLocationInfo(String companyName, String zipCode, String address, String category, String biztype,
-            String tenant, String pnu, String prctrNo, String groundFloorCd, int groundFloor, int underGroundFloor,
+            String tenant, String pnu, String prctrNo, String groundFloorCd, Integer groundFloor, Integer underGroundFloor,
             String subFloor, String endSubFloor, String tmYn, String groundFloorYn, String mainStrctType,
             String roofStrctType) {
         this.companyName = companyName;
