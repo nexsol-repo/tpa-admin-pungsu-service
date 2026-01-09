@@ -124,6 +124,24 @@ public class TotalFormMemberEntity {
     @Column(name = "entry_div")
     private String entryDiv;
 
+    @Column(name = "main_strct_type")
+    private String mainStrctType;
+
+    @Column(name = "roof_strct_type")
+    private String roofStrctType;
+
+    @Column(name = "bld_grade")
+    private String bldGrade;
+
+    @Column(name = "citycode")
+    private String cityCode; // 지역 코드
+
+    @Column(name = "city_text_1")
+    private String cityText1; // 시도
+
+    @Column(name = "city_text_2")
+    private String cityText2; // 시군구
+
     @Column
     private LocalDateTime createdAt;
 
@@ -218,6 +236,18 @@ public class TotalFormMemberEntity {
 
     public void applyEntryDiv(String entryDiv) {
         this.entryDiv = entryDiv;
+    }
+
+    public void applyBuildingStructure(String mainStrctType, String roofStrctType, String bldGrade) {
+        this.mainStrctType = mainStrctType;
+        this.roofStrctType = roofStrctType;
+        this.bldGrade = bldGrade;
+    }
+
+    public void applyCityInfo(String cityCode, String cityText1, String cityText2) {
+        this.cityCode = cityCode;
+        this.cityText1 = cityText1;
+        this.cityText2 = cityText2;
     }
 
 }

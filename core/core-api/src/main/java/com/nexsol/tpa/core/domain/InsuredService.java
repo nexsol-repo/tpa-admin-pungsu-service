@@ -71,7 +71,7 @@ public class InsuredService {
     @Transactional
     public void register(InsuredInfo insured, ContractInfo contract, BusinessLocationInfo location,
             InsuredSubscriptionInfo subscription, String memoContent, Long adminId) {
-        Integer contractId = insuredContractorWriter.create(insured, contract, location, subscription);
+        Integer contractId = insuredContractorWriter.write(insured, contract, location, subscription);
 
         String token = getJwtToken();
 
