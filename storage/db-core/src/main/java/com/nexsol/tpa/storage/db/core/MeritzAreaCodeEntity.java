@@ -15,7 +15,7 @@ public class MeritzAreaCodeEntity {
 
     @Id
     @Column(name = "id")
-    private Long id;
+    private Integer id;
 
     @Column(name = "citycode")
     private String cityCode;
