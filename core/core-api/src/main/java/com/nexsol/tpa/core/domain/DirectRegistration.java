@@ -52,7 +52,7 @@ public class DirectRegistration {
 
     private void applyBuildingGrade(TotalFormMemberEntity entity, String mainStrctGrade, String roofStrctGrade,
             String mainStrctType, String roofStrctType) {
-        String bldGrade = "1"; // 기본값
+        Integer bldGrade = 1; // 기본값
 
         if (StringUtils.hasText(mainStrctGrade) && StringUtils.hasText(roofStrctGrade)) {
             try {
@@ -62,15 +62,15 @@ public class DirectRegistration {
 
                 // 규칙: main * roof >= 4 ? 4 : main * roof
                 if (result >= 4) {
-                    bldGrade = "4";
+                    bldGrade = 4;
                 }
                 else {
-                    bldGrade = String.valueOf(result);
+                    bldGrade = Integer.valueOf(result);
                 }
             }
             catch (NumberFormatException e) {
                 // 숫자가 아닌 경우 기본값 유지
-                bldGrade = "1";
+                bldGrade = 1;
             }
         }
 

@@ -128,7 +128,7 @@ public class TotalFormMemberEntity {
     private String roofStrctType;
 
     @Column(name = "bld_grade")
-    private String bldGrade;
+    private Integer bldGrade;
 
     @Column(name = "citycode")
     private String cityCode; // 지역 코드
@@ -237,7 +237,7 @@ public class TotalFormMemberEntity {
         this.entryDiv = entryDiv;
     }
 
-    public void applyBuildingStructure(String mainStrctType, String roofStrctType, String bldGrade) {
+    public void applyBuildingStructure(String mainStrctType, String roofStrctType, Integer bldGrade) {
         this.mainStrctType = mainStrctType;
         this.roofStrctType = roofStrctType;
         this.bldGrade = bldGrade;
