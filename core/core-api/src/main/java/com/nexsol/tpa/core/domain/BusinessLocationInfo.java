@@ -10,7 +10,7 @@ public record BusinessLocationInfo(String companyName, String zipCode, String ad
         String mainStrctGrade, // 기동 구조 급수
         String roofStrctType, // 지붕 구조
         String roofStrctGrade, // 지붕구조 급수
-        String bldGrade, // 건물급수
+        Integer bldGrade, // 건물급수
         String pnu, String prctrNo, // 질권번호
         String groundFloorCd, // 지하소재여부 (Y/N 또는 코드)
         String groundFloorYn, // 지하층/1층 여부 (Y: 지하/1층, N: 2층이상),
