@@ -8,11 +8,14 @@ import com.nexsol.tpa.storage.db.core.CoverageAmount;
 import com.nexsol.tpa.storage.db.core.PremiumAmount;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberEntity;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,6 +28,8 @@ public class InsuredContractFinder {
     private final TotalFormMemberRepository totalFormMemberRepository;
 
     private final InsuredContractQueryGenerator queryGenerator;
+
+    private final EntityManager em;
 
     public DomainPage<InsuredContract> find(InsuredSearchCondition condition, OffsetLimit offsetLimit) {
 
@@ -41,7 +46,6 @@ public class InsuredContractFinder {
                 .referIdx(entity.getReferIdx())
                 .businessNumber(entity.getBusinessNumber())
                 .companyName(entity.getCompanyName())
-                .applicationDate(entity.getInsuranceStartDate())
                 .insuranceCompany(entity.getInsuranceCompany())
                 .insuranceStartDate(entity.getInsuranceStartDate())
                 .insuranceEndDate(entity.getInsuranceEndDate())
@@ -51,7 +55,7 @@ public class InsuredContractFinder {
                 .joinCheck(entity.getJoinCheck())
                 .account(entity.getAccount())
                 .path(entity.getPath())
-                .createdAt(entity.getCreatedAt())
+                .applicationDate(entity.getCreatedAt())
                 .build())
             .toList();
 
@@ -78,6 +82,38 @@ public class InsuredContractFinder {
             .toList();
     }
 
+    public List<InsuredContract> findAll(InsuredSearchCondition condition) {
+        StringBuilder jpql = new StringBuilder();
+        jpql.append("SELECT c FROM InsuredContract c ");
+        jpql.append("JOIN FETCH c.insuredInfo ");
+        jpql.append("JOIN FETCH c.businessLocationInfo ");
+        jpql.append("JOIN FETCH c.subscriptionInfo ");
+        jpql.append("WHERE 1=1 ");
+
+        if (condition.startDate() != null && condition.endDate() != null) {
+            jpql.append("AND c.subscriptionInfo.insuranceStartDate BETWEEN :startDate AND :endDate ");
+        }
+
+        if (StringUtils.hasText(condition.insuranceCompany())) {
+            jpql.append("AND c.insuranceCompany = :insuranceCompany ");
+        }
+
+        jpql.append("ORDER BY c.id DESC");
+
+        TypedQuery<InsuredContract> query = em.createQuery(jpql.toString(), InsuredContract.class);
+
+        if (condition.startDate() != null && condition.endDate() != null) {
+            query.setParameter("startDate", condition.startDate());
+            query.setParameter("endDate", condition.endDate());
+        }
+
+        if (StringUtils.hasText(condition.insuranceCompany())) {
+            query.setParameter("insuranceCompany", condition.insuranceCompany());
+        }
+
+        return query.getResultList();
+    }
+
     // [개념 1] 피보험자 정보 매핑
     private InsuredInfo mapToInsuredInfo(TotalFormMemberEntity entity) {
         return InsuredInfo.builder()
@@ -102,7 +138,6 @@ public class InsuredContractFinder {
             .address(entity.getAddress())
             .category(entity.getBizCategory())
             .tenant(entity.getTenant())
-            .structure(entity.getStructure())
             .pnu(entity.getPnu())
             .prctrNo(entity.getPrctrNo())
             .groundFloorCd(entity.getGroundFloorCd())

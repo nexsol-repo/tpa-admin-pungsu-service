@@ -35,7 +35,8 @@ public class ContractChangeDetector {
             compare("사업장 주소", entity.getAddress(), location.address(), changes);
             compare("업종", entity.getBizCategory(), location.category(), changes);
             compare("임차여부", entity.getTenant(), location.tenant(), changes);
-            compare("건물구조", entity.getStructure(), location.structure(), changes);
+            compare("건물(주)기둥구조", entity.getMainStrctType(), location.mainStrctType(), changes);
+            compare("건물 지붕구조", entity.getRoofStrctType(), location.roofStrctType(), changes);
             compare("지하소재여부", entity.getGroundFloorCd(), location.groundFloorCd(), changes);
             compare("전통시장 여부", entity.getTmYn(), location.tmYn(), changes);
             compare("지하층/1층 여부", entity.getGroundFloorYn(), location.groundFloorYn(), changes);

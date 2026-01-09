@@ -82,9 +82,6 @@ public class TotalFormMemberEntity {
     @Column(name = "biztype")
     private String biztype;
 
-    @Column(name = "structure")
-    private String structure;
-
     @Column(name = "tenant")
     private String tenant;
 
@@ -176,8 +173,9 @@ public class TotalFormMemberEntity {
 
     @Builder
     public void applyLocationInfo(String companyName, String zipCode, String address, String category, String biztype,
-            String tenant, String structure, String pnu, String prctrNo, String groundFloorCd, int groundFloor,
-            int underGroundFloor, String subFloor, String endSubFloor, String tmYn, String groundFloorYn) {
+            String tenant, String pnu, String prctrNo, String groundFloorCd, int groundFloor, int underGroundFloor,
+            String subFloor, String endSubFloor, String tmYn, String groundFloorYn, String mainStrctType,
+            String roofStrctType) {
         this.companyName = companyName;
         this.zipCode = zipCode;
         this.address = address;
@@ -187,13 +185,14 @@ public class TotalFormMemberEntity {
         this.groundFloorCd = groundFloorCd;
         this.groundFloor = groundFloor;
         this.underGroundFloor = underGroundFloor;
-        this.structure = structure;
         this.subFloor = subFloor;
         this.endSubFloor = endSubFloor;
         this.prctrNo = prctrNo;
         this.pnu = pnu;
         this.tmYn = tmYn;
         this.groundFloorYn = groundFloorYn;
+        this.mainStrctType = mainStrctType;
+        this.roofStrctType = roofStrctType;
     }
 
     public void applyContractStatus(String joinCheck, LocalDateTime createdAt, LocalDateTime insuranceStartDate,

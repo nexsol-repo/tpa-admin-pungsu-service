@@ -173,7 +173,6 @@ public class InsuredControllerTest extends RestDocsTest {
                 .underGroundFloor(1)
                 .subFloor("1")
                 .endSubFloor("5")
-                .structure("철근콘크리트")
                 .pnu("PNU123")
                 .prctrNo("PRC12345")
                 .build())
@@ -236,7 +235,6 @@ public class InsuredControllerTest extends RestDocsTest {
                     .underGroundFloor(0)
                     .subFloor("1")
                     .endSubFloor("1")
-                    .structure("철근")
                     .pnu("123")
                     .prctrNo("ABC")
                     .build(),

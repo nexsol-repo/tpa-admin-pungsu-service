@@ -16,8 +16,8 @@ public record InsuredContract(Integer id, String referIdx, String payYn, // 결�
         LocalDateTime insuranceEndDate, // 보험기간 종료
         String joinCheck, boolean isRenewalTarget, // 갱신대상 여부,
         String account, // 제휴사
-        String path, // 채널,
-        LocalDateTime createdAt // 보험 신청일
+        String path // 채널,
+
 ) {
 
     public boolean isRenewalTarget(LocalDateTime now) {

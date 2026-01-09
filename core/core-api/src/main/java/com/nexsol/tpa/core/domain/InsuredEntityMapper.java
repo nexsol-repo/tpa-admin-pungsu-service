@@ -32,9 +32,10 @@ public class InsuredEntityMapper {
 
         if (location != null) {
             entity.applyLocationInfo(location.companyName(), location.zipCode(), location.address(),
-                    location.category(), location.biztype(), location.tenant(), location.structure(), location.pnu(),
-                    location.prctrNo(), location.groundFloorCd(), location.groundFloor(), location.underGroundFloor(),
-                    location.subFloor(), location.endSubFloor(), location.tmYn(), location.groundFloorYn());
+                    location.category(), location.biztype(), location.tenant(), location.pnu(), location.prctrNo(),
+                    location.groundFloorCd(), location.groundFloor(), location.underGroundFloor(), location.subFloor(),
+                    location.endSubFloor(), location.tmYn(), location.groundFloorYn(), location.mainStrctType(),
+                    location.roofStrctType());
         }
 
         if (subscription != null) {

@@ -16,6 +16,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -29,6 +30,8 @@ public class InsuredService {
     private final InsuredContractFinder insuredContractFinder;
 
     private final InsuredContractorWriter insuredContractorWriter;
+
+    private final InsuredExcelWriter insuredExcelWriter;
 
     private final FileStorageClient fileStorageClient;
 
@@ -99,6 +102,54 @@ public class InsuredService {
             // 알림 발송 명령 (기존 send 메서드 재사용하여 이벤트 발행)
             this.send(detail, MailType.REJOIN, rejoinUrl, 0L); // 시스템 자동 발송은 adminId 0 처리
         });
+    }
+
+    @Transactional(readOnly = true)
+    public void downloadExcel(String insuranceCompany, InsuredSearchCondition condition, OutputStream outputStream) {
+        // 1. 기간 필수 체크
+        if (condition.startDate() == null || condition.endDate() == null) {
+            throw new CoreException(ErrorType.INVALID_REQUEST);
+        }
+
+        // 2. 전체 데이터 조회
+        List<InsuredContract> contracts = insuredContractFinder.findAll(condition);
+        if (contracts.isEmpty()) {
+            throw new CoreException(ErrorType.NOT_FOUND_DATA);
+        }
+
+        List<ContractExcelData> excelDataList = contracts.stream().map(contract -> {
+            // InsuredInfo 생성 (Builder 사용)
+            InsuredInfo insured = InsuredInfo.builder()
+                .name(contract.companyName()) // companyName -> name 매핑
+                .businessNumber(contract.businessNumber())
+                .phoneNumber(contract.phoneNumber())
+                .build();
+
+            // BusinessLocationInfo 생성 (Builder 사용)
+            BusinessLocationInfo location = BusinessLocationInfo.builder()
+                .companyName(contract.companyName())
+                .address(contract.address())
+                .build();
+
+            // InsuredSubscriptionInfo 생성 (Builder 사용)
+            InsuredSubscriptionInfo subscription = InsuredSubscriptionInfo.builder()
+                .joinCheck(contract.joinCheck())
+                .insuranceStartDate(contract.insuranceStartDate())
+                .insuranceEndDate(contract.insuranceEndDate())
+                .insuranceCompany(contract.insuranceCompany())
+                .payYn(contract.payYn())
+                .account(contract.account())
+                .path(contract.path())
+                .createdAt(contract.applicationDate())
+                .isRenewalTarget(contract.isRenewalTarget())
+                .build();
+
+            return new ContractExcelData(contract, insured, location, subscription);
+        }).toList();
+
+        // 4. 도구 레이어 위임
+        insuredExcelWriter.write(insuranceCompany, excelDataList, outputStream);
+
     }
 
     public void send(InsuredContractDetail detail, MailType type, String targetUrl, Long adminId) {

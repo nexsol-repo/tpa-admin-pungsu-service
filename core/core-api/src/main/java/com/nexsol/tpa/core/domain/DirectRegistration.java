@@ -25,7 +25,8 @@ public class DirectRegistration {
         applyCityCode(entity, location.address());
 
         // 2. 건물 급수 계산 및 적용
-        applyBuildingGrade(entity, location.mainStrctType(), location.roofStrctType());
+        applyBuildingGrade(entity, location.mainStrctGrade(), location.roofStrctGrade(), location.mainStrctType(),
+                location.roofStrctType());
     }
 
     private void applyCityCode(TotalFormMemberEntity entity, String address) {
@@ -49,13 +50,14 @@ public class DirectRegistration {
         entity.applyCityInfo(cityCode, cityText1, cityText2);
     }
 
-    private void applyBuildingGrade(TotalFormMemberEntity entity, String mainStrctType, String roofStrctType) {
+    private void applyBuildingGrade(TotalFormMemberEntity entity, String mainStrctGrade, String roofStrctGrade,
+            String mainStrctType, String roofStrctType) {
         String bldGrade = "1"; // 기본값
 
-        if (StringUtils.hasText(mainStrctType) && StringUtils.hasText(roofStrctType)) {
+        if (StringUtils.hasText(mainStrctGrade) && StringUtils.hasText(roofStrctGrade)) {
             try {
-                int mainVal = Integer.parseInt(mainStrctType);
-                int roofVal = Integer.parseInt(roofStrctType);
+                int mainVal = Integer.parseInt(mainStrctGrade);
+                int roofVal = Integer.parseInt(roofStrctGrade);
                 int result = mainVal * roofVal;
 
                 // 규칙: main * roof >= 4 ? 4 : main * roof

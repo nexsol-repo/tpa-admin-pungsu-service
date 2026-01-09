@@ -30,7 +30,6 @@ public record InsuredContractResponse(Integer id, String businessNumber, String 
             .joinCheck(contract.joinCheck())
             .account(contract.account())
             .path(contract.path())
-            .createdAt(contract.createdAt())
             .referIdx(contract.referIdx())
             .build();
     }
