@@ -192,6 +192,7 @@ public class InsuredControllerTest extends RestDocsTest {
                 .companyName("테스트상호")
                 .address("서울시 강남구 테헤란로")
                 .category("음식점")
+                .bizNoType("P")
                 .tenant("임차인")
                 .groundFloorCd("1")
                 .tmYn("Y")
@@ -388,6 +389,7 @@ public class InsuredControllerTest extends RestDocsTest {
                 fieldWithPath(prefix + "zipCode").description("우편번호").optional(), // 추가
                 fieldWithPath(prefix + "address").description("주소"),
                 fieldWithPath(prefix + "category").description("업종").optional(),
+                fieldWithPath(prefix + "bizNoType").description("사업자 구분").optional(),
                 fieldWithPath(prefix + "biztype").description("소상인 구분").optional(), // 추가
                 fieldWithPath(prefix + "tenant").description("임차여부").optional(),
                 fieldWithPath(prefix + "mainStrctType").description("기둥 구조").optional(), // 추가

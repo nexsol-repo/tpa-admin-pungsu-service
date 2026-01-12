@@ -145,6 +145,7 @@ public class InsuredContractFinder {
             .address(entity.getAddress())
             .zipCode(entity.getZipCode())
             .category(entity.getBizCategory())
+            .bizNoType(entity.getBizNoType())
             .biztype(entity.getBiztype())
             .mainStrctType(entity.getMainStrctType())
             .roofStrctType(entity.getMainStrctType())
