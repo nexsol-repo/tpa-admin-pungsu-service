@@ -84,34 +84,50 @@ public class InsuredContractFinder {
 
     public List<InsuredContract> findAll(InsuredSearchCondition condition) {
         StringBuilder jpql = new StringBuilder();
-        jpql.append("SELECT c FROM InsuredContract c ");
-        jpql.append("JOIN FETCH c.insuredInfo ");
-        jpql.append("JOIN FETCH c.businessLocationInfo ");
-        jpql.append("JOIN FETCH c.subscriptionInfo ");
+        jpql.append("SELECT e FROM TotalFormMemberEntity e ");
         jpql.append("WHERE 1=1 ");
 
         if (condition.startDate() != null && condition.endDate() != null) {
-            jpql.append("AND c.subscriptionInfo.insuranceStartDate BETWEEN :startDate AND :endDate ");
+            // 엔티티 내 필드명 확인 (예: insuranceStartDate)
+            jpql.append("AND e.insuranceStartDate BETWEEN :startDate AND :endDate ");
         }
 
         if (StringUtils.hasText(condition.insuranceCompany())) {
-            jpql.append("AND c.insuranceCompany = :insuranceCompany ");
+            jpql.append("AND e.insuranceCompany = :insuranceCompany ");
         }
 
         jpql.append("ORDER BY c.id DESC");
 
-        TypedQuery<InsuredContract> query = em.createQuery(jpql.toString(), InsuredContract.class);
+        TypedQuery<TotalFormMemberEntity> query = em.createQuery(jpql.toString(), TotalFormMemberEntity.class);
 
         if (condition.startDate() != null && condition.endDate() != null) {
-            query.setParameter("startDate", condition.startDate());
-            query.setParameter("endDate", condition.endDate());
+            query.setParameter("startDate", condition.startDate().atStartOfDay());
+            query.setParameter("endDate", condition.endDate().atTime(23, 59, 59));
         }
 
         if (StringUtils.hasText(condition.insuranceCompany())) {
             query.setParameter("insuranceCompany", condition.insuranceCompany());
         }
 
-        return query.getResultList();
+        // 4. 조회된 엔티티 리스트를 도메인 객체(InsuredContract) 리스트로 매핑하여 반환
+        return query.getResultList().stream()
+                .map(entity -> InsuredContract.builder()
+                        .id(entity.getId())
+                        .referIdx(entity.getReferIdx())
+                        .businessNumber(entity.getBusinessNumber())
+                        .companyName(entity.getCompanyName())
+                        .insuranceCompany(entity.getInsuranceCompany())
+                        .insuranceStartDate(entity.getInsuranceStartDate())
+                        .insuranceEndDate(entity.getInsuranceEndDate())
+                        .phoneNumber(entity.getPhoneNumber())
+                        .payYn(entity.getPayYn())
+                        .address(entity.getAddress())
+                        .joinCheck(entity.getJoinCheck())
+                        .account(entity.getAccount())
+                        .path(entity.getPath())
+                        .applicationDate(entity.getCreatedAt())
+                        .build())
+                .toList();
     }
 
     // [개념 1] 피보험자 정보 매핑
