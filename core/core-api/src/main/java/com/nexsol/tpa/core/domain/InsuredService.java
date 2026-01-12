@@ -111,45 +111,15 @@ public class InsuredService {
             throw new CoreException(ErrorType.INVALID_REQUEST);
         }
 
-        // 2. 전체 데이터 조회
-        List<InsuredContract> contracts = insuredContractFinder.findAll(condition);
-        if (contracts.isEmpty()) {
+        // 2. 전체 데이터 조회 (Finder가 모든 정보를 포함한 ContractExcelData 리스트를 반환)
+        List<ContractExcelData> excelDataList = insuredContractFinder.findAll(condition);
+
+        if (excelDataList.isEmpty()) {
             throw new CoreException(ErrorType.NOT_FOUND_DATA);
         }
 
-        List<ContractExcelData> excelDataList = contracts.stream().map(contract -> {
-            // InsuredInfo 생성 (Builder 사용)
-            InsuredInfo insured = InsuredInfo.builder()
-                .name(contract.companyName()) // companyName -> name 매핑
-                .businessNumber(contract.businessNumber())
-                .phoneNumber(contract.phoneNumber())
-                .build();
-
-            // BusinessLocationInfo 생성 (Builder 사용)
-            BusinessLocationInfo location = BusinessLocationInfo.builder()
-                .companyName(contract.companyName())
-                .address(contract.address())
-                .build();
-
-            // InsuredSubscriptionInfo 생성 (Builder 사용)
-            InsuredSubscriptionInfo subscription = InsuredSubscriptionInfo.builder()
-                .joinCheck(contract.joinCheck())
-                .insuranceStartDate(contract.insuranceStartDate())
-                .insuranceEndDate(contract.insuranceEndDate())
-                .insuranceCompany(contract.insuranceCompany())
-                .payYn(contract.payYn())
-                .account(contract.account())
-                .path(contract.path())
-                .createdAt(contract.applicationDate())
-                .isRenewalTarget(contract.isRenewalTarget())
-                .build();
-
-            return new ContractExcelData(contract, insured, location, subscription);
-        }).toList();
-
-        // 4. 도구 레이어 위임
+        // 3. 도구 레이어 위임 (이미 모든 요소가 채워진 리스트를 전달)
         insuredExcelWriter.write(insuranceCompany, excelDataList, outputStream);
-
     }
 
     public void send(InsuredContractDetail detail, MailType type, String targetUrl, Long adminId) {
