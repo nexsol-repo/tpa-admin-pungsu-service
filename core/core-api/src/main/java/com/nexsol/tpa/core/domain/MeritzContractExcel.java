@@ -16,9 +16,9 @@ public class MeritzContractExcel implements ContractExcel {
 
     private final ExcelCellTool cellTool;
 
-    private static final String[] HEADERS = { "보험시작일자", "시군구명", "시군구코드", "소재지주소", "소유자명", "사업자번호", "내진설계", "건물세부코드",
+    private static final String[] HEADERS = {"보험시작일자", "시군구명", "시군구코드", "소재지주소", "소유자명", "사업자번호", "내진설계", "건물세부코드",
             "건물급수", "소유구분(임차자/소유자)", "건물", "시설", "비품/집기", "기계", "재고자산", "자기부담금", "지하소재여부", "풍수해보험료지원대상코드", "풍수해시설유형코드",
-            "보험가입면적", "전체층가입여부", "건물지상총층수", "건물지하총층수", "가입층수", "가입신청일", "일반/공장" };
+            "보험가입면적", "전체층가입여부", "건물지상총층수", "건물지하총층수", "가입층수", "가입신청일", "일반/공장"};
 
     @Override
     public boolean supports(String insuranceCompany) {
@@ -61,7 +61,7 @@ public class MeritzContractExcel implements ContractExcel {
                 cellTool.setCellValue(row, 17, pungsuPlaceCode(loc.tmYn(), loc.groundFloorYn()));
                 cellTool.setCellValue(row, 18, "");// TODO: using_area 면적
                 cellTool.setCellValue(row, 19, ""); // TODO: using_flr_nm_list이 있어야
-                                                    // 전체층가입여부 확인가능
+                // 전체층가입여부 확인가능
                 cellTool.setCellValue(row, 20, loc.groundFloor());
                 cellTool.setCellValue(row, 21, loc.underGroundFloor());
                 cellTool.setCellValue(row, 22, "");// TODO: using_flr_nm_list 가입층수
@@ -71,33 +71,33 @@ public class MeritzContractExcel implements ContractExcel {
             }
 
             workbook.write(outputStream);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException("메리츠 엑셀 생성 실패", e);
         }
     }
 
-    private static String pungsuGivenCode(String payYn) {
-        return payYn == "Y" ? "01" : "05";
+    private String pungsuGivenCode(String payYn) {
+        return "Y".equals(payYn) ? "01" : "05";
     }
 
-    private static String pungsuPlaceCode(String tmYn, String groundFloorYn) {
-        return switch (tmYn) {
-            // 1순위: tmYn이 "Y"인 경우
-            case "Y" -> "01";
+    private String pungsuPlaceCode(String tmYn, String groundFloorYn) {
 
-            // 2순위: tmYn이 "Y"가 아닐 때 groundFloorYn에 따라 분기
-            default -> switch (groundFloorYn) {
-                case "Y" -> "02";
-                default -> "03";
-            };
-        };
+        if ("Y".equals(tmYn)) {
+            return "01";
+        }
 
+        if ("Y".equals(groundFloorYn)) {
+            return "02";
+        }
+
+        return "03";
     }
 
-    private static String companyType(String bizType) {
-        return bizType == "소상인(일반)" ? "일반" : "공장";
 
+    private String companyType(String bizType) {
+        // bizType이 null일 경우를 대비해 문자열을 앞에 두고 비교
+        return "소상인(일반)".equals(bizType) ? "일반" : "공장";
     }
+
 
 }
