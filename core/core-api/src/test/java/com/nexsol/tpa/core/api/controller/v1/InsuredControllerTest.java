@@ -166,6 +166,7 @@ public class InsuredControllerTest extends RestDocsTest {
                 .accept(MediaType.APPLICATION_OCTET_STREAM))
             .andExpect(status().isOk())
             .andDo(document("admin-insured-contract-excel",
+
                     queryParameters(
                             parameterWithName("insuranceCompany").description("다운로드할 보험사 양식 (메리츠, 삼성, DB 등)")
                                 .optional(),

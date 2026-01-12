@@ -74,8 +74,8 @@ public class InsuredController {
     }
 
     @GetMapping("/contract/excel")
-    public void downloadExcel(@ModelAttribute InsuredSearchRequest request, HttpServletResponse response)
-            throws IOException {
+    public void downloadExcel(@ModelAttribute InsuredSearchRequest request, HttpServletResponse response,
+            @LoginAdmin AdminUser admin) throws IOException {
         // 1. DTO를 통해 도메인 객체 생성 (레이어 오염 방지)
         InsuredSearchCondition condition = request.toInsuredSearchCondition();
 
