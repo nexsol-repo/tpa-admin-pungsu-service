@@ -173,9 +173,9 @@ public class TotalFormMemberEntity {
 
     @Builder
     public void applyLocationInfo(String companyName, String zipCode, String address, String category, String biztype,
-            String tenant, String pnu, String prctrNo, String groundFloorCd, Integer groundFloor, Integer underGroundFloor,
-            String subFloor, String endSubFloor, String tmYn, String groundFloorYn, String mainStrctType,
-            String roofStrctType) {
+            String tenant, String pnu, String prctrNo, String groundFloorCd, Integer groundFloor,
+            Integer underGroundFloor, String subFloor, String endSubFloor, String tmYn, String groundFloorYn,
+            String mainStrctType, String roofStrctType) {
         this.companyName = companyName;
         this.zipCode = zipCode;
         this.address = address;
