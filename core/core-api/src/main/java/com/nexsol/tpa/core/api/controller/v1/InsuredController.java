@@ -9,7 +9,6 @@ import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractResponse;
 import com.nexsol.tpa.core.domain.*;
 import com.nexsol.tpa.core.enums.MailType;
 import com.nexsol.tpa.core.support.DomainPage;
-import com.nexsol.tpa.core.support.OffsetLimit;
 import com.nexsol.tpa.core.support.response.ApiResponse;
 
 import com.nexsol.tpa.core.support.response.PageResponse;
@@ -78,18 +77,24 @@ public class InsuredController {
             @LoginAdmin AdminUser admin) throws IOException {
 
         InsuredSearchCondition condition = request.toInsuredSearchCondition();
+
         // 1. 보험사명 처리 (null 또는 빈값일 경우 "전체")
-        String insuranceCompanyName = StringUtils.hasText(request.insuranceCompany()) ? request.insuranceCompany()
-                : "전체";
+        String insuranceCompanyName = StringUtils.hasText(request.insuranceCompany()) ? request.insuranceCompany() : "전체";
 
         // 2. 파일명 생성 (가입리스트_보험사명_날짜.xlsx)
         String fileName = String.format("가입리스트_%s_%s.xlsx", insuranceCompanyName, LocalDate.now());
+
+        // 3. 한글 파일명 인코딩 (브라우저 깨짐 방지 및 표준 준수)
         String encodedFileName = UriUtils.encode(fileName, StandardCharsets.UTF_8);
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + encodedFileName + "\"");
 
-        // 3. 서비스 호출
+        // RFC 5987 표준: filename* 속성을 추가하여 UTF-8 파일명을 명시적으로 전달
+        String contentDisposition = String.format("attachment; filename=\"%s\"; filename*=UTF-8''%s",
+                encodedFileName, encodedFileName);
+        response.setHeader("Content-Disposition", contentDisposition);
+
+        // 4. 서비스 호출
         insuredService.downloadExcel(request.insuranceCompany(), condition, response.getOutputStream());
 
     }
