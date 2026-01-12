@@ -104,14 +104,14 @@ public class InsuredControllerTest extends RestDocsTest {
         given(insuredService.getList(any(InsuredSearchCondition.class), any(OffsetLimit.class))).willReturn(mockPage);
 
         mockMvc
-            .perform(get("/v1/admin/pungsu/contract").contentType(MediaType.APPLICATION_JSON)
-                .param("payYn", "Y")
+            .perform(get("/v1/admin/pungsu/contract").param("payYn", "Y")
+                .param("insuranceCompany", "메리츠화재")
                 .param("keyword", "테스트")
                 .param("offset", "0")
                 .param("limit", "10")
-                .param("limit", "10")
                 .param("sortBy", "insuranceStartDate")
-                .param("direction", "ASC"))
+                .param("direction", "ASC")
+                .contentType(MediaType.APPLICATION_JSON))
 
             .andExpect(status().isOk())
             .andDo(document("admin-insured-contract-list",
@@ -151,6 +151,31 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("data.totalElements").description("총 item 수"),
                             fieldWithPath("data.totalPages").description("총 page 수"),
                             fieldWithPath("error").description("에러 정보").optional())));
+    }
+
+    @Test
+    @DisplayName("풍수해 계약 내역 엑셀 다운로드 API 문서화")
+    void downloadExcel() throws Exception {
+        // 엑셀 다운로드는 void 리턴이며 OutputStream에 데이터를 직접 씀
+        doNothing().when(insuredService).downloadExcel(any(), any(), any());
+
+        mockMvc
+            .perform(get("/v1/admin/pungsu/contract/excel").param("insuranceCompany", "메리츠화재")
+                .param("startDate", "2025-01-01")
+                .param("endDate", "2025-12-31")
+                .accept(MediaType.APPLICATION_OCTET_STREAM))
+            .andExpect(status().isOk())
+            .andDo(document("admin-insured-contract-excel",
+                    queryParameters(
+                            parameterWithName("insuranceCompany").description("다운로드할 보험사 양식 (메리츠, 삼성, DB 등)")
+                                .optional(),
+                            parameterWithName("status").description("계약 상태 필터").optional(),
+                            parameterWithName("payYn").description("결제 여부 필터").optional(),
+                            parameterWithName("startDate").description("시작일").optional(),
+                            parameterWithName("endDate").description("종료일").optional(),
+                            parameterWithName("keyword").description("검색 키워드").optional(),
+                            parameterWithName("account").description("제휴사 필터").optional(),
+                            parameterWithName("path").description("채널 필터").optional())));
     }
 
     @Test
