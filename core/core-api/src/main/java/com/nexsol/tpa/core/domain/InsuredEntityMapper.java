@@ -42,12 +42,11 @@ public class InsuredEntityMapper {
 
         if (subscription != null) {
 
-            LocalDateTime createdAt = subscription.createdAt() != null ?
-                    subscription.createdAt() : LocalDateTime.now();
+            LocalDateTime createdAt = subscription.createdAt() != null ? subscription.createdAt() : LocalDateTime.now();
             // 상태 및 기간
-            entity.applyContractStatus(subscription.joinCheck(), createdAt,
-                    subscription.insuranceStartDate(), subscription.insuranceEndDate(), subscription.insuranceNumber(),
-                    subscription.payYn(), subscription.insuranceCompany());
+            entity.applyContractStatus(subscription.joinCheck(), createdAt, subscription.insuranceStartDate(),
+                    subscription.insuranceEndDate(), subscription.insuranceNumber(), subscription.payYn(),
+                    subscription.insuranceCompany());
 
             // 가입 금액 (Embedded)
             entity.applyCoverage(CoverageAmount.builder()
