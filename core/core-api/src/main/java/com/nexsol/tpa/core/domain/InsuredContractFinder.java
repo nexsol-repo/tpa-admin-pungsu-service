@@ -96,7 +96,7 @@ public class InsuredContractFinder {
             jpql.append("AND e.insuranceCompany = :insuranceCompany ");
         }
 
-        jpql.append("ORDER BY c.id DESC");
+        jpql.append("ORDER BY e.id DESC");
 
         TypedQuery<TotalFormMemberEntity> query = em.createQuery(jpql.toString(), TotalFormMemberEntity.class);
 
