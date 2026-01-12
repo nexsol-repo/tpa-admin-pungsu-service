@@ -2,6 +2,7 @@ package com.nexsol.tpa.core.api.controller.v1;
 
 import com.nexsol.tpa.core.api.controller.v1.request.InsuredModifyRequest;
 import com.nexsol.tpa.core.api.controller.v1.request.InsuredRegisterRequest;
+import com.nexsol.tpa.core.api.controller.v1.request.InsuredSearchRequest;
 import com.nexsol.tpa.core.api.controller.v1.request.NotificationSendRequest;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractDetailResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractResponse;
@@ -13,11 +14,15 @@ import com.nexsol.tpa.core.support.response.ApiResponse;
 
 import com.nexsol.tpa.core.support.response.PageResponse;
 import com.nexsol.tpa.core.support.response.ResultType;
+import feign.template.UriUtils;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -31,28 +36,11 @@ public class InsuredController {
     private final MeritzService meritzService;
 
     @GetMapping("/contract")
-    public ApiResponse<PageResponse<InsuredContractResponse>> getContract(@RequestParam(required = false) String status,
-            @RequestParam(required = false) String account, @RequestParam(required = false) String path,
-            @RequestParam(required = false) String payYn, @RequestParam(required = false) String insuranceCompany,
-            @RequestParam(required = false) LocalDate startDate, @RequestParam(required = false) LocalDate endDate,
-            @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "0") int offset,
-            @RequestParam(defaultValue = "10") int limit, @RequestParam(required = false) String sortBy,
-            @RequestParam(required = false) String direction, @LoginAdmin AdminUser admin) {
+    public ApiResponse<PageResponse<InsuredContractResponse>> getContract(@ModelAttribute InsuredSearchRequest request,
+            @LoginAdmin AdminUser admin) {
 
-        InsuredSearchCondition condition = InsuredSearchCondition.builder()
-            .status(status)
-            .payYn(payYn)
-            .insuranceCompany(insuranceCompany)
-            .startDate(startDate)
-            .endDate(endDate)
-            .keyword(keyword)
-            .account(account)
-            .path(path)
-            .build();
-
-        OffsetLimit offsetLimit = new OffsetLimit(offset, limit, sortBy, direction);
-
-        DomainPage<InsuredContract> contract = insuredService.getList(condition, offsetLimit);
+        DomainPage<InsuredContract> contract = insuredService.getList(request.toInsuredSearchCondition(),
+                request.toOffsetLimit());
 
         List<InsuredContractResponse> responses = contract.content().stream().map(InsuredContractResponse::of).toList();
 
@@ -83,6 +71,22 @@ public class InsuredController {
         }
 
         return ApiResponse.success(InsuredContractDetailResponse.of(detail, certificateUrl));
+    }
+
+    @GetMapping("/contract/excel")
+    public void downloadExcel(@ModelAttribute InsuredSearchRequest request, HttpServletResponse response)
+            throws IOException {
+        // 1. DTO를 통해 도메인 객체 생성 (레이어 오염 방지)
+        InsuredSearchCondition condition = request.toInsuredSearchCondition();
+
+        // 2. 응답 헤더 설정
+        String fileName = "insured_contracts_" + LocalDate.now() + ".xlsx";
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+
+        // 3. 서비스 호출
+        insuredService.downloadExcel(request.insuranceCompany(), condition, response.getOutputStream());
+
     }
 
     @PutMapping("/{id}")
