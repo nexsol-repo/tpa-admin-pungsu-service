@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RequestMapping("/v1/admin/pungsu")
@@ -80,9 +81,11 @@ public class InsuredController {
 
         // 1. 보험사명 처리 (null 또는 빈값일 경우 "전체")
         String insuranceCompanyName = StringUtils.hasText(request.insuranceCompany()) ? request.insuranceCompany() : "전체";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+        String datetimeFormatter= request.startDate().format(formatter)+" ~ "+request.endDate().format(formatter);
         // 2. 파일명 생성 (가입리스트_보험사명_날짜.xlsx)
-        String fileName = String.format("가입리스트_%s_%s.xlsx", insuranceCompanyName, LocalDate.now());
+        String fileName = String.format("가입리스트_%s_%s.xlsx", insuranceCompanyName,datetimeFormatter);
 
         // 3. 한글 파일명 인코딩 (브라우저 깨짐 방지 및 표준 준수)
         String encodedFileName = UriUtils.encode(fileName, StandardCharsets.UTF_8);
