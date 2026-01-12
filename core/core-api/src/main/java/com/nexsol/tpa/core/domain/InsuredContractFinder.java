@@ -110,24 +110,25 @@ public class InsuredContractFinder {
         }
 
         // 4. 조회된 엔티티 리스트를 도메인 객체(InsuredContract) 리스트로 매핑하여 반환
-        return query.getResultList().stream()
-                .map(entity -> InsuredContract.builder()
-                        .id(entity.getId())
-                        .referIdx(entity.getReferIdx())
-                        .businessNumber(entity.getBusinessNumber())
-                        .companyName(entity.getCompanyName())
-                        .insuranceCompany(entity.getInsuranceCompany())
-                        .insuranceStartDate(entity.getInsuranceStartDate())
-                        .insuranceEndDate(entity.getInsuranceEndDate())
-                        .phoneNumber(entity.getPhoneNumber())
-                        .payYn(entity.getPayYn())
-                        .address(entity.getAddress())
-                        .joinCheck(entity.getJoinCheck())
-                        .account(entity.getAccount())
-                        .path(entity.getPath())
-                        .applicationDate(entity.getCreatedAt())
-                        .build())
-                .toList();
+        return query.getResultList()
+            .stream()
+            .map(entity -> InsuredContract.builder()
+                .id(entity.getId())
+                .referIdx(entity.getReferIdx())
+                .businessNumber(entity.getBusinessNumber())
+                .companyName(entity.getCompanyName())
+                .insuranceCompany(entity.getInsuranceCompany())
+                .insuranceStartDate(entity.getInsuranceStartDate())
+                .insuranceEndDate(entity.getInsuranceEndDate())
+                .phoneNumber(entity.getPhoneNumber())
+                .payYn(entity.getPayYn())
+                .address(entity.getAddress())
+                .joinCheck(entity.getJoinCheck())
+                .account(entity.getAccount())
+                .path(entity.getPath())
+                .applicationDate(entity.getCreatedAt())
+                .build())
+            .toList();
     }
 
     // [개념 1] 피보험자 정보 매핑
@@ -152,6 +153,7 @@ public class InsuredContractFinder {
         return BusinessLocationInfo.builder()
             .companyName(entity.getCompanyName())
             .address(entity.getAddress())
+            .zipCode(entity.getZipCode())
             .category(entity.getBizCategory())
             .biztype(entity.getBiztype())
             .mainStrctType(entity.getMainStrctType())

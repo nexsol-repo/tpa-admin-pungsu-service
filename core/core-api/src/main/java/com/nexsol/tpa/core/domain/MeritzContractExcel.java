@@ -1,5 +1,7 @@
 package com.nexsol.tpa.core.domain;
 
+import com.nexsol.tpa.core.support.util.ExcelCellTool;
+import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.stereotype.Component;
@@ -9,7 +11,10 @@ import java.io.OutputStream;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class MeritzContractExcel implements ContractExcel {
+
+    private final ExcelCellTool cellTool;
 
     private static final String[] HEADERS = { "보험시작일자", "시군구명", "시군구코드", "소재지주소", "소유자명", "사업자번호", "내진설계", "건물세부코드",
             "건물급수", "소유구분(임차자/소유자)", "건물", "시설", "비품/집기", "기계", "재고자산", "자기부담금", "지하소재여부", "풍수해보험료지원대상코드", "풍수해시설유형코드",
@@ -33,34 +38,35 @@ public class MeritzContractExcel implements ContractExcel {
             int rowIndex = 1;
             for (ContractExcelData data : dataList) {
                 Row row = sheet.createRow(rowIndex++);
+                var loc = data.location();
+                var sub = data.subscription();
                 // 메리츠 매핑 로직
-                row.createCell(0).setCellValue(data.contract().applicationDate());
-                row.createCell(1).setCellValue(data.location().district());
-                row.createCell(2).setCellValue(data.location().cityCode());
-                row.createCell(3).setCellValue(data.location().address());
-                row.createCell(4).setCellValue(data.insured().name());
-                row.createCell(5).setCellValue(data.insured().businessNumber());
-                row.createCell(6).setCellValue(2); // TODO: 내진설계 확인필요
-                row.createCell(7).setCellValue("");// TODO: 건물 세부 코드
-                row.createCell(8).setCellValue(data.location().bldGrade());
-                row.createCell(9).setCellValue(data.location().biztype());
-                row.createCell(10).setCellValue(data.subscription().insuranceCostBld());
-                row.createCell(11).setCellValue(data.subscription().insuranceCostFcl());
-                row.createCell(12).setCellValue(data.subscription().insuranceCostMach());
-                row.createCell(13).setCellValue(data.subscription().insuranceCostInven());
-                row.createCell(14).setCellValue(data.subscription().insuranceCostDeductible());
-                row.createCell(15).setCellValue(data.location().groundFloorCd());
-                row.createCell(16).setCellValue(pungsuGivenCode(data.subscription().payYn()));
-                row.createCell(17)
-                    .setCellValue(pungsuPlaceCode(data.location().tmYn(), data.location().groundFloorYn()));
-                row.createCell(18).setCellValue(""); // TODO: using_area 면적
-                row.createCell(19).setCellValue(""); // TODO: using_flr_nm_list이 있어야
-                                                     // 전체층가입여부 확인가능
-                row.createCell(20).setCellValue(data.location().groundFloor());
-                row.createCell(21).setCellValue(data.location().underGroundFloor());
-                row.createCell(22).setCellValue(""); // TODO: using_flr_nm_list 가입층수
-                row.createCell(23).setCellValue(data.contract().applicationDate());
-                row.createCell(24).setCellValue(companyType(data.location().biztype()));
+                cellTool.setCellValue(row, 0, sub.insuranceStartDate(), "yyyy-MM-dd");
+                cellTool.setCellValue(row, 1, loc.district());
+                cellTool.setCellValue(row, 2, loc.cityCode());
+                cellTool.setCellValue(row, 3, loc.address());
+                cellTool.setCellValue(row, 4, data.insured().name());
+                cellTool.setCellValue(row, 5, data.insured().businessNumber());
+                cellTool.setCellValue(row, 6, 2); // TODO: 내진설계 확인필요
+                cellTool.setCellValue(row, 7, ""); // TODO: 건물 세부 코드
+                cellTool.setCellValue(row, 8, loc.bldGrade());
+                cellTool.setCellValue(row, 9, loc.biztype());
+                cellTool.setCellValue(row, 10, sub.insuranceCostBld());
+                cellTool.setCellValue(row, 11, sub.insuranceCostFcl());
+                cellTool.setCellValue(row, 12, sub.insuranceCostMach());
+                cellTool.setCellValue(row, 13, sub.insuranceCostInven());
+                cellTool.setCellValue(row, 14, sub.insuranceCostDeductible());
+                cellTool.setCellValue(row, 15, loc.groundFloorCd());
+                cellTool.setCellValue(row, 16, pungsuGivenCode(sub.payYn()));
+                cellTool.setCellValue(row, 17, pungsuPlaceCode(loc.tmYn(), loc.groundFloorYn()));
+                cellTool.setCellValue(row, 18, "");// TODO: using_area 면적
+                cellTool.setCellValue(row, 19, ""); // TODO: using_flr_nm_list이 있어야
+                                                    // 전체층가입여부 확인가능
+                cellTool.setCellValue(row, 20, loc.groundFloor());
+                cellTool.setCellValue(row, 21, loc.underGroundFloor());
+                cellTool.setCellValue(row, 22, "");// TODO: using_flr_nm_list 가입층수
+                cellTool.setCellValue(row, 23, data.contract().applicationDate(), "yyyy-MM-dd");
+                cellTool.setCellValue(row, 24, companyType(loc.biztype()));
 
             }
 
