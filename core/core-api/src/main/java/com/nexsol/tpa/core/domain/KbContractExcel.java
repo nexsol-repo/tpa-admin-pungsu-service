@@ -1,5 +1,7 @@
 package com.nexsol.tpa.core.domain;
 
+import com.nexsol.tpa.core.support.util.ExcelCellTool;
+import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.stereotype.Component;
@@ -11,7 +13,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
+@RequiredArgsConstructor
 public class KbContractExcel implements ContractExcel {
+
+    private final ExcelCellTool cellTool;
 
     private static final Pattern ADDR_NUM_PATTERN = Pattern.compile("(\\d+)(?:-(\\d+))?$");
 
@@ -37,33 +42,36 @@ public class KbContractExcel implements ContractExcel {
             int rowIndex = 1;
             for (ContractExcelData data : dataList) {
                 Row row = sheet.createRow(rowIndex++);
-                // KB 매핑 로직
-                row.createCell(0).setCellValue(data.subscription().insuranceStartDate());
-                row.createCell(1).setCellValue(data.subscription().insuranceEndDate());
-                row.createCell(2).setCellValue(data.location().companyName());
-                row.createCell(3).setCellValue(data.contract().businessNumber());
-                row.createCell(4).setCellValue(data.location().category());
-                row.createCell(5).setCellValue(data.contract().businessNumber());
-                row.createCell(6).setCellValue(zipCodeFirst(data.location().zipCode()));
-                row.createCell(7).setCellValue(zipCodeSecond(data.location().zipCode()));
-                row.createCell(8).setCellValue(data.location().address());
-                row.createCell(9).setCellValue(""); // TODO: address_detail
-                row.createCell(10).setCellValue(splitAddress(data.location().address())[0]);
-                row.createCell(11).setCellValue(splitAddress(data.location().address())[1]);
-                row.createCell(12).setCellValue(data.insured().email());
-                row.createCell(13).setCellValue("");// TODO: 면적
-                row.createCell(14).setCellValue(data.location().groundFloorCd());
-                row.createCell(15).setCellValue(data.insured().name());
-                row.createCell(16).setCellValue(splitPhoneNumber(data.insured().phoneNumber())[0]);
-                row.createCell(17).setCellValue(splitPhoneNumber(data.insured().phoneNumber())[1]);
-                row.createCell(18).setCellValue(splitPhoneNumber(data.insured().phoneNumber())[2]);
-                row.createCell(19).setCellValue(""); // TODO: 물건구분
-                row.createCell(20).setCellValue(data.location().tenant());
-                row.createCell(21).setCellValue(data.subscription().insuranceCostBld());
-                row.createCell(22).setCellValue(data.subscription().insuranceCostFcl());
-                row.createCell(23).setCellValue(data.subscription().insuranceCostMach());
-                row.createCell(24).setCellValue(data.subscription().insuranceCostInven());
-                row.createCell(25).setCellValue(data.subscription().insuranceCostDeductible());
+                var loc = data.location();
+                var sub = data.subscription();
+                var ins = data.insured();
+
+                cellTool.setCellValue(row, 0, sub.insuranceStartDate(), "yyyy-MM-dd");
+                cellTool.setCellValue(row, 1, sub.insuranceEndDate(), "yyyy-MM-dd");
+                cellTool.setCellValue(row, 2, loc.companyName());
+                cellTool.setCellValue(row, 3, data.contract().businessNumber());
+                cellTool.setCellValue(row, 4, loc.category());
+                cellTool.setCellValue(row, 5, data.contract().businessNumber());
+                cellTool.setCellValue(row, 6, zipCodeFirst(loc.zipCode()));
+                cellTool.setCellValue(row, 7, zipCodeSecond(loc.zipCode()));
+                cellTool.setCellValue(row, 8, loc.address());
+                cellTool.setCellValue(row, 9, "");// TODO: address_detail
+                cellTool.setCellValue(row, 10, splitAddress(loc.address())[0]);
+                cellTool.setCellValue(row, 11, splitAddress(loc.address())[1]);
+                cellTool.setCellValue(row, 12, ins.email());
+                cellTool.setCellValue(row, 13, "");// TODO: 면적
+                cellTool.setCellValue(row, 14, loc.groundFloorCd());
+                cellTool.setCellValue(row, 15, ins.name());
+                cellTool.setCellValue(row, 16, splitPhoneNumber(ins.phoneNumber())[0]);
+                cellTool.setCellValue(row, 17, splitPhoneNumber(ins.phoneNumber())[1]);
+                cellTool.setCellValue(row, 18, splitPhoneNumber(ins.phoneNumber())[2]);
+                cellTool.setCellValue(row, 19, ""); // TODO: 물건구분
+                cellTool.setCellValue(row, 20, loc.tenant());
+                cellTool.setCellValue(row, 21, sub.insuranceCostBld());
+                cellTool.setCellValue(row, 22, sub.insuranceCostFcl());
+                cellTool.setCellValue(row, 23, sub.insuranceCostMach());
+                cellTool.setCellValue(row, 24, sub.insuranceCostInven());
+                cellTool.setCellValue(row, 25, sub.insuranceCostDeductible());
 
             }
             workbook.write(outputStream);

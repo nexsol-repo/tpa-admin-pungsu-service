@@ -1,5 +1,7 @@
 package com.nexsol.tpa.core.domain;
 
+import com.nexsol.tpa.core.support.util.ExcelCellTool;
+import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.stereotype.Component;
@@ -9,7 +11,10 @@ import java.io.OutputStream;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class DbContractExcel implements ContractExcel {
+
+    private final ExcelCellTool cellTool;
 
     private static final String[] HEADERS = { "순번", "취급자코드", "계약자명", "계약자번호 구분", "계약자번호", "계약자사업자번호", "계약자우편번호",
             "계약자신주소", "계약자기타주소", "피보험자명", "피보험자번호구분", "피보험자번호", "피보험자사업자번호", "피보험자우편번호", "피보험자신주소", "기타번지", "갱신구분",
@@ -37,18 +42,20 @@ public class DbContractExcel implements ContractExcel {
             int rowIndex = 1;
             for (ContractExcelData data : dataList) {
                 Row row = sheet.createRow(rowIndex++);
+                var loc = data.location();
+                var sub = data.subscription();
                 // DB 매핑 로직 (인덱스 주의)
-                row.createCell(0).setCellValue(rowIndex - 1); // 순번
-                row.createCell(1).setCellValue(""); // 취급자코드
-                row.createCell(2).setCellValue(data.contract().companyName());
-                row.createCell(3).setCellValue(2);
-                row.createCell(4).setCellValue("");// 계약자번호
-                row.createCell(5).setCellValue(data.contract().businessNumber());
-                row.createCell(6).setCellValue("");// 계약자 우편코드
-                row.createCell(7).setCellValue(data.contract().address());
-                row.createCell(8).setCellValue("");
-                row.createCell(9).setCellValue(data.insured().name());
-                row.createCell(10).setCellValue(2);
+                cellTool.setCellValue(row, 0, rowIndex - 1); // 순번
+                cellTool.setCellValue(row, 1, ""); // 취급자코드
+                cellTool.setCellValue(row, 2, data.contract().companyName());
+                cellTool.setCellValue(row, 3, 2);
+                cellTool.setCellValue(row, 4, "");// 계약자번호
+                cellTool.setCellValue(row, 5, data.contract().businessNumber());
+                cellTool.setCellValue(row, 6, "");// 계약자 우편코드
+                cellTool.setCellValue(row, 7, data.contract().address());
+                cellTool.setCellValue(row, 8, "");
+                cellTool.setCellValue(row, 9, data.insured().name());
+                cellTool.setCellValue(row, 10, 2);
                 row.createCell(11).setCellValue("");
                 row.createCell(12).setCellValue(data.insured().businessNumber());
                 row.createCell(13).setCellValue(data.location().zipCode());
@@ -61,11 +68,11 @@ public class DbContractExcel implements ContractExcel {
                 row.createCell(20).setCellValue("");
                 row.createCell(21).setCellValue(24);
                 row.createCell(22).setCellValue("");// 영위화재업종코드
-                row.createCell(23).setCellValue(data.location().mainStrctGrade());// 기둥구분코드
-                row.createCell(24).setCellValue(data.location().roofStrctGrade());// 지붕코드
+                cellTool.setCellValue(row, 23, data.location().mainStrctGrade());// 기둥구분코드
+                cellTool.setCellValue(row, 24, data.location().roofStrctGrade());// 지붕코드
                 row.createCell(25).setCellValue("");// 외벽코드
-                row.createCell(26).setCellValue(data.location().groundFloor());
-                row.createCell(27).setCellValue(data.location().underGroundFloor());
+                cellTool.setCellValue(row, 26, data.location().groundFloor());
+                cellTool.setCellValue(row, 27, data.location().underGroundFloor());
                 row.createCell(28).setCellValue("");// 면적
                 row.createCell(29).setCellValue(99);// 건물유형
                 row.createCell(30).setCellValue(data.location().groundFloorCd());
