@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.function.Function;
 
 @Component
 @RequiredArgsConstructor
@@ -173,17 +174,16 @@ public class InsuredContractFinder {
             .account(entity.getAccount())
             .path(entity.getPath())
             // 가입 금액 매핑
-            .insuranceCostBld(coverage != null ? coverage.getInsuranceCostBld() : 0L)
-            .insuranceCostFcl(coverage != null ? coverage.getInsuranceCostFcl() : 0L)
-            .insuranceCostMach(coverage != null ? coverage.getInsuranceCostMach() : 0L)
-            .insuranceCostInven(coverage != null ? coverage.getInsuranceCostInven() : 0L)
-            .insuranceCostShopSign(coverage != null ? coverage.getInsuranceCostShopSign() : 0L)
-            .insuranceCostDeductible(coverage != null ? coverage.getInsuranceCostDeductible() : 0L)
-            // 보험료 매핑
-            .totalInsuranceCost(premium != null ? premium.getTotalInsuranceCost() : 0L)
-            .totalGovernmentCost(premium != null ? premium.getTotalGovernmentCost() : 0L)
-            .totalLocalGovernmentCost(premium != null ? premium.getTotalLocalGovernmentCost() : 0L)
-            .totalInsuranceMyCost(premium != null ? premium.getTotalInsuranceMyCost() : 0L)
+                .insuranceCostBld(getSafeAmount(coverage, CoverageAmount::getInsuranceCostBld))
+                .insuranceCostFcl(getSafeAmount(coverage, CoverageAmount::getInsuranceCostFcl))
+                .insuranceCostMach(getSafeAmount(coverage, CoverageAmount::getInsuranceCostMach))
+                .insuranceCostInven(getSafeAmount(coverage, CoverageAmount::getInsuranceCostInven))
+                .insuranceCostShopSign(getSafeAmount(coverage, CoverageAmount::getInsuranceCostShopSign))
+                .insuranceCostDeductible(getSafeAmount(coverage, CoverageAmount::getInsuranceCostDeductible))
+                .totalInsuranceCost(getSafeAmount(premium, PremiumAmount::getTotalInsuranceCost))
+                .totalGovernmentCost(getSafeAmount(premium, PremiumAmount::getTotalGovernmentCost))
+                .totalLocalGovernmentCost(getSafeAmount(premium, PremiumAmount::getTotalLocalGovernmentCost))
+                .totalInsuranceMyCost(getSafeAmount(premium, PremiumAmount::getTotalInsuranceMyCost))
             .isRenewalTarget(InsuredSubscriptionInfo.calculateRenewalTarget(entity.getInsuranceEndDate(), now))
             .build();
     }
@@ -195,6 +195,12 @@ public class InsuredContractFinder {
                 mapToBusinessLocationInfo(entity), // 사업장 정보 매핑
                 mapToInsuranceSubscriptionInfo(entity) // 보험 가입 정보 매핑
         );
+    }
+
+    private <T> Long getSafeAmount(T source, Function<T, Long> extractor) {
+        if (source == null) return 0L;
+        Long val = extractor.apply(source);
+        return val == null ? 0L : val;
     }
 
 }
