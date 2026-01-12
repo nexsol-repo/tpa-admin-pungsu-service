@@ -76,13 +76,18 @@ public class InsuredController {
     @GetMapping("/contract/excel")
     public void downloadExcel(@ModelAttribute InsuredSearchRequest request, HttpServletResponse response,
             @LoginAdmin AdminUser admin) throws IOException {
-        // 1. DTO를 통해 도메인 객체 생성 (레이어 오염 방지)
-        InsuredSearchCondition condition = request.toInsuredSearchCondition();
 
-        // 2. 응답 헤더 설정
-        String fileName = "insured_contracts_" + LocalDate.now() + ".xlsx";
+        InsuredSearchCondition condition = request.toInsuredSearchCondition();
+        // 1. 보험사명 처리 (null 또는 빈값일 경우 "전체")
+        String insuranceCompanyName = StringUtils.hasText(request.insuranceCompany()) ? request.insuranceCompany()
+                : "전체";
+
+        // 2. 파일명 생성 (가입리스트_보험사명_날짜.xlsx)
+        String fileName = String.format("가입리스트_%s_%s.xlsx", insuranceCompanyName, LocalDate.now());
+        String encodedFileName = UriUtils.encode(fileName, StandardCharsets.UTF_8);
+
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + encodedFileName + "\"");
 
         // 3. 서비스 호출
         insuredService.downloadExcel(request.insuranceCompany(), condition, response.getOutputStream());

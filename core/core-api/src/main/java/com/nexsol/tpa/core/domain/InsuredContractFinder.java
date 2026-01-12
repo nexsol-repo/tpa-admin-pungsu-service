@@ -70,8 +70,11 @@ public class InsuredContractFinder {
         // 1. Root Entity는 반드시 JPA 엔티티인 TotalFormMemberEntity여야 함
         jpql.append("SELECT e FROM TotalFormMemberEntity e WHERE 1=1 ");
 
+        // 시작일과 종료일 조건이 모두 있을 때만 필터링
         if (condition.startDate() != null && condition.endDate() != null) {
-            jpql.append("AND e.insuranceStartDate BETWEEN :startDate AND :endDate ");
+            // 보험 기간(시작~종료)이 검색 기간 내에 완전히 포함되는 계약을 조회
+            jpql.append("AND e.insuranceStartDate >= :startDate ");
+            jpql.append("AND e.insuranceEndDate <= :endDate ");
         }
 
         if (StringUtils.hasText(condition.insuranceCompany())) {
@@ -174,16 +177,16 @@ public class InsuredContractFinder {
             .account(entity.getAccount())
             .path(entity.getPath())
             // 가입 금액 매핑
-                .insuranceCostBld(getSafeAmount(coverage, CoverageAmount::getInsuranceCostBld))
-                .insuranceCostFcl(getSafeAmount(coverage, CoverageAmount::getInsuranceCostFcl))
-                .insuranceCostMach(getSafeAmount(coverage, CoverageAmount::getInsuranceCostMach))
-                .insuranceCostInven(getSafeAmount(coverage, CoverageAmount::getInsuranceCostInven))
-                .insuranceCostShopSign(getSafeAmount(coverage, CoverageAmount::getInsuranceCostShopSign))
-                .insuranceCostDeductible(getSafeAmount(coverage, CoverageAmount::getInsuranceCostDeductible))
-                .totalInsuranceCost(getSafeAmount(premium, PremiumAmount::getTotalInsuranceCost))
-                .totalGovernmentCost(getSafeAmount(premium, PremiumAmount::getTotalGovernmentCost))
-                .totalLocalGovernmentCost(getSafeAmount(premium, PremiumAmount::getTotalLocalGovernmentCost))
-                .totalInsuranceMyCost(getSafeAmount(premium, PremiumAmount::getTotalInsuranceMyCost))
+            .insuranceCostBld(getSafeAmount(coverage, CoverageAmount::getInsuranceCostBld))
+            .insuranceCostFcl(getSafeAmount(coverage, CoverageAmount::getInsuranceCostFcl))
+            .insuranceCostMach(getSafeAmount(coverage, CoverageAmount::getInsuranceCostMach))
+            .insuranceCostInven(getSafeAmount(coverage, CoverageAmount::getInsuranceCostInven))
+            .insuranceCostShopSign(getSafeAmount(coverage, CoverageAmount::getInsuranceCostShopSign))
+            .insuranceCostDeductible(getSafeAmount(coverage, CoverageAmount::getInsuranceCostDeductible))
+            .totalInsuranceCost(getSafeAmount(premium, PremiumAmount::getTotalInsuranceCost))
+            .totalGovernmentCost(getSafeAmount(premium, PremiumAmount::getTotalGovernmentCost))
+            .totalLocalGovernmentCost(getSafeAmount(premium, PremiumAmount::getTotalLocalGovernmentCost))
+            .totalInsuranceMyCost(getSafeAmount(premium, PremiumAmount::getTotalInsuranceMyCost))
             .isRenewalTarget(InsuredSubscriptionInfo.calculateRenewalTarget(entity.getInsuranceEndDate(), now))
             .build();
     }
@@ -198,7 +201,8 @@ public class InsuredContractFinder {
     }
 
     private <T> Long getSafeAmount(T source, Function<T, Long> extractor) {
-        if (source == null) return 0L;
+        if (source == null)
+            return 0L;
         Long val = extractor.apply(source);
         return val == null ? 0L : val;
     }
