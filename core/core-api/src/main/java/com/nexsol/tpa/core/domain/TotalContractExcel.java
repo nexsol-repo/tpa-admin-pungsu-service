@@ -17,6 +17,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class TotalContractExcel implements ContractExcel {
+
     private final ExcelCellTool cellTool;
 
     private static final String[] HEADERS = { "거래처", "보험사", "상태", "유·무료", "사업자구분", "사업자번호", "사업장명", "사업자형태", "업종",
@@ -69,7 +70,7 @@ public class TotalContractExcel implements ContractExcel {
                 cellTool.setCellValue(row, 21, loc.subFloor());
                 cellTool.setCellValue(row, 22, cont.applicationDate(), "yyyy-MM-dd");
                 cellTool.setCellValue(row, 23, "풍수해6");
-                cellTool.setCellValue(row, 24,datetimeFormatter(cont.insuranceStartDate(),cont.insuranceEndDate()) );
+                cellTool.setCellValue(row, 24, datetimeFormatter(cont.insuranceStartDate(), cont.insuranceEndDate()));
                 cellTool.setCellValue(row, 25, sub.account());
                 cellTool.setCellValue(row, 26, sub.path());
                 cellTool.setCellValue(row, 27, sub.totalInsuranceMyCost());
@@ -78,13 +79,11 @@ public class TotalContractExcel implements ContractExcel {
                 cellTool.setCellValue(row, 30, sub.totalGovernmentCost());
             }
             workbook.write(outputStream);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException("전체 엑셀 파일 생성 중 오류가 발생했습니다.", e);
         }
     }
-
-
-
 
     private static String determineBusinessType(String businessNumber) {
         String cleanedCompanyCode = businessNumber.replaceAll("-", "");

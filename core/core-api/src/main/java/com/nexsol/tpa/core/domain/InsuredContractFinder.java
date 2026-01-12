@@ -39,25 +39,7 @@ public class InsuredContractFinder {
 
         Page<TotalFormMemberEntity> result = totalFormMemberRepository.findAll(specification, pageable);
 
-        List<InsuredContract> contracts = result.getContent()
-            .stream()
-            .map(entity -> InsuredContract.builder()
-                .id(entity.getId())
-                .referIdx(entity.getReferIdx())
-                .businessNumber(entity.getBusinessNumber())
-                .companyName(entity.getCompanyName())
-                .insuranceCompany(entity.getInsuranceCompany())
-                .insuranceStartDate(entity.getInsuranceStartDate())
-                .insuranceEndDate(entity.getInsuranceEndDate())
-                .phoneNumber(entity.getPhoneNumber())
-                .payYn(entity.getPayYn())
-                .address(entity.getAddress())
-                .joinCheck(entity.getJoinCheck())
-                .account(entity.getAccount())
-                .path(entity.getPath())
-                .applicationDate(entity.getCreatedAt())
-                .build())
-            .toList();
+        List<InsuredContract> contracts = result.getContent().stream().map(this::mapToContract).toList();
 
         return new DomainPage<>(contracts, result.hasNext(), result.getTotalElements(), result.getTotalPages());
     }
@@ -82,13 +64,12 @@ public class InsuredContractFinder {
             .toList();
     }
 
-    public List<InsuredContract> findAll(InsuredSearchCondition condition) {
+    public List<ContractExcelData> findAll(InsuredSearchCondition condition) {
         StringBuilder jpql = new StringBuilder();
-        jpql.append("SELECT e FROM TotalFormMemberEntity e ");
-        jpql.append("WHERE 1=1 ");
+        // 1. Root Entity는 반드시 JPA 엔티티인 TotalFormMemberEntity여야 함
+        jpql.append("SELECT e FROM TotalFormMemberEntity e WHERE 1=1 ");
 
         if (condition.startDate() != null && condition.endDate() != null) {
-            // 엔티티 내 필드명 확인 (예: insuranceStartDate)
             jpql.append("AND e.insuranceStartDate BETWEEN :startDate AND :endDate ");
         }
 
@@ -109,26 +90,31 @@ public class InsuredContractFinder {
             query.setParameter("insuranceCompany", condition.insuranceCompany());
         }
 
-        // 4. 조회된 엔티티 리스트를 도메인 객체(InsuredContract) 리스트로 매핑하여 반환
+        // 2. 조회된 엔티티를 상세 정보가 포함된 ExcelData 객체로 매핑
         return query.getResultList()
             .stream()
-            .map(entity -> InsuredContract.builder()
-                .id(entity.getId())
-                .referIdx(entity.getReferIdx())
-                .businessNumber(entity.getBusinessNumber())
-                .companyName(entity.getCompanyName())
-                .insuranceCompany(entity.getInsuranceCompany())
-                .insuranceStartDate(entity.getInsuranceStartDate())
-                .insuranceEndDate(entity.getInsuranceEndDate())
-                .phoneNumber(entity.getPhoneNumber())
-                .payYn(entity.getPayYn())
-                .address(entity.getAddress())
-                .joinCheck(entity.getJoinCheck())
-                .account(entity.getAccount())
-                .path(entity.getPath())
-                .applicationDate(entity.getCreatedAt())
-                .build())
+            .map(entity -> new ContractExcelData(mapToContract(entity), mapToInsuredInfo(entity),
+                    mapToBusinessLocationInfo(entity), mapToInsuranceSubscriptionInfo(entity)))
             .toList();
+    }
+
+    private InsuredContract mapToContract(TotalFormMemberEntity entity) {
+        return InsuredContract.builder()
+            .id(entity.getId())
+            .referIdx(entity.getReferIdx())
+            .businessNumber(entity.getBusinessNumber())
+            .companyName(entity.getCompanyName())
+            .insuranceCompany(entity.getInsuranceCompany())
+            .insuranceStartDate(entity.getInsuranceStartDate())
+            .insuranceEndDate(entity.getInsuranceEndDate())
+            .phoneNumber(entity.getPhoneNumber())
+            .payYn(entity.getPayYn())
+            .address(entity.getAddress())
+            .joinCheck(entity.getJoinCheck())
+            .account(entity.getAccount())
+            .path(entity.getPath())
+            .applicationDate(entity.getCreatedAt())
+            .build();
     }
 
     // [개념 1] 피보험자 정보 매핑
