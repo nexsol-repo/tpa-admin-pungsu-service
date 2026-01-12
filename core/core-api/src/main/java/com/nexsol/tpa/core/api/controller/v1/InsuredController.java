@@ -80,12 +80,13 @@ public class InsuredController {
         InsuredSearchCondition condition = request.toInsuredSearchCondition();
 
         // 1. 보험사명 처리 (null 또는 빈값일 경우 "전체")
-        String insuranceCompanyName = StringUtils.hasText(request.insuranceCompany()) ? request.insuranceCompany() : "전체";
+        String insuranceCompanyName = StringUtils.hasText(request.insuranceCompany()) ? request.insuranceCompany()
+                : "전체";
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        String datetimeFormatter= request.startDate().format(formatter)+" ~ "+request.endDate().format(formatter);
+        String datetimeFormatter = request.startDate().format(formatter) + " ~ " + request.endDate().format(formatter);
         // 2. 파일명 생성 (가입리스트_보험사명_날짜.xlsx)
-        String fileName = String.format("가입리스트_%s_%s.xlsx", insuranceCompanyName,datetimeFormatter);
+        String fileName = String.format("가입리스트_%s_%s.xlsx", insuranceCompanyName, datetimeFormatter);
 
         // 3. 한글 파일명 인코딩 (브라우저 깨짐 방지 및 표준 준수)
         String encodedFileName = UriUtils.encode(fileName, StandardCharsets.UTF_8);
@@ -93,8 +94,8 @@ public class InsuredController {
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
         // RFC 5987 표준: filename* 속성을 추가하여 UTF-8 파일명을 명시적으로 전달
-        String contentDisposition = String.format("attachment; filename=\"%s\"; filename*=UTF-8''%s",
-                encodedFileName, encodedFileName);
+        String contentDisposition = String.format("attachment; filename=\"%s\"; filename*=UTF-8''%s", encodedFileName,
+                encodedFileName);
         response.setHeader("Content-Disposition", contentDisposition);
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
 

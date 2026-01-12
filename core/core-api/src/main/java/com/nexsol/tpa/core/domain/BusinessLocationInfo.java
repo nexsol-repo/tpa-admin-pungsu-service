@@ -5,6 +5,7 @@ import lombok.Builder;
 @Builder
 public record BusinessLocationInfo(String companyName, String zipCode, String address, String category, // 업종
         String biztype, // 소상인 구분
+        String bizNoType, // 사업자구분
         String tenant, // 임차여부
         String mainStrctType, // 기둥 구조
         String mainStrctGrade, // 기동 구조 급수

@@ -27,6 +27,9 @@ public class TotalFormMemberEntity {
     @Column(name = "ins_number")
     private String insuranceNumber;
 
+    @Column(name = "biz_no_type")
+    private String bizNoType;
+
     @Column(name = "insured_nm")
     private String name;
 
@@ -172,8 +175,8 @@ public class TotalFormMemberEntity {
      */
 
     @Builder
-    public void applyLocationInfo(String companyName, String zipCode, String address, String category, String biztype,
-            String tenant, String pnu, String prctrNo, String groundFloorCd, Integer groundFloor,
+    public void applyLocationInfo(String companyName, String zipCode, String address, String category, String bizNoType,
+            String biztype, String tenant, String pnu, String prctrNo, String groundFloorCd, Integer groundFloor,
             Integer underGroundFloor, String subFloor, String endSubFloor, String tmYn, String groundFloorYn,
             String mainStrctType, String roofStrctType) {
         this.companyName = companyName;
@@ -181,6 +184,7 @@ public class TotalFormMemberEntity {
         this.address = address;
         this.bizCategory = category;
         this.biztype = biztype;
+        this.bizNoType = bizNoType;
         this.tenant = tenant;
         this.groundFloorCd = groundFloorCd;
         this.groundFloor = groundFloor;
