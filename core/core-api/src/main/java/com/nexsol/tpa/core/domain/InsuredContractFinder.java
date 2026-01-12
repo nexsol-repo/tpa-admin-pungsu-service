@@ -39,10 +39,7 @@ public class InsuredContractFinder {
 
         Page<TotalFormMemberEntity> result = totalFormMemberRepository.findAll(specification, pageable);
 
-        List<InsuredContract> contracts = result.getContent()
-            .stream()
-            .map(this::mapToContract)
-            .toList();
+        List<InsuredContract> contracts = result.getContent().stream().map(this::mapToContract).toList();
 
         return new DomainPage<>(contracts, result.hasNext(), result.getTotalElements(), result.getTotalPages());
     }
@@ -66,7 +63,6 @@ public class InsuredContractFinder {
             .map(this::mapToDetail) // 기존 매핑 로직 재사용
             .toList();
     }
-
 
     public List<ContractExcelData> findAll(InsuredSearchCondition condition) {
         StringBuilder jpql = new StringBuilder();
@@ -95,37 +91,31 @@ public class InsuredContractFinder {
         }
 
         // 2. 조회된 엔티티를 상세 정보가 포함된 ExcelData 객체로 매핑
-        return query.getResultList().stream()
-                .map(entity -> new ContractExcelData(
-                        mapToContract(entity),
-                        mapToInsuredInfo(entity),
-                        mapToBusinessLocationInfo(entity),
-                        mapToInsuranceSubscriptionInfo(entity)
-                ))
-                .toList();
+        return query.getResultList()
+            .stream()
+            .map(entity -> new ContractExcelData(mapToContract(entity), mapToInsuredInfo(entity),
+                    mapToBusinessLocationInfo(entity), mapToInsuranceSubscriptionInfo(entity)))
+            .toList();
     }
-
-
 
     private InsuredContract mapToContract(TotalFormMemberEntity entity) {
         return InsuredContract.builder()
-                .id(entity.getId())
-                .referIdx(entity.getReferIdx())
-                .businessNumber(entity.getBusinessNumber())
-                .companyName(entity.getCompanyName())
-                .insuranceCompany(entity.getInsuranceCompany())
-                .insuranceStartDate(entity.getInsuranceStartDate())
-                .insuranceEndDate(entity.getInsuranceEndDate())
-                .phoneNumber(entity.getPhoneNumber())
-                .payYn(entity.getPayYn())
-                .address(entity.getAddress())
-                .joinCheck(entity.getJoinCheck())
-                .account(entity.getAccount())
-                .path(entity.getPath())
-                .applicationDate(entity.getCreatedAt())
-                .build();
+            .id(entity.getId())
+            .referIdx(entity.getReferIdx())
+            .businessNumber(entity.getBusinessNumber())
+            .companyName(entity.getCompanyName())
+            .insuranceCompany(entity.getInsuranceCompany())
+            .insuranceStartDate(entity.getInsuranceStartDate())
+            .insuranceEndDate(entity.getInsuranceEndDate())
+            .phoneNumber(entity.getPhoneNumber())
+            .payYn(entity.getPayYn())
+            .address(entity.getAddress())
+            .joinCheck(entity.getJoinCheck())
+            .account(entity.getAccount())
+            .path(entity.getPath())
+            .applicationDate(entity.getCreatedAt())
+            .build();
     }
-
 
     // [개념 1] 피보험자 정보 매핑
     private InsuredInfo mapToInsuredInfo(TotalFormMemberEntity entity) {

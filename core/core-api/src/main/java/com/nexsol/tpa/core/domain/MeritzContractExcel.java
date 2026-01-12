@@ -16,9 +16,9 @@ public class MeritzContractExcel implements ContractExcel {
 
     private final ExcelCellTool cellTool;
 
-    private static final String[] HEADERS = {"보험시작일자", "시군구명", "시군구코드", "소재지주소", "소유자명", "사업자번호", "내진설계", "건물세부코드",
+    private static final String[] HEADERS = { "보험시작일자", "시군구명", "시군구코드", "소재지주소", "소유자명", "사업자번호", "내진설계", "건물세부코드",
             "건물급수", "소유구분(임차자/소유자)", "건물", "시설", "비품/집기", "기계", "재고자산", "자기부담금", "지하소재여부", "풍수해보험료지원대상코드", "풍수해시설유형코드",
-            "보험가입면적", "전체층가입여부", "건물지상총층수", "건물지하총층수", "가입층수", "가입신청일", "일반/공장"};
+            "보험가입면적", "전체층가입여부", "건물지상총층수", "건물지하총층수", "가입층수", "가입신청일", "일반/공장" };
 
     @Override
     public boolean supports(String insuranceCompany) {
@@ -71,7 +71,8 @@ public class MeritzContractExcel implements ContractExcel {
             }
 
             workbook.write(outputStream);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException("메리츠 엑셀 생성 실패", e);
         }
     }
@@ -93,11 +94,9 @@ public class MeritzContractExcel implements ContractExcel {
         return "03";
     }
 
-
     private String companyType(String bizType) {
         // bizType이 null일 경우를 대비해 문자열을 앞에 두고 비교
         return "소상인(일반)".equals(bizType) ? "일반" : "공장";
     }
-
 
 }
