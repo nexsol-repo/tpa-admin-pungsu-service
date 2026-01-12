@@ -96,6 +96,7 @@ public class InsuredController {
         String contentDisposition = String.format("attachment; filename=\"%s\"; filename*=UTF-8''%s",
                 encodedFileName, encodedFileName);
         response.setHeader("Content-Disposition", contentDisposition);
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
 
         // 4. 서비스 호출
         insuredService.downloadExcel(request.insuranceCompany(), condition, response.getOutputStream());
