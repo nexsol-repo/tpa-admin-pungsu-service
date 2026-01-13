@@ -73,7 +73,7 @@ public class InsuredContractFinder {
         // 시작일과 종료일 조건이 모두 있을 때만 필터링
         if (condition.startDate() != null && condition.endDate() != null) {
             // 보험 기간(시작~종료)이 검색 기간 내에 완전히 포함되는 계약을 조회
-            jpql.append("AND e.applicationDate >= :startDate ");
+            jpql.append("AND e.createdAt >= :startDate ");
             jpql.append("AND e.insuranceEndDate <= :endDate ");
         }
 
