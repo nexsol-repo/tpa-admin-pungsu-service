@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
@@ -124,9 +125,26 @@ public class InsuredService {
 
     public void send(InsuredContractDetail detail, MailType type, String targetUrl, Long adminId) {
         String token = getJwtToken();
-        eventPublisher.publishEvent(new InsuredIntegratedNotificationEvent(detail.id(), detail.insuredInfo().name(),
-                detail.insuredInfo().email(), detail.insuredInfo().phoneNumber(), type, targetUrl,
-                String.valueOf(adminId), token));
+
+        LocalDateTime referenceDate = (type == MailType.CERTIFICATE) ? detail.subscription().applicationDate()
+                : detail.subscription().insuranceEndDate();
+
+        InsuredIntegratedNotificationEvent event = InsuredIntegratedNotificationEvent.builder()
+            .contractId(detail.id())
+            .name(detail.location().companyName())
+            .email(detail.insuredInfo().email())
+            .phoneNumber(detail.insuredInfo().phoneNumber())
+            .type(type)
+            .link(targetUrl)
+            .writerId(String.valueOf(adminId))
+            .token(token)
+            .applicationDate(referenceDate)
+            .account(detail.subscription().account())
+            .payYn(detail.subscription().payYn())
+            .policyNumber(detail.subscription().insuranceNumber())
+            .build();
+        eventPublisher.publishEvent(event);
+
     }
 
     private String getJwtToken() {
