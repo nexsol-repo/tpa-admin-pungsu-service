@@ -5,10 +5,9 @@ import lombok.Builder;
 
 @Builder
 public record InsuredContractDetailResponse(Integer id, String referIdx, InsuredInfo insuredInfo,
-        ContractInfo contractInfo, BusinessLocationInfo location, InsuredSubscriptionInfo subscription,
-        String certificateUrl) {
+        ContractInfo contractInfo, BusinessLocationInfo location, InsuredSubscriptionInfo subscription) {
 
-    public static InsuredContractDetailResponse of(InsuredContractDetail detail, String certificateUrl) {
+    public static InsuredContractDetailResponse of(InsuredContractDetail detail) {
         return InsuredContractDetailResponse.builder()
             .id(detail.id())
             .referIdx(detail.referIdx())
@@ -16,7 +15,7 @@ public record InsuredContractDetailResponse(Integer id, String referIdx, Insured
             .contractInfo(detail.contractInfo())
             .location(detail.location())
             .subscription(detail.subscription())
-            .certificateUrl(certificateUrl)
+            // .certificateUrl(certificateUrl)
             .build();
     }
 }

@@ -33,7 +33,7 @@ public class InsuredController {
 
     private final InsuredService insuredService;
 
-    private final MeritzService meritzService;
+    // private final MeritzService meritzService;
 
     @GetMapping("/contract")
     public ApiResponse<PageResponse<InsuredContractResponse>> getContract(@ModelAttribute InsuredSearchRequest request,
@@ -54,23 +54,23 @@ public class InsuredController {
 
         InsuredContractDetail detail = insuredService.getDetail(id);
 
-        String certificateUrl = null;
-        InsuredSubscriptionInfo subscription = detail.subscription();
-        String joinCheck = subscription.joinCheck();
-        String insuranceCompany = subscription.insuranceCompany();
+        // String certificateUrl = null;
+        // InsuredSubscriptionInfo subscription = detail.subscription();
+        // String joinCheck = subscription.joinCheck();
+        // String insuranceCompany = subscription.insuranceCompany();
+        //
+        // // 1. 결제 완료('Y')
+        // // 2. 질권번호(prctrNo) 존재
+        // // 3. 계약 상태가 가입완료('Y') 또는 보험만료('X')
+        // // 4. 보험사가 '메리츠'인 경우
+        // if ("Y".equals(subscription.payYn()) && StringUtils.hasText(detail.prctrNo())
+        // && ("Y".equals(joinCheck) || "X".equals(joinCheck))
+        // && (insuranceCompany != null && insuranceCompany.contains("메리츠"))) {
+        //
+        // certificateUrl = meritzService.getLink4(detail.prctrNo());
+        // }
 
-        // 1. 결제 완료('Y')
-        // 2. 질권번호(prctrNo) 존재
-        // 3. 계약 상태가 가입완료('Y') 또는 보험만료('X')
-        // 4. 보험사가 '메리츠'인 경우
-        if ("Y".equals(subscription.payYn()) && StringUtils.hasText(detail.prctrNo())
-                && ("Y".equals(joinCheck) || "X".equals(joinCheck))
-                && (insuranceCompany != null && insuranceCompany.contains("메리츠"))) {
-
-            certificateUrl = meritzService.getLink4(detail.prctrNo());
-        }
-
-        return ApiResponse.success(InsuredContractDetailResponse.of(detail, certificateUrl));
+        return ApiResponse.success(InsuredContractDetailResponse.of(detail));
     }
 
     @GetMapping("/contract/excel")
@@ -138,8 +138,9 @@ public class InsuredController {
             targetUrl = "http://pungsu.tpakorea.com/rejoin/feeGuide?idx=" + detail.referIdx();
         }
         else if (request.type() == MailType.CERTIFICATE) {
-            // 가입확인서 URL: MeritzService를 통해 rltLinkUrl4 조회 (getDetail과 동일 패턴)
-            targetUrl = meritzService.getLink4(detail.prctrNo());
+
+            // targetUrl = meritzService.getLink4(detail.prctrNo());
+            targetUrl = request.certificateUrl();
         }
 
         // 3. 취합된 정보로 알림 발송 명령 (Service 호출)

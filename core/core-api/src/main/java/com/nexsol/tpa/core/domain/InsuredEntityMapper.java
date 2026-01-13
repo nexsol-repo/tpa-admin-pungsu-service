@@ -42,7 +42,8 @@ public class InsuredEntityMapper {
 
         if (subscription != null) {
 
-            LocalDateTime createdAt = subscription.createdAt() != null ? subscription.createdAt() : LocalDateTime.now();
+            LocalDateTime createdAt = subscription.applicationDate() != null ? subscription.applicationDate()
+                    : LocalDateTime.now();
             // 상태 및 기간
             entity.applyContractStatus(subscription.joinCheck(), createdAt, subscription.insuranceStartDate(),
                     subscription.insuranceEndDate(), subscription.insuranceNumber(), subscription.payYn(),

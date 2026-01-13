@@ -44,7 +44,7 @@ public class InsuredContractQueryGenerator {
             // 조회 기간 (보험 신청일 기준)
             if (condition.startDate() != null) {
                 predicates
-                    .add(cb.greaterThanOrEqualTo(root.get("createdAt"), condition.startDate().atStartOfDay()));
+                    .add(cb.greaterThanOrEqualTo(root.get("applicationDate"), condition.startDate().atStartOfDay()));
             }
             if (condition.endDate() != null) {
                 predicates

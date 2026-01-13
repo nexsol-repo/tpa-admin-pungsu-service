@@ -73,7 +73,7 @@ public class InsuredControllerTest extends RestDocsTest {
         };
 
         // standaloneSetup을 직접 호출하여 customArgumentResolvers 등록
-        mockMvc = MockMvcBuilders.standaloneSetup(new InsuredController(insuredService, meritzService))
+        mockMvc = MockMvcBuilders.standaloneSetup(new InsuredController(insuredService))
             .setCustomArgumentResolvers(loginAdminResolver)
             .apply(documentationConfiguration(restDocumentation))
             .build();
@@ -146,7 +146,7 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("data.content[].path").description("채널"),
                             fieldWithPath("data.content[].payYn").description("결제여부"),
                             fieldWithPath("data.content[].referIdx").description("참조번호"),
-                            fieldWithPath("data.content[].createdAt").description("생성일시").optional(),
+                            fieldWithPath("data.content[].applicationDate").description("가입신청일").optional(),
                             fieldWithPath("data.hasNext").description("다음 페이지 여부"),
                             fieldWithPath("data.totalElements").description("총 item 수"),
                             fieldWithPath("data.totalPages").description("총 page 수"),
@@ -228,7 +228,6 @@ public class InsuredControllerTest extends RestDocsTest {
             .build();
 
         given(insuredService.getDetail(id)).willReturn(response);
-        given(meritzService.getLink4(any())).willReturn("https://meritz.com/cert");
 
         mockMvc.perform(get("/v1/admin/pungsu/{id}", id).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -238,7 +237,6 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("data.referIdx").description("참조번호").optional(),
                             insuredFields("data.insuredInfo."), contractFields("data.contractInfo."),
                             locationFields("data.location."), subscriptionFields("data.subscription."),
-                            fieldWithPath("data.certificateUrl").description("증권 URL").optional(),
                             fieldWithPath("error").description("에러").optional()))));
     }
 
@@ -309,7 +307,8 @@ public class InsuredControllerTest extends RestDocsTest {
     void sendNotification() throws Exception {
         Integer id = 1;
         // 수정됨: NotificationSendRequest 생성자가 MailType type 하나만 받는다고 하셨으므로 수정
-        NotificationSendRequest request = new NotificationSendRequest(MailType.REJOIN);
+        NotificationSendRequest request = new NotificationSendRequest(MailType.REJOIN,
+                "https://msea.meritzfire.com/mblSfdgInsDcmCnf.do?inqDiv=2&polNo=17600-149653&ctnsKdCd=000476&cusNo=20000124762");
 
         InsuredContractDetail mockDetail = InsuredContractDetail.builder()
             .id(id)
@@ -325,7 +324,8 @@ public class InsuredControllerTest extends RestDocsTest {
             .andExpect(status().isOk())
             .andDo(document("admin-insured-notification-send",
                     pathParameters(parameterWithName("id").description("계약 PK ID")),
-                    requestFields(fieldWithPath("type").description("알림 유형 (REJOIN, CERTIFICATE)")
+                    requestFields(fieldWithPath("type").description("알림 유형 (REJOIN, CERTIFICATE)"),
+                            fieldWithPath("certificateUrl").description("가입확인서 URL (link4)").optional()
                     // record 필드가 type 하나뿐이므로 content, serviceType 제거
                     ),
                     responseFields(fieldWithPath("result").description("성공 여부"),
@@ -417,7 +417,7 @@ public class InsuredControllerTest extends RestDocsTest {
                 fieldWithPath(prefix + "insuranceEndDate").description("종료일").optional(),
                 fieldWithPath(prefix + "insuranceCompany").description("보험사").optional(),
                 fieldWithPath(prefix + "insuranceNumber").description("증권번호").optional(),
-                fieldWithPath(prefix + "createdAt").description("생성일시").optional(), // 추가
+                fieldWithPath(prefix + "applicationDate").description("생성일시").optional(), // 추가
                 fieldWithPath(prefix + "payYn").description("납입여부").optional(),
                 fieldWithPath(prefix + "account").description("제휴사").optional(),
                 fieldWithPath(prefix + "path").description("채널").optional(),
@@ -433,7 +433,9 @@ public class InsuredControllerTest extends RestDocsTest {
                 fieldWithPath(prefix + "totalInsuranceCost").description("총 보험료").optional(),
                 fieldWithPath(prefix + "totalInsuranceMyCost").description("자부담 보험료").optional(),
                 fieldWithPath(prefix + "totalGovernmentCost").description("정부지원금").optional(),
-                fieldWithPath(prefix + "totalLocalGovernmentCost").description("지자체지원금").optional() };
+                fieldWithPath(prefix + "totalLocalGovernmentCost").description("지자체지원금").optional()
+
+        };
     }
 
     private List<FieldDescriptor> flatten(Object... descriptors) {

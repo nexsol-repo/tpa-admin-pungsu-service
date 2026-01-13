@@ -1,5 +1,6 @@
 package com.nexsol.tpa.core.domain;
 
+import com.nexsol.tpa.core.enums.MailType;
 import com.nexsol.tpa.core.enums.ServiceType;
 import com.nexsol.tpa.core.support.error.CoreException;
 import com.nexsol.tpa.core.support.error.ErrorType;
@@ -14,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+
+import java.time.format.DateTimeFormatter;
 
 @Slf4j
 @Component
@@ -60,14 +63,7 @@ public class InsuredEventListener {
         String token = event.token();
         String adminId = event.writerId();
         Long cId = Long.valueOf(event.contractId());
-        String message = """
-                [TPA KOREA]
-                안녕하세요, %s 고객님.
-                %s을 위해 아래 링크를 클릭해주세요.
-
-                링크: %s
-
-                감사합니다.""".formatted(event.name(), event.type().getTitle(), event.link());
+        String message = buildSmsMessage(event);
 
         // 1. 메일 발송 및 이력 저장
         try {
@@ -90,6 +86,52 @@ public class InsuredEventListener {
         catch (Exception e) {
             log.error("문자 발송/이력저장 실패: {}", event.contractId(), e);
         }
+    }
+
+    private String buildSmsMessage(InsuredIntegratedNotificationEvent event) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일");
+        String formattedDate = event.applicationDate() != null ? event.applicationDate().format(formatter) : "-";
+
+        if (event.type() == MailType.CERTIFICATE) {
+            // 가입확인서/증권 템플릿
+            String docName = "Y".equals(event.payYn()) ? "증권" : "가입확인서";
+            String termsUrl = "https://bit.ly/dsf6MrTermsV3_2"; // 고정 약관 URL
+
+            return """
+                    안녕하세요? %s 님
+                    TPA KOREA입니다.
+                    %s %s를 통해 가입하신 실손보상소상공인풍수해·지진재해보험(Ⅵ) %s 발송드립니다.
+                    [증권번호 %s]
+                    아래 링크를 통해 해당 %s을 확인 바랍니다.
+                    %s
+                    약관보기
+                    %s
+                    기타 궁금하신 사항은 아래 문의처로 연락 바랍니다.
+
+                    ※문의처
+                    티피에이코리아 주식회사 고객센터 02-6952-6525
+                    (평일 9:00~18:00)
+                    """.formatted(event.name(), formattedDate, event.account(), docName, event.policyNumber(), docName,
+                    event.link(), termsUrl);
+
+        }
+        else if (event.type() == MailType.REJOIN) {
+            // 재가입 템플릿
+            return """
+                    (광고) [TPA KOREA] [보험기간 만기 안내]
+                    실손보상소상공인풍수해·지진재해보험(Ⅵ) 보험기간 만료 및 갱신안내
+                    %s 님, %s 통해 가입하신 실손보상소상공인풍수해·지진재해보험(Ⅵ)의 보험만료일이 %s까지 입니다.
+                    재계약이 필요하시면 아래 가입 바로가기를 눌러 바로 간편하게 가입 가능합니다.
+
+                    ■ 가입 바로가기
+                    %s
+
+                    * 보험가입시 알아두실 사항
+                    ⊙ 이 보험계약은 예금자보호법에 따라... (생략)
+                    * 수신거부 : 티피에이코리아 주식회사 고객센터 02-6952-6525
+                    """.formatted(event.name(), event.account(), formattedDate, event.link());
+        }
+        return "";
     }
 
 }
