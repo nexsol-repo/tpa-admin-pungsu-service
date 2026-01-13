@@ -86,22 +86,29 @@ public class TotalContractExcel implements ContractExcel {
     }
 
     private static String determineBusinessType(String businessNumber) {
+        // 1. null 또는 빈 값 체크
+        if (businessNumber == null || businessNumber.isBlank()) {
+            return ""; // 또는 "-"
+        }
+
         String cleanedCompanyCode = businessNumber.replaceAll("-", "");
 
+        // 2. 길이가 10자가 아니더라도 예외를 던지는 대신 기본값 반환
         if (cleanedCompanyCode.length() != 10) {
-            throw new CoreException(ErrorType.NOT_FOUND_DATA);
+            return "";
         }
+
         String middleTwoDigits = cleanedCompanyCode.substring(3, 5);
-
-        int digits = Integer.parseInt(middleTwoDigits);
-        String result = switch (digits) {
-            case 81, 82, 83, 84, 85, 86, 87, 88 -> "법인";
-            default -> "개인";
-        };
-        return result;
-
+        try {
+            int digits = Integer.parseInt(middleTwoDigits);
+            return switch (digits) {
+                case 81, 82, 83, 84, 85, 86, 87, 88 -> "법인";
+                default -> "개인";
+            };
+        } catch (NumberFormatException e) {
+            return "개인"; // 숫자 변환 실패 시 기본값
+        }
     }
-
     private static String datetimeFormatter(LocalDateTime startDate, LocalDateTime endDate) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
