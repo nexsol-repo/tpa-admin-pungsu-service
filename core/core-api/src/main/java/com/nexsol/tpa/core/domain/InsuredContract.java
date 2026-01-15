@@ -24,9 +24,10 @@ public record InsuredContract(Integer id, String referIdx, String payYn, // 결�
         if (insuranceEndDate == null) {
             return false;
         }
-        LocalDateTime oneMonthLater = now.plusMonths(1);
+        // 기존: now.plusMonths(1) -> 수정: now.plusDays(7)
+        LocalDateTime oneWeekLater = now.plusDays(7);
 
-        // 현재보다는 미래여야 하고(종료 안됨), 1달 뒤보다는 과거여야 함(임박)
-        return insuranceEndDate.isAfter(now) && insuranceEndDate.isBefore(oneMonthLater);
+        // 현재보다는 미래여야 하고(종료 전), 일주일 뒤보다는 과거여야 함(임박)
+        return insuranceEndDate.isAfter(now) && insuranceEndDate.isBefore(oneWeekLater);
     }
 }

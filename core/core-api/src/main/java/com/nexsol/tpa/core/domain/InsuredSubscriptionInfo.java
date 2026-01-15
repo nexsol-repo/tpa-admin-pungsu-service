@@ -23,7 +23,8 @@ public record InsuredSubscriptionInfo(String joinCheck, // 진행 상태
     public static boolean calculateRenewalTarget(LocalDateTime endDate, LocalDateTime now) {
         if (endDate == null)
             return false;
-        LocalDateTime oneMonthLater = now.plusMonths(1);
-        return endDate.isAfter(now) && endDate.isBefore(oneMonthLater);
+        // 기존: now.plusMonths(1) -> 수정: now.plusDays(7)
+        LocalDateTime oneWeekLater = now.plusDays(7);
+        return endDate.isAfter(now) && endDate.isBefore(oneWeekLater);
     }
 }

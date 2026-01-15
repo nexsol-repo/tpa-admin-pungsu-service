@@ -91,7 +91,7 @@ public class TotalFormMemberEntity {
     @Column(name = "ground_floor_cd")
     private String groundFloorCd;
 
-    @Column(name = "ground_floor_yn")
+    @Column(name = "underground")
     private String groundFloorYn;
 
     @Column(name = "grnd_flr_cnt")
