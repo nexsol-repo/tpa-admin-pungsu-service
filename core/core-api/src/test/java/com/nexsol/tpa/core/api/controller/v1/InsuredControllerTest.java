@@ -201,6 +201,10 @@ public class InsuredControllerTest extends RestDocsTest {
                 .underGroundFloor(1)
                 .subFloor("1")
                 .endSubFloor("5")
+                .sigunguCd("11680")
+                .bjdongCd("10100")
+                .bun("0123")
+                .ji("0001")
                 .pnu("PNU123")
                 .prctrNo("PRC12345")
                 .build())
@@ -261,6 +265,10 @@ public class InsuredControllerTest extends RestDocsTest {
                     .underGroundFloor(0)
                     .subFloor("1")
                     .endSubFloor("1")
+                    .sigunguCd("11680")
+                    .bjdongCd("10100")
+                    .bun("0123")
+                    .ji("0001")
                     .pnu("123")
                     .prctrNo("ABC")
                     .build(),
@@ -348,6 +356,10 @@ public class InsuredControllerTest extends RestDocsTest {
                 .underGroundFloor(0)
                 .tenant("Y")
                 .groundFloorCd("1")
+                .sigunguCd("11680")
+                .bjdongCd("10100")
+                .bun("0123")
+                .ji("0001")
                 .build())
             .subscription(InsuredSubscriptionInfo.builder()
                 .totalInsuranceCost(150000L)
@@ -407,7 +419,11 @@ public class InsuredControllerTest extends RestDocsTest {
                 fieldWithPath(prefix + "subFloor").description("시작호수").optional(),
                 fieldWithPath(prefix + "endSubFloor").description("종료호수").optional(),
                 fieldWithPath(prefix + "pnu").description("PNU").optional(),
-                fieldWithPath(prefix + "prctrNo").description("질권번호").optional() };
+                fieldWithPath(prefix + "prctrNo").description("질권번호").optional(),
+                fieldWithPath(prefix + "sigunguCd").description("시군구코드").optional(),
+                fieldWithPath(prefix + "bjdongCd").description("법정동코드").optional(),
+                fieldWithPath(prefix + "bun").description("번").optional(),
+                fieldWithPath(prefix + "ji").description("지").optional() };
     }
 
     private FieldDescriptor[] subscriptionFields(String prefix) {

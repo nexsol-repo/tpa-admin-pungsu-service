@@ -15,8 +15,11 @@ public record BusinessLocationInfo(String companyName, String zipCode, String ad
         String pnu, String prctrNo, // 질권번호
         String groundFloorCd, // 지하소재여부 (Y/N 또는 코드)
         String groundFloorYn, // 지하층/1층 여부 (Y: 지하/1층, N: 2층이상),
-        Integer groundFloor, Integer underGroundFloor, String subFloor, String cityCode, // 시티
-                                                                                         // 코드
+        Integer groundFloor, Integer underGroundFloor, String subFloor, String cityCode,
+        // 시티
+        // 코드
         String district, // 시도 구군
-        String endSubFloor, String tmYn) {
+        String endSubFloor, String tmYn,
+        // pnu 생성
+        String sigunguCd, String bjdongCd, String bun, String ji) {
 }

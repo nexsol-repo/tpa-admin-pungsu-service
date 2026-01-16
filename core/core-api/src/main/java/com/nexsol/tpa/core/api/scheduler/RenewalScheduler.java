@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RenewalScheduler {
 
-//    private final InsuredService insuredService;
-//
-//    @Scheduled(cron = "0 0 10 * * *")
-//    public void run() {
-//        insuredService.sendRenewalNotifications(7);
-//    }
+    // private final InsuredService insuredService;
+    //
+    // @Scheduled(cron = "0 0 10 * * *")
+    // public void run() {
+    // insuredService.sendRenewalNotifications(7);
+    // }
 
 }

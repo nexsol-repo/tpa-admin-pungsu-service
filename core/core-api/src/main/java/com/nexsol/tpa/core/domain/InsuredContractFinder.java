@@ -159,6 +159,10 @@ public class InsuredContractFinder {
             .endSubFloor(entity.getEndSubFloor())
             .tmYn(entity.getTmYn())
             .groundFloorYn(entity.getGroundFloorYn())
+            .sigunguCd(entity.getSigunguCd())
+            .bjdongCd(entity.getBjdongCd())
+            .bun(entity.getBun())
+            .ji(entity.getJi())
             .build();
     }
 

@@ -1,5 +1,6 @@
 package com.nexsol.tpa.core.domain;
 
+import com.nexsol.tpa.storage.db.core.BuildingLedgerRepository;
 import com.nexsol.tpa.storage.db.core.MeritzAreaCodeEntity;
 import com.nexsol.tpa.storage.db.core.MeritzAreaCodeRepository;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberEntity;
@@ -12,6 +13,8 @@ import org.springframework.util.StringUtils;
 public class DirectRegistration {
 
     private final MeritzAreaCodeRepository areaCodeRepository;
+
+    private final BuildingLedgerRepository buildingLedgerRepository;
 
     /**
      * 직접 등록에 필요한 파생 데이터(지역코드, 건물급수 등)를 계산하여 엔티티에 적용합니다.
@@ -27,6 +30,9 @@ public class DirectRegistration {
         // 2. 건물 급수 계산 및 적용
         applyBuildingGrade(entity, location.mainStrctGrade(), location.roofStrctGrade(), location.mainStrctType(),
                 location.roofStrctType());
+
+        // 3. [추가] 4가지 코드 기반 PNU 생성 및 적용
+        applyPnu(entity, location);
     }
 
     private void applyCityCode(TotalFormMemberEntity entity, String address) {
@@ -76,6 +82,35 @@ public class DirectRegistration {
 
         // 엔티티에 구조 타입 및 계산된 등급 설정
         entity.applyBuildingStructure(mainStrctType, roofStrctType, bldGrade);
+    }
+
+    private void applyPnu(TotalFormMemberEntity entity, BusinessLocationInfo location) {
+        String sigunguCd = location.sigunguCd();
+        String bjdongCd = location.bjdongCd();
+        String bun = location.bun();
+        String ji = location.ji();
+
+        // 1. 4가지 코드가 모두 존재할 때만 로직 수행
+        if (StringUtils.hasText(sigunguCd) && StringUtils.hasText(bjdongCd) && StringUtils.hasText(bun)
+                && StringUtils.hasText(ji)) {
+
+            // 2. 건축물 대장 정보 조회하여 대지구분코드(plat_gb_cd) 획득
+            // (tb_br_title_info 테이블 조회)
+            String platGbCd = buildingLedgerRepository.findPlatGbCd(sigunguCd, bjdongCd, bun, ji).orElse("0"); // 조회
+                                                                                                               // 실패
+                                                                                                               // 시
+                                                                                                               // 기본값
+                                                                                                               // 혹은
+                                                                                                               // 예외
+                                                                                                               // 처리
+
+            // 3. PNU 조합 (시군구 + 법정동 + 대지구분 + 번 + 지)
+            String pnu = sigunguCd + bjdongCd + platGbCd + bun + ji;
+
+            // 4. 엔티티에 적용 (PNU 및 개별 코드 저장)
+            // Note: Entity에 applyAddressKeys 메소드 추가 필요 (Storage Layer 단계)
+            entity.applyAddressKeys(sigunguCd, bjdongCd, bun, ji, pnu);
+        }
     }
 
 }

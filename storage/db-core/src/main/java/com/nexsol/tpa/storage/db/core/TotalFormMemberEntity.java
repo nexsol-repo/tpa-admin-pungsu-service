@@ -115,6 +115,18 @@ public class TotalFormMemberEntity {
     @Column(name = "path")
     private String path;
 
+    @Column(name = "sigungu_cd")
+    private String sigunguCd;
+
+    @Column(name = "bjdong_cd")
+    private String bjdongCd;
+
+    @Column(name = "bun")
+    private String bun;
+
+    @Column(name = "ji")
+    private String ji;
+
     @Column(name = "pnu")
     private String pnu;
 
@@ -178,7 +190,7 @@ public class TotalFormMemberEntity {
     public void applyLocationInfo(String companyName, String zipCode, String address, String category, String bizNoType,
             String biztype, String tenant, String pnu, String prctrNo, String groundFloorCd, Integer groundFloor,
             Integer underGroundFloor, String subFloor, String endSubFloor, String tmYn, String groundFloorYn,
-            String mainStrctType, String roofStrctType) {
+            String mainStrctType, String roofStrctType, String sigunguCd, String bjdongCd, String bun, String ji) {
         this.companyName = companyName;
         this.zipCode = zipCode;
         this.address = address;
@@ -192,6 +204,10 @@ public class TotalFormMemberEntity {
         this.subFloor = subFloor;
         this.endSubFloor = endSubFloor;
         this.prctrNo = prctrNo;
+        this.sigunguCd = sigunguCd;
+        this.bjdongCd = bjdongCd;
+        this.bun = bun;
+        this.ji = ji;
         this.pnu = pnu;
         this.tmYn = tmYn;
         this.groundFloorYn = groundFloorYn;
@@ -251,6 +267,14 @@ public class TotalFormMemberEntity {
         this.cityCode = cityCode;
         this.cityText1 = cityText1;
         this.cityText2 = cityText2;
+    }
+
+    public void applyAddressKeys(String sigunguCd, String bjdongCd, String bun, String ji, String pnu) {
+        this.sigunguCd = sigunguCd;
+        this.bjdongCd = bjdongCd;
+        this.bun = bun;
+        this.ji = ji;
+        this.pnu = pnu;
     }
 
 }

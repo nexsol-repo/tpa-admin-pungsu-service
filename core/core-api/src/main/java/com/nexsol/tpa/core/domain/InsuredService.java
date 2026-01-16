@@ -58,14 +58,14 @@ public class InsuredService {
         if (!diffs.isEmpty()) {
             // [수정 포인트] 이전/이후 값 상세 표시(toString) 대신 필드명(fieldName)만 추출하여 연결합니다.
             String changedFields = diffs.stream()
-                    .map(ChangeDetail::fieldName) // 필드명(예: 피보험자명, 업종 등)만 가져옴
-                    .collect(Collectors.joining(", "));
+                .map(ChangeDetail::fieldName) // 필드명(예: 피보험자명, 업종 등)만 가져옴
+                .collect(Collectors.joining(", "));
 
             // 사용자의 요구사항에 맞춰 "필드명1, 필드명2 정보가 변경되었습니다." 포맷으로 생성
             String systemLogContent = changedFields + " 정보가 변경되었습니다.";
 
             eventPublisher
-                    .publishEvent(new InsuredSystemLogEvent(id, systemLogContent, String.valueOf(adminId), token));
+                .publishEvent(new InsuredSystemLogEvent(id, systemLogContent, String.valueOf(adminId), token));
         }
 
         // 3. 관리자가 직접 작성한 메모가 있다면 이벤트 발행

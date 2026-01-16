@@ -158,3 +158,24 @@ include::{snippets}/admin-insured-contract-excel/query-parameters.adoc[]
 
 ==== HTTP Response
 include::{snippets}/admin-insured-contract-excel/http-response.adoc[]
+
+== 건축물대장 조회 API (Building Ledger API)
+
+=== 건축물대장 상세 조회
+시군구, 법정동, 번, 지 코드를 이용하여 해당 대지에 존재하는 모든 건축물대장 정보를 조회합니다.
+하나의 대지(번지)에 여러 동의 건물이 존재할 수 있으므로 리스트 형태로 반환됩니다.
+
+==== Curl Request
+include::{snippets}/admin-building-ledger-search/curl-request.adoc[]
+
+==== HTTP Request
+include::{snippets}/admin-building-ledger-search/http-request.adoc[]
+
+==== Query Parameters
+include::{snippets}/admin-building-ledger-search/query-parameters.adoc[]
+
+==== HTTP Response
+include::{snippets}/admin-building-ledger-search/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/admin-building-ledger-search/response-fields.adoc[]

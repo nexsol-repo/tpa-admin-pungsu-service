@@ -33,11 +33,14 @@ public class InsuredEntityMapper {
         }
 
         if (location != null) {
+            // [수정] 상세 주소 코드 4종 추가 전달
             entity.applyLocationInfo(location.companyName(), location.zipCode(), location.address(),
                     location.category(), location.bizNoType(), location.biztype(), location.tenant(), location.pnu(),
                     location.prctrNo(), location.groundFloorCd(), location.groundFloor(), location.underGroundFloor(),
                     location.subFloor(), location.endSubFloor(), location.tmYn(), location.groundFloorYn(),
-                    location.mainStrctType(), location.roofStrctType());
+                    location.mainStrctType(), location.roofStrctType(),
+                    // 추가된 필드 전달
+                    location.sigunguCd(), location.bjdongCd(), location.bun(), location.ji());
         }
 
         if (subscription != null) {
