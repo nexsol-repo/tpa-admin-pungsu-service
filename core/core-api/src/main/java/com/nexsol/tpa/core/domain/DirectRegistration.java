@@ -1,6 +1,6 @@
 package com.nexsol.tpa.core.domain;
 
-import com.nexsol.tpa.storage.db.core.BuildingLedgerRepository;
+import com.nexsol.tpa.storage.db.boon.BuildingLedgerRepository;
 import com.nexsol.tpa.storage.db.core.MeritzAreaCodeEntity;
 import com.nexsol.tpa.storage.db.core.MeritzAreaCodeRepository;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberEntity;

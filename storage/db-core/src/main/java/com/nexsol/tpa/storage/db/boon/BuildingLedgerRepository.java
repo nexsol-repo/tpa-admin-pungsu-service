@@ -1,4 +1,4 @@
-package com.nexsol.tpa.storage.db.core;
+package com.nexsol.tpa.storage.db.boon;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
