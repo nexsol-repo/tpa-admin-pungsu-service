@@ -1,4 +1,4 @@
-package com.nexsol.tpa.storage.db.core;
+package com.nexsol.tpa.storage.db.boon;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

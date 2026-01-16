@@ -1,7 +1,7 @@
 package com.nexsol.tpa.core.domain;
 
-import com.nexsol.tpa.storage.db.core.BuildingLedgerEntity;
-import com.nexsol.tpa.storage.db.core.BuildingLedgerRepository;
+import com.nexsol.tpa.storage.db.boon.BuildingLedgerEntity;
+import com.nexsol.tpa.storage.db.boon.BuildingLedgerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
