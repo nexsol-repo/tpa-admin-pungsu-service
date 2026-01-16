@@ -105,10 +105,12 @@ public class TotalContractExcel implements ContractExcel {
                 case 81, 82, 83, 84, 85, 86, 87, 88 -> "법인";
                 default -> "개인";
             };
-        } catch (NumberFormatException e) {
+        }
+        catch (NumberFormatException e) {
             return "개인"; // 숫자 변환 실패 시 기본값
         }
     }
+
     private static String datetimeFormatter(LocalDateTime startDate, LocalDateTime endDate) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
