@@ -1,8 +1,10 @@
 package com.nexsol.tpa.core.api.controller.v1;
 
 import com.nexsol.tpa.core.api.controller.v1.response.BuildingLedgerResponse;
+import com.nexsol.tpa.core.domain.AdminUser;
 import com.nexsol.tpa.core.domain.BuildingLedger;
 import com.nexsol.tpa.core.domain.BuildingLedgerService;
+import com.nexsol.tpa.core.domain.LoginAdmin;
 import com.nexsol.tpa.core.support.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +30,8 @@ public class BuildingLedgerController {
      */
     @GetMapping
     public ApiResponse<List<BuildingLedgerResponse>> search(@RequestParam String sigunguCd,
-            @RequestParam String bjdongCd, @RequestParam String bun, @RequestParam String ji) {
+            @RequestParam String bjdongCd, @RequestParam String bun, @RequestParam String ji,
+            @LoginAdmin AdminUser admin) {
         // 1. 서비스 호출 (비즈니스 로직 수행)
         List<BuildingLedger> ledgers = buildingLedgerService.searchBuildingLedgers(sigunguCd, bjdongCd, bun, ji);
 

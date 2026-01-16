@@ -1,15 +1,22 @@
 package com.nexsol.tpa.core.api.controller.v1;
 
+import com.nexsol.tpa.core.domain.AdminUser;
 import com.nexsol.tpa.core.domain.BuildingLedger;
 import com.nexsol.tpa.core.domain.BuildingLedgerService;
+import com.nexsol.tpa.core.domain.LoginAdmin;
 import com.nexsol.tpa.test.api.RestDocsTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 
 import java.util.List;
 
@@ -32,6 +39,20 @@ public class BuildingLedgerControllerTest extends RestDocsTest {
     @BeforeEach
     public void setUp(RestDocumentationContextProvider restDocumentation) {
         buildingLedgerService = mock(BuildingLedgerService.class);
+
+        HandlerMethodArgumentResolver loginAdminResolver = new HandlerMethodArgumentResolver() {
+            @Override
+            public boolean supportsParameter(MethodParameter parameter) {
+                return parameter.hasParameterAnnotation(LoginAdmin.class);
+            }
+
+            @Override
+            public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+                    NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+                // 테스트용 관리자 정보 (ID: 1L) 반환
+                return new AdminUser(1L, "MASTER");
+            }
+        };
 
         // Controller 등록 및 RestDocs 설정 적용
         mockMvc = MockMvcBuilders.standaloneSetup(new BuildingLedgerController(buildingLedgerService))
