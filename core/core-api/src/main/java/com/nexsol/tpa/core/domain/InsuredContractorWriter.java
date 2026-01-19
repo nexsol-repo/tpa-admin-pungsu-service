@@ -6,6 +6,7 @@ import com.nexsol.tpa.storage.db.core.MeritzAreaCodeEntity;
 import com.nexsol.tpa.storage.db.core.MeritzAreaCodeRepository;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberEntity;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -52,6 +53,19 @@ public class InsuredContractorWriter {
         directRegistration.applyDerivedFields(entity, location);
 
         return totalFormMemberRepository.save(entity).getId();
+    }
+
+    @Transactional
+    public void confirmFreeContract(FreeContractUpdateInfo info) {
+
+        TotalFormMemberEntity entity = totalFormMemberRepository
+            .findFirstByBusinessNumberAndAddressContaining(info.businessNo(), info.address())
+            .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND_DATA,
+                    "해당 사업자번호와 주소를 가진 계약을 찾을 수 없습니다: " + info.businessNo()));
+
+        // 2. 엔티티 상태 변경 (기존 동일)
+        entity.updateFreeContract(info.securityNo(), info.insuranceDate(), info.insuranceEndDate(), info.totalPremium(),
+                info.govPremium(), info.localPremium(), info.ownerPremium());
     }
 
 }

@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -121,6 +122,12 @@ public class InsuredController {
         insuredService.register(request.insuredInfo(), request.contractInfo(), request.location(),
                 request.subscription(), request.memoContent(), admin.userId());
 
+        return ApiResponse.success(ResultType.SUCCESS);
+    }
+
+    @PostMapping("/contract/free/upload")
+    public ApiResponse<ResultType> uploadFreeContract(@RequestPart MultipartFile file) {
+        insuredService.updateFreeContracts(file);
         return ApiResponse.success(ResultType.SUCCESS);
     }
 
