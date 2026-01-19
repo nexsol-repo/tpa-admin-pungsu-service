@@ -66,6 +66,8 @@ public class BuildingLedgerControllerTest extends RestDocsTest {
         // Given
         BuildingLedger mockLedger = BuildingLedger.builder()
             .mgmBldrgstPk("11110-100002")
+            .regstrGbCdNm("일반")
+            .regstrKindCdNm("표제부")
             .buildingName("타워팰리스")
             .dongName("A동")
             .platPlc("서울특별시 강남구 도곡동 467")
@@ -140,6 +142,12 @@ public class BuildingLedgerControllerTest extends RestDocsTest {
                             parameterWithName("ji").description("지 (4자리)")),
                     responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과"),
                             fieldWithPath("data[].mgmBldrgstPk").type(JsonFieldType.STRING).description("관리건축물대장PK"),
+                            fieldWithPath("data[].regstrGbCdNm").type(JsonFieldType.STRING)
+                                .description("대장구분코드명")
+                                .optional(),
+                            fieldWithPath("data[].regstrKindCdNm").type(JsonFieldType.STRING)
+                                .description("대장종류코드명")
+                                .optional(),
                             fieldWithPath("data[].buildingName").type(JsonFieldType.STRING)
                                 .description("건물명")
                                 .optional(),

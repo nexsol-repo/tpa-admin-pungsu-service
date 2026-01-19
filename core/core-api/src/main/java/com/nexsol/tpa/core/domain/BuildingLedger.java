@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record BuildingLedger(String mgmBldrgstPk, // 관리건축물대장PK (고유키)
-        String buildingName, // 건물명 (bld_nm)
+
+        String regstrGbCdNm, String regstrKindCdNm, String buildingName, // 건물명 (bld_nm)
         String dongName, // 동명 (dong_nm)
 
         // 주소 정보

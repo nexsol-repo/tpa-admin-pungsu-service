@@ -25,6 +25,9 @@ public class BuildingLedgerReader {
     private BuildingLedger mapToDomain(BuildingLedgerEntity entity) {
         return BuildingLedger.builder()
             .mgmBldrgstPk(entity.getMgmBldrgstPk())
+
+            .regstrGbCdNm(entity.getRegstrGbCdNm())
+            .regstrKindCdNm(entity.getRegstrKindCdNm())
             .buildingName(entity.getBuildingName())
             .dongName(entity.getDongName())
             .platPlc(entity.getPlatPlc())

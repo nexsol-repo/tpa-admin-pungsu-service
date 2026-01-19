@@ -18,6 +18,12 @@ public class BuildingLedgerEntity {
     @Column(name = "mgm_bldrgst_pk")
     private String mgmBldrgstPk;
 
+    @Column(name = "regstr_gb_cd_nm")
+    private String regstrGbCdNm; // 대장구분코드명 (예: 일반)
+
+    @Column(name = "regstr_kind_cd_nm")
+    private String regstrKindCdNm; // 대장종류코드명 (예: 표제부, 전유부)
+
     // --- 주소 및 식별 정보 ---
     @Column(name = "sigungu_cd")
     private String sigunguCd;
