@@ -1,9 +1,6 @@
 package com.nexsol.tpa.core.api.controller.v1;
 
-import com.nexsol.tpa.core.domain.AdminUser;
-import com.nexsol.tpa.core.domain.BuildingLedger;
-import com.nexsol.tpa.core.domain.BuildingLedgerService;
-import com.nexsol.tpa.core.domain.LoginAdmin;
+import com.nexsol.tpa.core.domain.*;
 import com.nexsol.tpa.test.api.RestDocsTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -61,9 +58,17 @@ public class BuildingLedgerControllerTest extends RestDocsTest {
     }
 
     @Test
-    @DisplayName("건축물대장 상세 조회 API 문서화")
+    @DisplayName("건축물대장 상세 조회 (총괄+표제부) API 문서화")
     void searchBuildingLedger() throws Exception {
-        // Given
+        // Given (총괄표제부 Mock)
+        BuildingLedgerRecap mockRecap = BuildingLedgerRecap.builder()
+            .mgmBldrgstPk("11110-99999")
+            .buildingName("타워팰리스 총괄")
+            .totArea(50000.0)
+            .useAprDay("20021001")
+            .build();
+
+        // Given (표제부 상세 Mock - 이전과 동일하게 상세 필드 포함)
         BuildingLedger mockLedger = BuildingLedger.builder()
             .mgmBldrgstPk("11110-100002")
             .regstrGbCdNm("일반")
@@ -82,8 +87,8 @@ public class BuildingLedgerControllerTest extends RestDocsTest {
             .vlRatEstmTotArea(12000.0)
             .bcRat(50.0)
             .vlRat(1200.0)
-            .atchBldArea(1000.0)
-            .totalDongArea(10000.0)
+            .atchBldArea(12.0)
+            .totalDongArea(24.0)
             .height(200.0)
             .groundFloorCnt(60)
             .underGroundFloorCnt(5)
@@ -100,34 +105,16 @@ public class BuildingLedgerControllerTest extends RestDocsTest {
             .useAprDay("20021025")
             .seismicDesignYn("Y")
             .seismicAbility("VII-0.124g")
-            // [추가] 주차 시설 정보 Mock 데이터
+            // 주차/허가 정보 (생략 가능하나 완전성을 위해 일부 포함)
             .indrMechUtcnt(10)
-            .indrMechArea(200.0)
-            .oudrMechUtcnt(0)
-            .oudrMechArea(0.0)
-            .indrAutoUtcnt(100)
-            .indrAutoArea(1500.0)
-            .oudrAutoUtcnt(20)
-            .oudrAutoArea(300.0)
-            // [추가] 허가 및 인증 정보 Mock 데이터
             .pmsDay("20000101")
-            .stcnsDay("20000301")
-            .pmsnoYear("2000")
-            .pmsnoKikCdNm("강남구청")
-            .pmsnoGbCdNm("신축허가")
-            .hoCnt(100)
-            .engrGrade("1등급")
-            .engrRat(15.5)
-            .engrEpi(80)
-            .gnBldGrade("최우수")
-            .gnBldCert(100)
-            .itgBldGrade("1등급")
-            .itgBldCert(90)
-            .crtnDay("20220101")
             .build();
 
-        given(buildingLedgerService.searchBuildingLedgers(anyString(), anyString(), anyString(), anyString()))
-            .willReturn(List.of(mockLedger));
+        // Service가 Overview 객체를 반환하도록 설정
+        BuildingLedgerOverview mockOverview = new BuildingLedgerOverview(mockRecap, List.of(mockLedger));
+
+        given(buildingLedgerService.searchBuildingLedgerOverview(anyString(), anyString(), anyString(), anyString()))
+            .willReturn(mockOverview);
 
         // When & Then
         mockMvc
@@ -143,139 +130,202 @@ public class BuildingLedgerControllerTest extends RestDocsTest {
                             parameterWithName("bun").description("번 (4자리)"),
                             parameterWithName("ji").description("지 (4자리)")),
                     responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과"),
-                            fieldWithPath("data[].mgmBldrgstPk").type(JsonFieldType.STRING).description("관리건축물대장PK"),
-                            fieldWithPath("data[].regstrGbCdNm").type(JsonFieldType.STRING)
+
+                            // [1] 총괄표제부 (Recap)
+                            fieldWithPath("data.recap").type(JsonFieldType.OBJECT)
+                                .description("총괄표제부 정보 (없을 경우 null)")
+                                .optional(),
+                            fieldWithPath("data.recap.mgmBldrgstPk").type(JsonFieldType.STRING)
+                                .description("총괄 관리PK")
+                                .optional(),
+                            fieldWithPath("data.recap.buildingName").type(JsonFieldType.STRING)
+                                .description("총괄 건물명")
+                                .optional(),
+                            fieldWithPath("data.recap.totArea").type(JsonFieldType.NUMBER)
+                                .description("총괄 연면적")
+                                .optional(),
+                            fieldWithPath("data.recap.useAprDay").type(JsonFieldType.STRING)
+                                .description("총괄 사용승인일")
+                                .optional(),
+
+                            // [2] 표제부 목록 (Ledgers)
+                            fieldWithPath("data.ledgers").type(JsonFieldType.ARRAY).description("건축물대장(표제부) 목록"),
+
+                            // 아래 필드들은 data.ledgers[].~ 로 시작해야 함
+                            fieldWithPath("data.ledgers[].mgmBldrgstPk").type(JsonFieldType.STRING)
+                                .description("관리건축물대장PK"),
+                            fieldWithPath("data.ledgers[].regstrGbCdNm").type(JsonFieldType.STRING)
                                 .description("대장구분코드명")
                                 .optional(),
-                            fieldWithPath("data[].regstrKindCdNm").type(JsonFieldType.STRING)
+                            fieldWithPath("data.ledgers[].regstrKindCdNm").type(JsonFieldType.STRING)
                                 .description("대장종류코드명")
                                 .optional(),
-                            fieldWithPath("data[].buildingName").type(JsonFieldType.STRING)
+                            fieldWithPath("data.ledgers[].buildingName").type(JsonFieldType.STRING)
                                 .description("건물명")
                                 .optional(),
-                            fieldWithPath("data[].dongName").type(JsonFieldType.STRING).description("동명").optional(),
-                            fieldWithPath("data[].platPlc").type(JsonFieldType.STRING).description("대지위치 (지번 주소)"),
-                            fieldWithPath("data[].newPlatPlc").type(JsonFieldType.STRING)
-                                .description("도로명 대지위치")
+                            fieldWithPath("data.ledgers[].dongName").type(JsonFieldType.STRING)
+                                .description("동명")
                                 .optional(),
-                            fieldWithPath("data[].sigunguCd").type(JsonFieldType.STRING).description("시군구코드"),
-                            fieldWithPath("data[].bjdongCd").type(JsonFieldType.STRING).description("법정동코드"),
-                            fieldWithPath("data[].bun").type(JsonFieldType.STRING).description("번"),
-                            fieldWithPath("data[].ji").type(JsonFieldType.STRING).description("지"),
-                            fieldWithPath("data[].platArea").type(JsonFieldType.NUMBER)
-                                .description("대지면적 (㎡)")
+                            fieldWithPath("data.ledgers[].platPlc").type(JsonFieldType.STRING)
+                                .description("대지위치")
                                 .optional(),
-                            fieldWithPath("data[].archArea").type(JsonFieldType.NUMBER)
-                                .description("건축면적 (㎡)")
+                            fieldWithPath("data.ledgers[].newPlatPlc").type(JsonFieldType.STRING)
+                                .description("도로명주소")
                                 .optional(),
-                            fieldWithPath("data[].totArea").type(JsonFieldType.NUMBER)
-                                .description("연면적 (㎡)")
+                            fieldWithPath("data.ledgers[].sigunguCd").type(JsonFieldType.STRING)
+                                .description("시군구코드")
                                 .optional(),
-                            fieldWithPath("data[].vlRatEstmTotArea").type(JsonFieldType.NUMBER)
-                                .description("용적률산정연면적 (㎡)")
+                            fieldWithPath("data.ledgers[].bjdongCd").type(JsonFieldType.STRING)
+                                .description("법정동코드")
                                 .optional(),
-                            fieldWithPath("data[].bcRat").type(JsonFieldType.NUMBER).description("건폐율 (%)").optional(),
-                            fieldWithPath("data[].vlRat").type(JsonFieldType.NUMBER).description("용적률 (%)").optional(),
-                            fieldWithPath("data[].atchBldArea").type(JsonFieldType.NUMBER)
-                                .description("부속건축물면적(m^2)")
+                            fieldWithPath("data.ledgers[].bun").type(JsonFieldType.STRING).description("번").optional(),
+                            fieldWithPath("data.ledgers[].ji").type(JsonFieldType.STRING).description("지").optional(),
+
+                            fieldWithPath("data.ledgers[].platArea").type(JsonFieldType.NUMBER)
+                                .description("대지면적")
                                 .optional(),
-                            fieldWithPath("data[].totalDongArea").type(JsonFieldType.NUMBER)
-                                .description("총동연면적 (m^2)")
+                            fieldWithPath("data.ledgers[].archArea").type(JsonFieldType.NUMBER)
+                                .description("건축면적")
                                 .optional(),
-                            fieldWithPath("data[].height").type(JsonFieldType.NUMBER).description("높이 (m)").optional(),
-                            fieldWithPath("data[].groundFloorCnt").type(JsonFieldType.NUMBER)
+                            fieldWithPath("data.ledgers[].totArea").type(JsonFieldType.NUMBER)
+                                .description("연면적")
+                                .optional(),
+                            fieldWithPath("data.ledgers[].vlRatEstmTotArea").type(JsonFieldType.NUMBER)
+                                .description("용적률산정연면적")
+                                .optional(),
+                            fieldWithPath("data.ledgers[].bcRat").type(JsonFieldType.NUMBER)
+                                .description("건폐율")
+                                .optional(),
+                            fieldWithPath("data.ledgers[].vlRat").type(JsonFieldType.NUMBER)
+                                .description("용적률")
+                                .optional(),
+                            fieldWithPath("data.ledgers[].atchBldArea").type(JsonFieldType.NUMBER)
+                                .description("부속건축물면적")
+                                .optional(),
+                            fieldWithPath("data.ledgers[].totalDongArea").type(JsonFieldType.NUMBER)
+                                .description("총동연면적")
+                                .optional(),
+
+                            fieldWithPath("data.ledgers[].height").type(JsonFieldType.NUMBER)
+                                .description("높이")
+                                .optional(),
+                            fieldWithPath("data.ledgers[].groundFloorCnt").type(JsonFieldType.NUMBER)
                                 .description("지상층수")
                                 .optional(),
-                            fieldWithPath("data[].underGroundFloorCnt").type(JsonFieldType.NUMBER)
+                            fieldWithPath("data.ledgers[].underGroundFloorCnt").type(JsonFieldType.NUMBER)
                                 .description("지하층수")
                                 .optional(),
-                            fieldWithPath("data[].strctCdNm").type(JsonFieldType.STRING)
+
+                            fieldWithPath("data.ledgers[].strctCdNm").type(JsonFieldType.STRING)
                                 .description("구조코드명")
                                 .optional(),
-                            fieldWithPath("data[].etcStrct").type(JsonFieldType.STRING).description("기타구조").optional(),
-                            fieldWithPath("data[].mainPurpsCdNm").type(JsonFieldType.STRING)
+                            fieldWithPath("data.ledgers[].etcStrct").type(JsonFieldType.STRING)
+                                .description("기타구조")
+                                .optional(),
+                            fieldWithPath("data.ledgers[].mainPurpsCdNm").type(JsonFieldType.STRING)
                                 .description("주용도코드명")
                                 .optional(),
-                            fieldWithPath("data[].etcPurps").type(JsonFieldType.STRING).description("기타용도").optional(),
-                            fieldWithPath("data[].roofCdNm").type(JsonFieldType.STRING).description("지붕코드명").optional(),
-                            fieldWithPath("data[].etcRoof").type(JsonFieldType.STRING).description("기타지붕").optional(),
-                            fieldWithPath("data[].householdCnt").type(JsonFieldType.NUMBER)
+                            fieldWithPath("data.ledgers[].etcPurps").type(JsonFieldType.STRING)
+                                .description("기타용도")
+                                .optional(),
+                            fieldWithPath("data.ledgers[].roofCdNm").type(JsonFieldType.STRING)
+                                .description("지붕코드명")
+                                .optional(),
+                            fieldWithPath("data.ledgers[].etcRoof").type(JsonFieldType.STRING)
+                                .description("기타지붕")
+                                .optional(),
+
+                            fieldWithPath("data.ledgers[].householdCnt").type(JsonFieldType.NUMBER)
                                 .description("세대수")
                                 .optional(),
-                            fieldWithPath("data[].familyCnt").type(JsonFieldType.NUMBER).description("가구수").optional(),
-                            fieldWithPath("data[].rideUseElvtCnt").type(JsonFieldType.NUMBER)
+                            fieldWithPath("data.ledgers[].familyCnt").type(JsonFieldType.NUMBER)
+                                .description("가구수")
+                                .optional(),
+                            fieldWithPath("data.ledgers[].rideUseElvtCnt").type(JsonFieldType.NUMBER)
                                 .description("승용승강기수")
                                 .optional(),
-                            fieldWithPath("data[].emgenUseElvtCnt").type(JsonFieldType.NUMBER)
+                            fieldWithPath("data.ledgers[].emgenUseElvtCnt").type(JsonFieldType.NUMBER)
                                 .description("비상용승강기수")
                                 .optional(),
-                            fieldWithPath("data[].useAprDay").type(JsonFieldType.STRING)
-                                .description("사용승인일 (YYYYMMDD)")
+                            fieldWithPath("data.ledgers[].useAprDay").type(JsonFieldType.STRING)
+                                .description("사용승인일")
                                 .optional(),
-                            fieldWithPath("data[].seismicDesignYn").type(JsonFieldType.STRING)
-                                .description("내진설계적용여부 (Y/N)")
+                            fieldWithPath("data.ledgers[].seismicDesignYn").type(JsonFieldType.STRING)
+                                .description("내진설계여부")
                                 .optional(),
-                            fieldWithPath("data[].seismicAbility").type(JsonFieldType.STRING)
+                            fieldWithPath("data.ledgers[].seismicAbility").type(JsonFieldType.STRING)
                                 .description("내진능력")
                                 .optional(),
 
-                            // [추가] 주차 시설 정보 필드 문서화
-                            fieldWithPath("data[].indrMechUtcnt").type(JsonFieldType.NUMBER)
+                            // 주차 관련 필드 문서화
+                            fieldWithPath("data.ledgers[].indrMechUtcnt").type(JsonFieldType.NUMBER)
                                 .description("옥내기계식대수")
                                 .optional(),
-                            fieldWithPath("data[].indrMechArea").type(JsonFieldType.NUMBER)
+                            fieldWithPath("data.ledgers[].indrMechArea").type(JsonFieldType.NUMBER)
                                 .description("옥내기계식면적")
                                 .optional(),
-                            fieldWithPath("data[].oudrMechUtcnt").type(JsonFieldType.NUMBER)
+                            fieldWithPath("data.ledgers[].oudrMechUtcnt").type(JsonFieldType.NUMBER)
                                 .description("옥외기계식대수")
                                 .optional(),
-                            fieldWithPath("data[].oudrMechArea").type(JsonFieldType.NUMBER)
+                            fieldWithPath("data.ledgers[].oudrMechArea").type(JsonFieldType.NUMBER)
                                 .description("옥외기계식면적")
                                 .optional(),
-                            fieldWithPath("data[].indrAutoUtcnt").type(JsonFieldType.NUMBER)
+                            fieldWithPath("data.ledgers[].indrAutoUtcnt").type(JsonFieldType.NUMBER)
                                 .description("옥내자주식대수")
                                 .optional(),
-                            fieldWithPath("data[].indrAutoArea").type(JsonFieldType.NUMBER)
+                            fieldWithPath("data.ledgers[].indrAutoArea").type(JsonFieldType.NUMBER)
                                 .description("옥내자주식면적")
                                 .optional(),
-                            fieldWithPath("data[].oudrAutoUtcnt").type(JsonFieldType.NUMBER)
+                            fieldWithPath("data.ledgers[].oudrAutoUtcnt").type(JsonFieldType.NUMBER)
                                 .description("옥외자주식대수")
                                 .optional(),
-                            fieldWithPath("data[].oudrAutoArea").type(JsonFieldType.NUMBER)
+                            fieldWithPath("data.ledgers[].oudrAutoArea").type(JsonFieldType.NUMBER)
                                 .description("옥외자주식면적")
                                 .optional(),
 
-                            // [추가] 허가 및 인증 정보 필드 문서화
-                            fieldWithPath("data[].pmsDay").type(JsonFieldType.STRING).description("허가일").optional(),
-                            fieldWithPath("data[].stcnsDay").type(JsonFieldType.STRING).description("착공일").optional(),
-                            fieldWithPath("data[].pmsnoYear").type(JsonFieldType.STRING)
+                            // 허가/인증 관련 필드 문서화
+                            fieldWithPath("data.ledgers[].pmsDay").type(JsonFieldType.STRING)
+                                .description("허가일")
+                                .optional(),
+                            fieldWithPath("data.ledgers[].stcnsDay").type(JsonFieldType.STRING)
+                                .description("착공일")
+                                .optional(),
+                            fieldWithPath("data.ledgers[].pmsnoYear").type(JsonFieldType.STRING)
                                 .description("허가번호년")
                                 .optional(),
-                            fieldWithPath("data[].pmsnoKikCdNm").type(JsonFieldType.STRING)
+                            fieldWithPath("data.ledgers[].pmsnoKikCdNm").type(JsonFieldType.STRING)
                                 .description("허가기관")
                                 .optional(),
-                            fieldWithPath("data[].pmsnoGbCdNm").type(JsonFieldType.STRING)
+                            fieldWithPath("data.ledgers[].pmsnoGbCdNm").type(JsonFieldType.STRING)
                                 .description("허가번호구분")
                                 .optional(),
-                            fieldWithPath("data[].hoCnt").type(JsonFieldType.NUMBER).description("호수").optional(),
-                            fieldWithPath("data[].engrGrade").type(JsonFieldType.STRING)
+                            fieldWithPath("data.ledgers[].hoCnt").type(JsonFieldType.NUMBER)
+                                .description("호수")
+                                .optional(),
+                            fieldWithPath("data.ledgers[].engrGrade").type(JsonFieldType.STRING)
                                 .description("에너지효율등급")
                                 .optional(),
-                            fieldWithPath("data[].engrRat").type(JsonFieldType.NUMBER).description("에너지절감율").optional(),
-                            fieldWithPath("data[].engrEpi").type(JsonFieldType.NUMBER).description("EPI점수").optional(),
-                            fieldWithPath("data[].gnBldGrade").type(JsonFieldType.STRING)
+                            fieldWithPath("data.ledgers[].engrRat").type(JsonFieldType.NUMBER)
+                                .description("에너지절감율")
+                                .optional(),
+                            fieldWithPath("data.ledgers[].engrEpi").type(JsonFieldType.NUMBER)
+                                .description("EPI점수")
+                                .optional(),
+                            fieldWithPath("data.ledgers[].gnBldGrade").type(JsonFieldType.STRING)
                                 .description("친환경건축물등급")
                                 .optional(),
-                            fieldWithPath("data[].gnBldCert").type(JsonFieldType.NUMBER)
+                            fieldWithPath("data.ledgers[].gnBldCert").type(JsonFieldType.NUMBER)
                                 .description("친환경건축물인증점수")
                                 .optional(),
-                            fieldWithPath("data[].itgBldGrade").type(JsonFieldType.STRING)
+                            fieldWithPath("data.ledgers[].itgBldGrade").type(JsonFieldType.STRING)
                                 .description("지능형건축물등급")
                                 .optional(),
-                            fieldWithPath("data[].itgBldCert").type(JsonFieldType.NUMBER)
+                            fieldWithPath("data.ledgers[].itgBldCert").type(JsonFieldType.NUMBER)
                                 .description("지능형건축물인증점수")
                                 .optional(),
-                            fieldWithPath("data[].crtnDay").type(JsonFieldType.STRING).description("생성일자").optional(),
+                            fieldWithPath("data.ledgers[].crtnDay").type(JsonFieldType.STRING)
+                                .description("생성일자")
+                                .optional(),
 
                             fieldWithPath("error").description("에러 정보").optional())));
     }
