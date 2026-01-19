@@ -179,3 +179,22 @@ include::{snippets}/admin-building-ledger-search/http-response.adoc[]
 
 ==== Response Fields
 include::{snippets}/admin-building-ledger-search/response-fields.adoc[]
+
+=== 무료계약 엑셀 업로드
+보험사로부터 수령한 무료계약 확정 리스트(엑셀)를 업로드하여 시스템 내 가입 대기 계약들을 일괄적으로 가입 완료 상태로 업데이트합니다.
+삼성, 메리츠, KB, DB 각 보험사의 특정 양식을 자동으로 식별하여 처리합니다.
+
+==== Curl Request
+include::{snippets}/admin-insured-free-contract-upload/curl-request.adoc[]
+
+==== HTTP Request
+include::{snippets}/admin-insured-free-contract-upload/http-request.adoc[]
+
+==== Request Parts
+include::{snippets}/admin-insured-free-contract-upload/request-parts.adoc[]
+
+==== HTTP Response
+include::{snippets}/admin-insured-free-contract-upload/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/admin-insured-free-contract-upload/response-fields.adoc[]

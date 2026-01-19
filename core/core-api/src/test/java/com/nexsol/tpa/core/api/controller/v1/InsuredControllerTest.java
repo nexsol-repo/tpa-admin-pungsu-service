@@ -397,20 +397,23 @@ public class InsuredControllerTest extends RestDocsTest {
     }
 
     @Test
-    @DisplayName("무료계약 엑셀 업로드 API 호출 성공 테스트")
+    @DisplayName("무료계약 엑셀 업로드 API 문서화")
     void uploadFreeContract_success() throws Exception {
         // given
         MockMultipartFile file = new MockMultipartFile("file", "free_contract.xlsx",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "dummy content".getBytes());
-
-        // Service는 아무 동작도 하지 않도록(void) Mocking 상태 유지
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "엑셀 데이터 내용".getBytes());
 
         // when & then
         mockMvc
             .perform(multipart("/v1/admin/pungsu/contract/free/upload").file(file)
-                .header("Authorization", "Bearer token") // 인증 토큰 필요 시
                 .contentType(MediaType.MULTIPART_FORM_DATA))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andDo(document("admin-insured-free-contract-upload",
+                    requestParts(partWithName("file").description("업로드할 무료계약 엑셀 파일 (삼성, 메리츠, KB, DB 양식 지원)")),
+                    responseFields(
+                            fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (SUCCESS/ERROR)"),
+                            fieldWithPath("data").type(JsonFieldType.STRING).description("결과 타입 (SUCCESS)"),
+                            fieldWithPath("error").description("에러 정보").optional())));
 
         // verify: 서비스 메서드가 1번 호출되었는지 검증
         verify(insuredService, times(1)).updateFreeContracts(any(MultipartFile.class));
