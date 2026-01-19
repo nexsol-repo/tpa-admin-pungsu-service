@@ -289,6 +289,8 @@ public class TotalFormMemberEntity {
         this.insuranceStartDate = startDate.atStartOfDay();
         this.insuranceEndDate = endDate.atTime(23, 59, 59);
 
+        this.createdAt = startDate.minusDays(7).atStartOfDay();
+
         // 3. 보험료 업데이트 (PremiumAmount가 불변 객체라면 새로 생성, 가변이면 내부 값 변경)
         // 여기서는 Embeddable 객체를 새로 교체하는 방식 사용
         this.premium = PremiumAmount.builder()
