@@ -116,4 +116,72 @@ public class BuildingLedgerEntity {
     @Column(name = "rserthqk_ablty")
     private String seismicAbility; // 내진능력
 
+    // 주차 시설 정보
+    @Column(name = "indr_mech_utcnt")
+    private Integer indrMechUtcnt; // 옥내기계식대수
+
+    @Column(name = "indr_mech_area")
+    private Double indrMechArea; // 옥내기계식면적
+
+    @Column(name = "oudr_mech_utcnt")
+    private Integer oudrMechUtcnt; // 옥외기계식대수
+
+    @Column(name = "oudr_mech_area")
+    private Double oudrMechArea; // 옥외기계식면적
+
+    @Column(name = "indr_auto_utcnt")
+    private Integer indrAutoUtcnt; // 옥내자주식대수
+
+    @Column(name = "indr_auto_area")
+    private Double indrAutoArea; // 옥내자주식면적
+
+    @Column(name = "oudr_auto_utcnt")
+    private Integer oudrAutoUtcnt; // 옥외자주식대수
+
+    @Column(name = "oudr_auto_area")
+    private Double oudrAutoArea; // 옥외자주식면적
+
+    // 허가 및 인증 정보
+    @Column(name = "pms_day")
+    private String pmsDay; // 허가일
+
+    @Column(name = "stcns_day")
+    private String stcnsDay; // 착공일
+
+    @Column(name = "pmsno_year")
+    private String pmsnoYear; // 허가번호년
+
+    @Column(name = "pmsno_kik_cd_nm")
+    private String pmsnoKikCdNm; // 허가기관
+
+    @Column(name = "pmsno_gb_cd_nm")
+    private String pmsnoGbCdNm; // 허가번호구분
+
+    @Column(name = "ho_cnt")
+    private Integer hoCnt; // 호수
+
+    @Column(name = "engr_grade")
+    private String engrGrade; // 에너지효율등급
+
+    @Column(name = "engr_rat")
+    private Double engrRat; // 에너지절감율
+
+    @Column(name = "engr_epi")
+    private Integer engrEpi; // EPI점수
+
+    @Column(name = "gn_bld_grade")
+    private String gnBldGrade; // 친환경건축물등급
+
+    @Column(name = "gn_bld_cert")
+    private Integer gnBldCert; // 친환경건축물인증점수
+
+    @Column(name = "itg_bld_grade")
+    private String itgBldGrade; // 지능형건축물등급
+
+    @Column(name = "itg_bld_cert")
+    private Integer itgBldCert; // 지능형건축물인증점수
+
+    @Column(name = "crtn_day")
+    private String crtnDay; // 생성일자
+
 }
