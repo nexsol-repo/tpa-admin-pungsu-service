@@ -5,7 +5,8 @@ import lombok.Builder;
 
 @Builder
 public record BuildingLedgerResponse(String mgmBldrgstPk, // 관리건축물대장PK
-        String buildingName, // 건물명
+
+        String regstrGbCdNm, String regstrKindCdNm, String buildingName, // 건물명
         String dongName, // 동명
         String platPlc, // 대지위치
         String newPlatPlc, // 도로명 대지위치
@@ -43,6 +44,8 @@ public record BuildingLedgerResponse(String mgmBldrgstPk, // 관리건축물대�
     public static BuildingLedgerResponse of(BuildingLedger ledger) {
         return BuildingLedgerResponse.builder()
             .mgmBldrgstPk(ledger.mgmBldrgstPk())
+            .regstrGbCdNm(ledger.regstrGbCdNm())
+            .regstrKindCdNm(ledger.regstrKindCdNm())
             .buildingName(ledger.buildingName())
             .dongName(ledger.dongName())
             .platPlc(ledger.platPlc())
