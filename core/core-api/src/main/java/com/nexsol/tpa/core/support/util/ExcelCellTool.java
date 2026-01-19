@@ -29,7 +29,7 @@ public class ExcelCellTool {
 
         try {
             // "13,500" -> "13500" 처리
-            return (long) Double.parseDouble(value.replace(",", ""));
+            return (long) Double.parseDouble(value.replaceAll("[^0-9]", ""));
         }
         catch (NumberFormatException e) {
             return 0L;
