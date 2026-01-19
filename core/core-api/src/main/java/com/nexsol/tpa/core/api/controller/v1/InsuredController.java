@@ -126,7 +126,7 @@ public class InsuredController {
     }
 
     @PostMapping("/contract/free/upload")
-    public ApiResponse<ResultType> uploadFreeContract(@RequestPart MultipartFile file) {
+    public ApiResponse<ResultType> uploadFreeContract(@RequestPart MultipartFile file, @LoginAdmin AdminUser admin) {
         insuredService.updateFreeContracts(file);
         return ApiResponse.success(ResultType.SUCCESS);
     }
