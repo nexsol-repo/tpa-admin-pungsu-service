@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -275,6 +276,27 @@ public class TotalFormMemberEntity {
         this.bun = bun;
         this.ji = ji;
         this.pnu = pnu;
+    }
+
+    public void updateFreeContract(String securityNo, LocalDate startDate, LocalDate endDate, Long totalPremium,
+            Long govPremium, Long localPremium, Long ownerPremium) {
+        // 1. 가입 확정 처리
+        this.joinCheck = "Y";
+
+        // 2. 증권번호 및 기간 업데이트
+        this.insuranceNumber = securityNo;
+        // 시간은 00:00:00 / 23:59:59 등으로 정책에 맞게 설정 (여기서는 시작일 0시, 종료일 23시 59분 가정)
+        this.insuranceStartDate = startDate.atStartOfDay();
+        this.insuranceEndDate = endDate.atTime(23, 59, 59);
+
+        // 3. 보험료 업데이트 (PremiumAmount가 불변 객체라면 새로 생성, 가변이면 내부 값 변경)
+        // 여기서는 Embeddable 객체를 새로 교체하는 방식 사용
+        this.premium = PremiumAmount.builder()
+            .totalInsuranceCost(totalPremium)
+            .totalGovernmentCost(govPremium)
+            .totalLocalGovernmentCost(localPremium)
+            .totalInsuranceMyCost(ownerPremium)
+            .build();
     }
 
 }

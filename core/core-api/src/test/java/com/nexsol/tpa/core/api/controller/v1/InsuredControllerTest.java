@@ -17,6 +17,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.multipart.MultipartFile;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDateTime;
@@ -43,6 +45,7 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class InsuredControllerTest extends RestDocsTest {
@@ -391,6 +394,26 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("memoContent").description("메모")))));
 
         verify(insuredService).register(any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("무료계약 엑셀 업로드 API 호출 성공 테스트")
+    void uploadFreeContract_success() throws Exception {
+        // given
+        MockMultipartFile file = new MockMultipartFile("file", "free_contract.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "dummy content".getBytes());
+
+        // Service는 아무 동작도 하지 않도록(void) Mocking 상태 유지
+
+        // when & then
+        mockMvc
+            .perform(multipart("/v1/admin/pungsu/contract/free/upload").file(file)
+                .header("Authorization", "Bearer token") // 인증 토큰 필요 시
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+            .andExpect(status().isOk());
+
+        // verify: 서비스 메서드가 1번 호출되었는지 검증
+        verify(insuredService, times(1)).updateFreeContracts(any(MultipartFile.class));
     }
 
     // --- 헬퍼 메서드 ---

@@ -30,4 +30,5 @@ public record InsuredContract(Integer id, String referIdx, String payYn, // 결�
         // 현재보다는 미래여야 하고(종료 전), 일주일 뒤보다는 과거여야 함(임박)
         return insuranceEndDate.isAfter(now) && insuranceEndDate.isBefore(oneWeekLater);
     }
+
 }
