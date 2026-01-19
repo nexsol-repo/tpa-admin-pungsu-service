@@ -42,6 +42,8 @@ public class BuildingLedgerReader {
             .vlRatEstmTotArea(entity.getVlRatEstmTotArea())
             .bcRat(entity.getBcRat())
             .vlRat(entity.getVlRat())
+            .atchBldArea(entity.getAtchBldArea())
+            .totalDongArea(entity.getTotalDongArea())
             .height(entity.getHeight())
             .groundFloorCnt(entity.getGroundFloorCnt())
             .underGroundFloorCnt(entity.getUnderGroundFloorCnt())

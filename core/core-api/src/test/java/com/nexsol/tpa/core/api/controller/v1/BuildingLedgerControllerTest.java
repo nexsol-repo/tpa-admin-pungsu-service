@@ -82,6 +82,8 @@ public class BuildingLedgerControllerTest extends RestDocsTest {
             .vlRatEstmTotArea(12000.0)
             .bcRat(50.0)
             .vlRat(1200.0)
+            .atchBldArea(1000.0)
+            .totalDongArea(10000.0)
             .height(200.0)
             .groundFloorCnt(60)
             .underGroundFloorCnt(5)
@@ -174,6 +176,12 @@ public class BuildingLedgerControllerTest extends RestDocsTest {
                                 .optional(),
                             fieldWithPath("data[].bcRat").type(JsonFieldType.NUMBER).description("건폐율 (%)").optional(),
                             fieldWithPath("data[].vlRat").type(JsonFieldType.NUMBER).description("용적률 (%)").optional(),
+                            fieldWithPath("data[].atchBldArea").type(JsonFieldType.NUMBER)
+                                .description("부속건축물면적(m^2)")
+                                .optional(),
+                            fieldWithPath("data[].totalDongArea").type(JsonFieldType.NUMBER)
+                                .description("총동연면적 (m^2)")
+                                .optional(),
                             fieldWithPath("data[].height").type(JsonFieldType.NUMBER).description("높이 (m)").optional(),
                             fieldWithPath("data[].groundFloorCnt").type(JsonFieldType.NUMBER)
                                 .description("지상층수")

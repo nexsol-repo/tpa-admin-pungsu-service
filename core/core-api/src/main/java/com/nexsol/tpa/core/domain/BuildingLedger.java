@@ -23,6 +23,7 @@ public record BuildingLedger(String mgmBldrgstPk, // 관리건축물대장PK (�
         Double vlRatEstmTotArea, // 용적률산정연면적 (vl_rat_estm_tot_area)
         Double bcRat, // 건폐율 (bc_rat)
         Double vlRat, // 용적률 (vl_rat)
+        Double atchBldArea, Double totalDongArea,
 
         // 높이/층수
         Double height, // 높이 (heit)
