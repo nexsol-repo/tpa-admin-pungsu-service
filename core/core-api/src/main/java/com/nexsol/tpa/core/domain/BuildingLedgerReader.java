@@ -1,22 +1,17 @@
 package com.nexsol.tpa.core.domain;
 
 import com.nexsol.tpa.storage.db.boon.BuildingLedgerEntity;
-import com.nexsol.tpa.storage.db.boon.BuildingLedgerRecapEntity;
-import com.nexsol.tpa.storage.db.boon.BuildingLedgerRecapRepository;
 import com.nexsol.tpa.storage.db.boon.BuildingLedgerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class BuildingLedgerReader {
 
     private final BuildingLedgerRepository buildingLedgerRepository;
-
-    private final BuildingLedgerRecapRepository recapRepository;
 
     public List<BuildingLedger> findAllByAddress(String sigunguCd, String bjdongCd, String bun, String ji) {
         // 1. DB 조회 (동일 번지에 여러 건물이 있을 수 있음 -> List 반환)
@@ -25,10 +20,6 @@ public class BuildingLedgerReader {
 
         // 2. Entity -> Domain 변환
         return entities.stream().map(this::mapToDomain).toList();
-    }
-
-    public Optional<BuildingLedgerRecap> findRecapByAddress(String sigunguCd, String bjdongCd, String bun, String ji) {
-        return recapRepository.findFirstByAddressKeys(sigunguCd, bjdongCd, bun, ji).map(this::mapRecapToDomain);
     }
 
     private BuildingLedger mapToDomain(BuildingLedgerEntity entity) {
@@ -95,15 +86,6 @@ public class BuildingLedgerReader {
             .itgBldGrade(entity.getItgBldGrade())
             .itgBldCert(entity.getItgBldCert())
             .crtnDay(entity.getCrtnDay())
-            .build();
-    }
-
-    private BuildingLedgerRecap mapRecapToDomain(BuildingLedgerRecapEntity entity) {
-        return BuildingLedgerRecap.builder()
-            .mgmBldrgstPk(entity.getMgmBldrgstPk())
-            .buildingName(entity.getBuildingName())
-            .totArea(entity.getTotArea())
-            .useAprDay(entity.getUseAprDay())
             .build();
     }
 

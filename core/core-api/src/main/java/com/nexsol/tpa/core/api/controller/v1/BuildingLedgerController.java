@@ -1,8 +1,10 @@
 package com.nexsol.tpa.core.api.controller.v1;
 
-import com.nexsol.tpa.core.api.controller.v1.response.BuildingLedgerOverviewResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.BuildingLedgerResponse;
-import com.nexsol.tpa.core.domain.*;
+import com.nexsol.tpa.core.domain.AdminUser;
+import com.nexsol.tpa.core.domain.BuildingLedger;
+import com.nexsol.tpa.core.domain.BuildingLedgerService;
+import com.nexsol.tpa.core.domain.LoginAdmin;
 import com.nexsol.tpa.core.support.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,16 +29,17 @@ public class BuildingLedgerController {
      * @return 해당 대지의 건축물대장 목록
      */
     @GetMapping
-    public ApiResponse<BuildingLedgerOverviewResponse> search(@RequestParam String sigunguCd,
+    public ApiResponse<List<BuildingLedgerResponse>> search(@RequestParam String sigunguCd,
             @RequestParam String bjdongCd, @RequestParam String bun, @RequestParam String ji,
             @LoginAdmin AdminUser admin) {
+        // 1. 서비스 호출 (비즈니스 로직 수행)
+        List<BuildingLedger> ledgers = buildingLedgerService.searchBuildingLedgers(sigunguCd, bjdongCd, bun, ji);
 
-        // 1. 서비스 호출 (총괄 + 상세 목록 조회)
-        BuildingLedgerOverview overview = buildingLedgerService.searchBuildingLedgerOverview(sigunguCd, bjdongCd, bun,
-                ji);
+        // 2. 도메인 -> 응답 DTO 변환
+        List<BuildingLedgerResponse> response = ledgers.stream().map(BuildingLedgerResponse::of).toList();
 
-        // 2. 응답 DTO 변환
-        return ApiResponse.success(BuildingLedgerOverviewResponse.of(overview));
+        // 3. 응답 반환
+        return ApiResponse.success(response);
     }
 
 }
