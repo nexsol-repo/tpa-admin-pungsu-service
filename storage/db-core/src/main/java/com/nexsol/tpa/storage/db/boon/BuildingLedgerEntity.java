@@ -71,6 +71,12 @@ public class BuildingLedgerEntity {
     @Column(name = "vl_rat")
     private Double vlRat; // 용적률
 
+    @Column(name = "atch_bld_area")
+    private Double atchBldArea; // 부속건축물면적(m^2)
+
+    @Column(name = "tot_dong_tot_area")
+    private Double totalDongArea; // 총동연면적(m^2)
+
     // --- 높이 및 층수 ---
     @Column(name = "heit")
     private Double height; // 높이

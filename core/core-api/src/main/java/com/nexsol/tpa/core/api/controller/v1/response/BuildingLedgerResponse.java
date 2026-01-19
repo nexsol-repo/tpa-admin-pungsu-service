@@ -16,7 +16,7 @@ public record BuildingLedgerResponse(String mgmBldrgstPk, // 관리건축물대�
         Double vlRatEstmTotArea, // 용적률산정연면적
         Double bcRat, // 건폐율
         Double vlRat, // 용적률
-        Double height, // 높이
+        Double atchBldArea, Double totalDongArea, Double height, // 높이
         Integer groundFloorCnt, // 지상층수
         Integer underGroundFloorCnt, // 지하층수
         String strctCdNm, // 구조코드명
@@ -60,6 +60,8 @@ public record BuildingLedgerResponse(String mgmBldrgstPk, // 관리건축물대�
             .vlRatEstmTotArea(ledger.vlRatEstmTotArea())
             .bcRat(ledger.bcRat())
             .vlRat(ledger.vlRat())
+            .atchBldArea(ledger.atchBldArea())
+            .totalDongArea(ledger.totalDongArea())
             .height(ledger.height())
             .groundFloorCnt(ledger.groundFloorCnt())
             .underGroundFloorCnt(ledger.underGroundFloorCnt())
