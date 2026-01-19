@@ -30,8 +30,16 @@ public record BuildingLedgerResponse(String mgmBldrgstPk, // 관리건축물대�
         Integer emgenUseElvtCnt, // 비상용승강기수
         String useAprDay, // 사용승인일
         String seismicDesignYn, // 내진설계적용여부
-        String seismicAbility // 내진능력
-) {
+        String seismicAbility, // 내진능력
+
+        // [추가] 주차 시설
+        Integer indrMechUtcnt, Double indrMechArea, Integer oudrMechUtcnt, Double oudrMechArea, Integer indrAutoUtcnt,
+        Double indrAutoArea, Integer oudrAutoUtcnt, Double oudrAutoArea,
+
+        // [추가] 허가 및 인증
+        String pmsDay, String stcnsDay, String pmsnoYear, String pmsnoKikCdNm, String pmsnoGbCdNm, Integer hoCnt,
+        String engrGrade, Double engrRat, Integer engrEpi, String gnBldGrade, Integer gnBldCert, String itgBldGrade,
+        Integer itgBldCert, String crtnDay) {
     public static BuildingLedgerResponse of(BuildingLedger ledger) {
         return BuildingLedgerResponse.builder()
             .mgmBldrgstPk(ledger.mgmBldrgstPk())
@@ -65,6 +73,29 @@ public record BuildingLedgerResponse(String mgmBldrgstPk, // 관리건축물대�
             .useAprDay(ledger.useAprDay())
             .seismicDesignYn(ledger.seismicDesignYn())
             .seismicAbility(ledger.seismicAbility())
+
+            .indrMechUtcnt(ledger.indrMechUtcnt())
+            .indrMechArea(ledger.indrMechArea())
+            .oudrMechUtcnt(ledger.oudrMechUtcnt())
+            .oudrMechArea(ledger.oudrMechArea())
+            .indrAutoUtcnt(ledger.indrAutoUtcnt())
+            .indrAutoArea(ledger.indrAutoArea())
+            .oudrAutoUtcnt(ledger.oudrAutoUtcnt())
+            .oudrAutoArea(ledger.oudrAutoArea())
+            .pmsDay(ledger.pmsDay())
+            .stcnsDay(ledger.stcnsDay())
+            .pmsnoYear(ledger.pmsnoYear())
+            .pmsnoKikCdNm(ledger.pmsnoKikCdNm())
+            .pmsnoGbCdNm(ledger.pmsnoGbCdNm())
+            .hoCnt(ledger.hoCnt())
+            .engrGrade(ledger.engrGrade())
+            .engrRat(ledger.engrRat())
+            .engrEpi(ledger.engrEpi())
+            .gnBldGrade(ledger.gnBldGrade())
+            .gnBldCert(ledger.gnBldCert())
+            .itgBldGrade(ledger.itgBldGrade())
+            .itgBldCert(ledger.itgBldCert())
+            .crtnDay(ledger.crtnDay())
             .build();
     }
 }

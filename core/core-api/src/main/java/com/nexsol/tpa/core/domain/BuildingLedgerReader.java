@@ -55,6 +55,32 @@ public class BuildingLedgerReader {
             .useAprDay(entity.getUseAprDay())
             .seismicDesignYn(entity.getSeismicDesignYn())
             .seismicAbility(entity.getSeismicAbility())
+
+            // [추가] 주차
+            .indrMechUtcnt(entity.getIndrMechUtcnt())
+            .indrMechArea(entity.getIndrMechArea())
+            .oudrMechUtcnt(entity.getOudrMechUtcnt())
+            .oudrMechArea(entity.getOudrMechArea())
+            .indrAutoUtcnt(entity.getIndrAutoUtcnt())
+            .indrAutoArea(entity.getIndrAutoArea())
+            .oudrAutoUtcnt(entity.getOudrAutoUtcnt())
+            .oudrAutoArea(entity.getOudrAutoArea())
+
+            // [추가] 허가 및 인증
+            .pmsDay(entity.getPmsDay())
+            .stcnsDay(entity.getStcnsDay())
+            .pmsnoYear(entity.getPmsnoYear())
+            .pmsnoKikCdNm(entity.getPmsnoKikCdNm())
+            .pmsnoGbCdNm(entity.getPmsnoGbCdNm())
+            .hoCnt(entity.getHoCnt())
+            .engrGrade(entity.getEngrGrade())
+            .engrRat(entity.getEngrRat())
+            .engrEpi(entity.getEngrEpi())
+            .gnBldGrade(entity.getGnBldGrade())
+            .gnBldCert(entity.getGnBldCert())
+            .itgBldGrade(entity.getItgBldGrade())
+            .itgBldCert(entity.getItgBldCert())
+            .crtnDay(entity.getCrtnDay())
             .build();
     }
 

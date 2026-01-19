@@ -43,7 +43,16 @@ public record BuildingLedger(String mgmBldrgstPk, // 관리건축물대장PK (�
         Integer emgenUseElvtCnt, // 비상용승강기수 (emgen_use_elvt_cnt)
         String useAprDay, // 사용승인일 (use_apr_day)
         String seismicDesignYn, // 내진설계적용여부 (rserthqk_dsgn_apply_yn)
-        String seismicAbility // 내진능력 (rserthqk_ablty)
+        String seismicAbility, // 내진능력 (rserthqk_ablty)
+
+        // 주차 시설 정보
+        Integer indrMechUtcnt, Double indrMechArea, Integer oudrMechUtcnt, Double oudrMechArea, Integer indrAutoUtcnt,
+        Double indrAutoArea, Integer oudrAutoUtcnt, Double oudrAutoArea,
+
+        // 허가 및 인증 정보
+        String pmsDay, String stcnsDay, String pmsnoYear, String pmsnoKikCdNm, String pmsnoGbCdNm, Integer hoCnt,
+        String engrGrade, Double engrRat, Integer engrEpi, String gnBldGrade, Integer gnBldCert, String itgBldGrade,
+        Integer itgBldCert, String crtnDay
 
 ) {
 }

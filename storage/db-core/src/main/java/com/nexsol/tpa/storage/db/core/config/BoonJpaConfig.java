@@ -15,8 +15,8 @@ import java.util.Objects;
 
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = "com.nexsol.tpa.storage.db.boon", // [핵심] boon 패키지
-                                                                        // 스캔
+@EnableJpaRepositories(basePackages = "com.nexsol.tpa.storage.db.boon",
+
         entityManagerFactoryRef = "boonEntityManagerFactory", transactionManagerRef = "boonTransactionManager")
 public class BoonJpaConfig {
 

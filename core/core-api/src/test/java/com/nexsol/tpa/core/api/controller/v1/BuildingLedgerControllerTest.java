@@ -96,6 +96,30 @@ public class BuildingLedgerControllerTest extends RestDocsTest {
             .useAprDay("20021025")
             .seismicDesignYn("Y")
             .seismicAbility("VII-0.124g")
+            // [추가] 주차 시설 정보 Mock 데이터
+            .indrMechUtcnt(10)
+            .indrMechArea(200.0)
+            .oudrMechUtcnt(0)
+            .oudrMechArea(0.0)
+            .indrAutoUtcnt(100)
+            .indrAutoArea(1500.0)
+            .oudrAutoUtcnt(20)
+            .oudrAutoArea(300.0)
+            // [추가] 허가 및 인증 정보 Mock 데이터
+            .pmsDay("20000101")
+            .stcnsDay("20000301")
+            .pmsnoYear("2000")
+            .pmsnoKikCdNm("강남구청")
+            .pmsnoGbCdNm("신축허가")
+            .hoCnt(100)
+            .engrGrade("1등급")
+            .engrRat(15.5)
+            .engrEpi(80)
+            .gnBldGrade("최우수")
+            .gnBldCert(100)
+            .itgBldGrade("1등급")
+            .itgBldCert(90)
+            .crtnDay("20220101")
             .build();
 
         given(buildingLedgerService.searchBuildingLedgers(anyString(), anyString(), anyString(), anyString()))
@@ -178,6 +202,65 @@ public class BuildingLedgerControllerTest extends RestDocsTest {
                             fieldWithPath("data[].seismicAbility").type(JsonFieldType.STRING)
                                 .description("내진능력")
                                 .optional(),
+
+                            // [추가] 주차 시설 정보 필드 문서화
+                            fieldWithPath("data[].indrMechUtcnt").type(JsonFieldType.NUMBER)
+                                .description("옥내기계식대수")
+                                .optional(),
+                            fieldWithPath("data[].indrMechArea").type(JsonFieldType.NUMBER)
+                                .description("옥내기계식면적")
+                                .optional(),
+                            fieldWithPath("data[].oudrMechUtcnt").type(JsonFieldType.NUMBER)
+                                .description("옥외기계식대수")
+                                .optional(),
+                            fieldWithPath("data[].oudrMechArea").type(JsonFieldType.NUMBER)
+                                .description("옥외기계식면적")
+                                .optional(),
+                            fieldWithPath("data[].indrAutoUtcnt").type(JsonFieldType.NUMBER)
+                                .description("옥내자주식대수")
+                                .optional(),
+                            fieldWithPath("data[].indrAutoArea").type(JsonFieldType.NUMBER)
+                                .description("옥내자주식면적")
+                                .optional(),
+                            fieldWithPath("data[].oudrAutoUtcnt").type(JsonFieldType.NUMBER)
+                                .description("옥외자주식대수")
+                                .optional(),
+                            fieldWithPath("data[].oudrAutoArea").type(JsonFieldType.NUMBER)
+                                .description("옥외자주식면적")
+                                .optional(),
+
+                            // [추가] 허가 및 인증 정보 필드 문서화
+                            fieldWithPath("data[].pmsDay").type(JsonFieldType.STRING).description("허가일").optional(),
+                            fieldWithPath("data[].stcnsDay").type(JsonFieldType.STRING).description("착공일").optional(),
+                            fieldWithPath("data[].pmsnoYear").type(JsonFieldType.STRING)
+                                .description("허가번호년")
+                                .optional(),
+                            fieldWithPath("data[].pmsnoKikCdNm").type(JsonFieldType.STRING)
+                                .description("허가기관")
+                                .optional(),
+                            fieldWithPath("data[].pmsnoGbCdNm").type(JsonFieldType.STRING)
+                                .description("허가번호구분")
+                                .optional(),
+                            fieldWithPath("data[].hoCnt").type(JsonFieldType.NUMBER).description("호수").optional(),
+                            fieldWithPath("data[].engrGrade").type(JsonFieldType.STRING)
+                                .description("에너지효율등급")
+                                .optional(),
+                            fieldWithPath("data[].engrRat").type(JsonFieldType.NUMBER).description("에너지절감율").optional(),
+                            fieldWithPath("data[].engrEpi").type(JsonFieldType.NUMBER).description("EPI점수").optional(),
+                            fieldWithPath("data[].gnBldGrade").type(JsonFieldType.STRING)
+                                .description("친환경건축물등급")
+                                .optional(),
+                            fieldWithPath("data[].gnBldCert").type(JsonFieldType.NUMBER)
+                                .description("친환경건축물인증점수")
+                                .optional(),
+                            fieldWithPath("data[].itgBldGrade").type(JsonFieldType.STRING)
+                                .description("지능형건축물등급")
+                                .optional(),
+                            fieldWithPath("data[].itgBldCert").type(JsonFieldType.NUMBER)
+                                .description("지능형건축물인증점수")
+                                .optional(),
+                            fieldWithPath("data[].crtnDay").type(JsonFieldType.STRING).description("생성일자").optional(),
+
                             fieldWithPath("error").description("에러 정보").optional())));
     }
 
