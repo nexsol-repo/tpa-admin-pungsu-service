@@ -58,6 +58,7 @@ public class MeritzFreeContractParser implements FreeContractParser {
             result.add(FreeContractUpdateInfo.builder()
                 .businessNo(businessNo)
                 .address(address)
+                .insuranceCompany("메리츠")
                 .securityNo(securityNo)
                 .insuranceDate(startDate)
                 .insuranceEndDate(endDate)

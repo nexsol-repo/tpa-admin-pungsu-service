@@ -9,14 +9,18 @@ import com.nexsol.tpa.storage.db.core.TotalFormMemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class InsuredContractorWriter {
 
     private final TotalFormMemberRepository totalFormMemberRepository;
+
+    private final FreeContractExcelTool freeContractExcelTool;
 
     private final DirectRegistration directRegistration;
 
@@ -56,16 +60,42 @@ public class InsuredContractorWriter {
     }
 
     @Transactional
-    public void confirmFreeContract(FreeContractUpdateInfo info) {
+    public UpdateCount confirmFreeContract(MultipartFile file) {
 
-        TotalFormMemberEntity entity = totalFormMemberRepository
-            .findFirstByBusinessNumberPayAndAddressContaining(info.businessNo(), "N",info.address())
-            .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND_DATA,
-                    "해당 사업자번호와 주소를 가진 계약을 찾을 수 없습니다: " + info.businessNo()));
+        // 1. 엑셀 파싱
+        List<FreeContractUpdateInfo> updates = freeContractExcelTool.parseFile(file);
 
-        // 2. 엔티티 상태 변경 (기존 동일)
-        entity.updateFreeContract(info.securityNo(), info.insuranceDate(), info.insuranceEndDate(), info.totalPremium(),
-                info.govPremium(), info.localPremium(), info.ownerPremium());
+        int totalCount = updates.size();
+        int successCount = 0;
+        int failureCount = 0;
+
+        // 2. 순회하며 업데이트 처리
+        for (FreeContractUpdateInfo info : updates) {
+            // 미결제(N) 상태인 건만 조회
+            Optional<TotalFormMemberEntity> entityOpt = totalFormMemberRepository
+                .findFirstByBusinessNumberAndPayYnAndInsuranceCompanyAndAddressContaining(info.businessNo(), "N",
+                        info.insuranceCompany(), info.address());
+
+            if (entityOpt.isPresent()) {
+                // 매핑 성공: 업데이트 진행
+                TotalFormMemberEntity entity = entityOpt.get();
+                entity.updateFreeContract(info.securityNo(), info.insuranceDate(), info.insuranceEndDate(),
+                        info.totalPremium(), info.govPremium(), info.localPremium(), info.ownerPremium());
+                successCount++;
+            }
+            else {
+                // 매핑 실패: 건너뛰고 카운트
+                failureCount++;
+            }
+        }
+
+        UpdateCount result = UpdateCount.builder()
+            .totalCount(totalCount)
+            .successCount(successCount)
+            .failCount(failureCount)
+            .build();
+
+        return result;
     }
 
 }

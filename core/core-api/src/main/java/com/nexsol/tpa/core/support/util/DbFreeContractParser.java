@@ -68,6 +68,7 @@ public class DbFreeContractParser implements FreeContractParser {
                 result.add(FreeContractUpdateInfo.builder()
                     .businessNo(businessNo)
                     .address(address)
+                    .insuranceCompany("DB손해보험")
                     .securityNo(securityNo)
                     .insuranceDate(startDate)
                     .insuranceEndDate(endDate)

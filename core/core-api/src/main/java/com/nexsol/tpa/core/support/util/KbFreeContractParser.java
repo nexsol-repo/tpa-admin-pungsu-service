@@ -66,6 +66,7 @@ public class KbFreeContractParser implements FreeContractParser {
                 .businessNo(businessNo)
                 .address(address)
                 .securityNo(securityNo)
+                .insuranceCompany("KB손해보험")
                 .insuranceDate(startDate)
                 .insuranceEndDate(endDate)
                 .totalPremium(total)
