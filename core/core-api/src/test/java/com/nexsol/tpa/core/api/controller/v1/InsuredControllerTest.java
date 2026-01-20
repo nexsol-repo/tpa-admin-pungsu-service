@@ -403,6 +403,10 @@ public class InsuredControllerTest extends RestDocsTest {
         MockMultipartFile file = new MockMultipartFile("file", "free_contract.xlsx",
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "엑셀 데이터 내용".getBytes());
 
+        // [수정 1] Service가 반환할 Mock 객체 생성 (UpdateStats)
+        UpdateCount mockStats = new UpdateCount(100, 95, 5); // 총 100건, 성공 95, 실패 5
+        given(insuredService.updateFreeContracts(any(MultipartFile.class))).willReturn(mockStats);
+
         // when & then
         mockMvc
             .perform(multipart("/v1/admin/pungsu/contract/free/upload").file(file)
@@ -412,10 +416,14 @@ public class InsuredControllerTest extends RestDocsTest {
                     requestParts(partWithName("file").description("업로드할 무료계약 엑셀 파일 (삼성, 메리츠, KB, DB 양식 지원)")),
                     responseFields(
                             fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (SUCCESS/ERROR)"),
-                            fieldWithPath("data").type(JsonFieldType.STRING).description("결과 타입 (SUCCESS)"),
+                            // [수정 2] 응답 데이터 필드 정의 수정 (DTO 구조 반영)
+                            fieldWithPath("data.totalCount").type(JsonFieldType.NUMBER).description("총 처리 건수"),
+                            fieldWithPath("data.successCount").type(JsonFieldType.NUMBER).description("성공 건수"),
+                            fieldWithPath("data.failureCount").type(JsonFieldType.NUMBER)
+                                .description("실패 건수 (DB 매칭 실패 등)"),
                             fieldWithPath("error").description("에러 정보").optional())));
 
-        // verify: 서비스 메서드가 1번 호출되었는지 검증
+        // verify
         verify(insuredService, times(1)).updateFreeContracts(any(MultipartFile.class));
     }
 
