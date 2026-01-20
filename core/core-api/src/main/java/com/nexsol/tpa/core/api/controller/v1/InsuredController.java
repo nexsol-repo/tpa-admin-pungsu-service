@@ -4,6 +4,7 @@ import com.nexsol.tpa.core.api.controller.v1.request.InsuredModifyRequest;
 import com.nexsol.tpa.core.api.controller.v1.request.InsuredRegisterRequest;
 import com.nexsol.tpa.core.api.controller.v1.request.InsuredSearchRequest;
 import com.nexsol.tpa.core.api.controller.v1.request.NotificationSendRequest;
+import com.nexsol.tpa.core.api.controller.v1.response.FreeContractUploadResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractDetailResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractResponse;
 import com.nexsol.tpa.core.domain.*;
@@ -126,9 +127,10 @@ public class InsuredController {
     }
 
     @PostMapping("/contract/free/upload")
-    public ApiResponse<ResultType> uploadFreeContract(@RequestPart MultipartFile file, @LoginAdmin AdminUser admin) {
-        insuredService.updateFreeContracts(file);
-        return ApiResponse.success(ResultType.SUCCESS);
+    public ApiResponse<FreeContractUploadResponse> uploadFreeContract(@RequestPart MultipartFile file,
+            @LoginAdmin AdminUser admin) {
+        UpdateCount stats = insuredService.updateFreeContracts(file);
+        return ApiResponse.success(FreeContractUploadResponse.of(stats));
     }
 
     @PostMapping("/{id}/notification")
