@@ -59,7 +59,7 @@ public class InsuredContractorWriter {
     public void confirmFreeContract(FreeContractUpdateInfo info) {
 
         TotalFormMemberEntity entity = totalFormMemberRepository
-            .findFirstByBusinessNumberAndAddressContaining(info.businessNo(), info.address())
+            .findFirstByBusinessNumberPayAndAddressContaining(info.businessNo(), "N",info.address())
             .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND_DATA,
                     "해당 사업자번호와 주소를 가진 계약을 찾을 수 없습니다: " + info.businessNo()));
 
