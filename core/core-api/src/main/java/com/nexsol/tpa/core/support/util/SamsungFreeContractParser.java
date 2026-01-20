@@ -60,6 +60,7 @@ public class SamsungFreeContractParser implements FreeContractParser {
             result.add(FreeContractUpdateInfo.builder()
                 .businessNo(businessNo)
                 .address(address)
+                .insuranceCompany("삼성화재")
                 .securityNo(securityNo)
                 .insuranceDate(startDate)
                 .insuranceEndDate(endDate)

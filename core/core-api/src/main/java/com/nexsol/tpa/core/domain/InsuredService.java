@@ -34,8 +34,6 @@ public class InsuredService {
 
     private final InsuredExcelWriter insuredExcelWriter;
 
-    private final FreeContractExcelTool freeContractExcelTool;
-
     private final FileStorageClient fileStorageClient;
 
     private final ApplicationEventPublisher eventPublisher;
@@ -130,15 +128,8 @@ public class InsuredService {
     }
 
     @Transactional
-    public void updateFreeContracts(MultipartFile file) {
-        // 1. [도구 위임] 엑셀 파일을 해석하여 업데이트 정보 DTO 목록으로 변환
-        // (어떤 파서를 쓸지는 Tool 내부에서 헤더를 보고 결정)
-        List<FreeContractUpdateInfo> updates = freeContractExcelTool.parseFile(file);
-
-        // 2. [Writer 위임] 데이터베이스 상태 변경 요청
-        for (FreeContractUpdateInfo info : updates) {
-            insuredContractorWriter.confirmFreeContract(info);
-        }
+    public UpdateCount updateFreeContracts(MultipartFile file) {
+        return insuredContractorWriter.confirmFreeContract(file);
     }
 
     public void send(InsuredContractDetail detail, MailType type, String targetUrl, Long adminId) {
