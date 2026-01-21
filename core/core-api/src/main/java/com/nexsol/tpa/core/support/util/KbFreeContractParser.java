@@ -22,7 +22,8 @@ public class KbFreeContractParser implements FreeContractParser {
 
     @Override
     public boolean supports(Set<String> headers) {
-        return headers.contains("합계 : 총보험료") && headers.contains("사업자번호");
+        return headers.contains("합계 : 총보험료") && headers.contains("사업자번호") && headers.contains("사업자명")
+                && headers.contains("합계 : 총보험료");
     }
 
     @Override
@@ -37,6 +38,7 @@ public class KbFreeContractParser implements FreeContractParser {
 
             // 1. 식별자 파싱
             String businessNo = cellTool.getValueAsString(row, headerMap.get("사업자번호"));
+            String companyName = cellTool.getValueAsString(row, headerMap.get("사업자명"));
             String securityNo = cellTool.getValueAsString(row, headerMap.get("증권번호"));
 
             // KB 양식에는 명시적인 주소 컬럼이 없는 경우가 많아, 소재지나 주소 키워드를 찾음
@@ -64,6 +66,7 @@ public class KbFreeContractParser implements FreeContractParser {
 
             result.add(FreeContractUpdateInfo.builder()
                 .businessNo(businessNo)
+                .companyName(companyName)
                 .address(address)
                 .securityNo(securityNo)
                 .insuranceCompany("KB손해보험")

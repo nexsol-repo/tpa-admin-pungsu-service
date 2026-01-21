@@ -24,7 +24,8 @@ public class DbFreeContractParser implements FreeContractParser {
 
     @Override
     public boolean supports(Set<String> headers) {
-        return headers.contains("피보험자사업자번호") && headers.contains("소재지신주소") && headers.contains("보험일자");
+        return headers.contains("피보험자사업자번호") && headers.contains("소재지신주소") && headers.contains("보험일자")
+                && headers.contains("피보험자명");
     }
 
     @Override
@@ -41,6 +42,7 @@ public class DbFreeContractParser implements FreeContractParser {
 
             // 1. 식별자 파싱
             String businessNo = cellTool.getValueAsString(row, headerMap.get("피보험자사업자번호"));
+            String companyName = cellTool.getValueAsString(row, headerMap.get("피보험자명"));
             String address = cellTool.getValueAsString(row, headerMap.get("소재지신주소"));
             String securityNo = cellTool.getValueAsString(row, headerMap.get("증권번호"));
 
@@ -67,6 +69,7 @@ public class DbFreeContractParser implements FreeContractParser {
             if (startDate != null && endDate != null) {
                 result.add(FreeContractUpdateInfo.builder()
                     .businessNo(businessNo)
+                    .companyName(companyName)
                     .address(address)
                     .insuranceCompany("DB손해보험")
                     .securityNo(securityNo)
