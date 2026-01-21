@@ -23,7 +23,8 @@ public class SamsungFreeContractParser implements FreeContractParser {
     @Override
     public boolean supports(Set<String> headers) {
         // 삼성 양식 식별 키워드 (헤더에 '피보험자 사업자명(상호명)' 등이 포함되는지 확인)
-        return headers.contains("피보험자 사업자명(상호명)") && headers.contains("전체보험료");
+        return headers.contains("피보험자 사업자명(상호명)") && headers.contains("전체보험료") && headers.contains("사업자번호")
+                && headers.contains("기본주소");
     }
 
     @Override
@@ -40,6 +41,7 @@ public class SamsungFreeContractParser implements FreeContractParser {
 
             // 엑셀 데이터 추출
             String businessNo = cellTool.getValueAsString(row, headerMap.get("사업자번호"));
+            String companyName = cellTool.getValueAsString(row, headerMap.get("피보험자 사업자명(상호명)"));
             String address = cellTool.getValueAsString(row, headerMap.get("기본주소"));
             String securityNo = cellTool.getValueAsString(row, headerMap.get("증권번호"));
 
@@ -59,6 +61,7 @@ public class SamsungFreeContractParser implements FreeContractParser {
 
             result.add(FreeContractUpdateInfo.builder()
                 .businessNo(businessNo)
+                .companyName(companyName)
                 .address(address)
                 .insuranceCompany("삼성화재")
                 .securityNo(securityNo)

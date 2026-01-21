@@ -23,7 +23,8 @@ public class MeritzFreeContractParser implements FreeContractParser {
     @Override
     public boolean supports(Set<String> headers) {
         // 메리츠 식별: '소유자코드'와 '소재지주소' 헤더가 존재하는지 확인
-        return headers.contains("소유자코드") && headers.contains("소재지주소") && headers.contains("보험시작일자");
+        return headers.contains("소유자코드") && headers.contains("소재지주소") && headers.contains("보험시작일자")
+                && headers.contains("소유자명") && headers.contains("합계");
     }
 
     @Override
@@ -37,10 +38,8 @@ public class MeritzFreeContractParser implements FreeContractParser {
                 continue;
 
             // 1. 식별자 파싱
-            String businessNo = cellTool.getValueAsString(row, headerMap.get("소유자코드")); // 메리츠는
-                                                                                        // 소유자코드를
-                                                                                        // 사업자번호로
-                                                                                        // 사용
+            String businessNo = cellTool.getValueAsString(row, headerMap.get("소유자코드"));
+            String companyName = cellTool.getValueAsString(row, headerMap.get("소유자명"));
             String address = cellTool.getValueAsString(row, headerMap.get("소재지주소"));
             String securityNo = cellTool.getValueAsString(row, headerMap.get("증권번호"));
 
@@ -57,6 +56,7 @@ public class MeritzFreeContractParser implements FreeContractParser {
 
             result.add(FreeContractUpdateInfo.builder()
                 .businessNo(businessNo)
+                .companyName(companyName)
                 .address(address)
                 .insuranceCompany("메리츠")
                 .securityNo(securityNo)

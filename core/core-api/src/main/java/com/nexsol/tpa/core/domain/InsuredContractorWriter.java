@@ -73,14 +73,15 @@ public class InsuredContractorWriter {
         for (FreeContractUpdateInfo info : updates) {
             // 미결제(N) 상태인 건만 조회
             Optional<TotalFormMemberEntity> entityOpt = totalFormMemberRepository
-                .findFirstByBusinessNumberAndPayYnAndInsuranceCompanyAndAddressContaining(info.businessNo(), "N",
-                        info.insuranceCompany(), info.address());
+                .findFirstByBusinessNumberAndCompanyNameAndPayYnAndInsuranceCompanyAndAddressContaining(
+                        info.businessNo(), info.companyName(), "N", info.insuranceCompany(), info.address());
 
             if (entityOpt.isPresent()) {
                 // 매핑 성공: 업데이트 진행
                 TotalFormMemberEntity entity = entityOpt.get();
-                entity.updateFreeContract(info.securityNo(), info.insuranceDate(), info.insuranceEndDate(),
-                        info.totalPremium(), info.govPremium(), info.localPremium(), info.ownerPremium());
+                entity.updateFreeContract(info.securityNo(), info.companyName(), info.insuranceDate(),
+                        info.insuranceEndDate(), info.totalPremium(), info.govPremium(), info.localPremium(),
+                        info.ownerPremium());
                 successCount++;
             }
             else {

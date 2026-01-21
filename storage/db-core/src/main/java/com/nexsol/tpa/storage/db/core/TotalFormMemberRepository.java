@@ -14,8 +14,9 @@ public interface TotalFormMemberRepository
     // Page<TotalFormMemberEntity> findAll(Specification<TotalFormMemberEntity> spec,
     // Pageable pageable);
 
-    Optional<TotalFormMemberEntity> findFirstByBusinessNumberAndPayYnAndInsuranceCompanyAndAddressContaining(
-            String businessNumber, String payYn, String insuranceCompany, // 파라미터 추가
+    Optional<TotalFormMemberEntity> findFirstByBusinessNumberAndCompanyNameAndPayYnAndInsuranceCompanyAndAddressContaining(
+            String businessNumber, String companyName, String payYn, String insuranceCompany, // 파라미터
+                                                                                              // 추가
             String addressKeyword);
 
 }

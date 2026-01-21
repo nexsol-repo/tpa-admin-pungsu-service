@@ -278,10 +278,12 @@ public class TotalFormMemberEntity {
         this.pnu = pnu;
     }
 
-    public void updateFreeContract(String securityNo, LocalDate startDate, LocalDate endDate, Long totalPremium,
-            Long govPremium, Long localPremium, Long ownerPremium) {
+    public void updateFreeContract(String securityNo, String companyName, LocalDate startDate, LocalDate endDate,
+            Long totalPremium, Long govPremium, Long localPremium, Long ownerPremium) {
         // 1. 가입 확정 처리
         this.joinCheck = "Y";
+
+        this.companyName = companyName;
 
         // 2. 증권번호 및 기간 업데이트
         this.insuranceNumber = securityNo;
