@@ -79,8 +79,7 @@ public class InsuredEventListener {
         // 2. 문자 발송 및 이력 저장
         try {
             smsSender.sendSms(event.phoneNumber(), message);
-            memoClient.recordNotification(cId,
-                    new CreateNotificationRequest("SMS", event.type().getTitle() + " 발송 완료", ServiceType.PUNGSU),
+            memoClient.recordNotification(cId, new CreateNotificationRequest("SMS", message, ServiceType.PUNGSU),
                     adminId);
         }
         catch (Exception e) {

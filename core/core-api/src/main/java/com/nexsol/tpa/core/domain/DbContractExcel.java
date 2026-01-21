@@ -75,23 +75,24 @@ public class DbContractExcel implements ContractExcel {
                 cellTool.setCellValue(row, 27, data.location().underGroundFloor());
                 row.createCell(28).setCellValue("");// 면적
                 row.createCell(29).setCellValue(99);// 건물유형
-                row.createCell(30).setCellValue(data.location().groundFloorCd());
+                cellTool.setCellValue(row, 30, data.location().groundFloorCd());
                 row.createCell(31).setCellValue(0);// 풍수해보험타보험가입여부
-                row.createCell(32).setCellValue("");// 목적물코드1
-                row.createCell(33).setCellValue("");// 풍수해가입금액1
-                row.createCell(34).setCellValue("");// 풍수해자가부담금액1
+                cellTool.setCellValue(row, 32, data.subscription().insuranceCostBld() != 0 ? "004" : "");// 목적물코드1
+                cellTool.setCellValue(row, 33, data.subscription().insuranceCostBld());// 풍수해가입금액1
+                cellTool.setCellValue(row, 34, data.subscription().insuranceCostDeductible());// 풍수해자가부담금액1
                 row.createCell(35).setCellValue("");// 야외간판금액1
-                row.createCell(36).setCellValue("");// 목적물코드2
-                row.createCell(37).setCellValue("");// 풍수해가입금액2
-                row.createCell(38).setCellValue("");// 풍수해자가부담금액2
-                row.createCell(39).setCellValue("");// 목적물코드3
-                row.createCell(40).setCellValue("");// 풍수해가입금액3
-                row.createCell(41).setCellValue("");// 풍수해자가부담금액3
+                cellTool.setCellValue(row, 36, data.subscription().insuranceCostFcl() != 0 ? "004" : "");// 목적물코드2
+                cellTool.setCellValue(row, 37, data.subscription().insuranceCostFcl());// 풍수해가입금액2
+                cellTool.setCellValue(row, 38, data.subscription().insuranceCostDeductible());// 풍수해자가부담금액2
+                cellTool.setCellValue(row, 39, data.subscription().insuranceCostInven() != 0 ? "024" : "");// 목적물코드3
+                cellTool.setCellValue(row, 40, data.subscription().insuranceCostInven());// 풍수해가입금액3
+                cellTool.setCellValue(row, 41, sub.insuranceCostInven() != 0 && sub.insuranceCostDeductible() != 0
+                        ? sub.insuranceCostDeductible().toString() : "");// 풍수해자가부담금액3
                 row.createCell(42).setCellValue("");// 목적물코드4
                 row.createCell(43).setCellValue("");// 풍수해가입금액4
                 row.createCell(44).setCellValue("");// 풍수해자기부담금액4
-                row.createCell(45).setCellValue("");// 보험료산출기준
-                row.createCell(46).setCellValue("");// 기부가입계약유형
+                cellTool.setCellValue(row, 45, sub.payYn() == "Y" ? "0" : "3");// 보험료산출기준
+                cellTool.setCellValue(row, 46, loc.tmYn() != "Y" || loc.groundFloorYn() == "Y" ? "3" : "1");// 기부가입계약유형
 
             }
             workbook.write(outputStream);
