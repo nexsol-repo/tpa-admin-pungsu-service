@@ -1,5 +1,6 @@
 package com.nexsol.tpa.core.domain;
 
+import com.nexsol.tpa.core.enums.DisplayStatus;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -14,21 +15,10 @@ public record InsuredContract(Integer id, String referIdx, String payYn, // 결�
         String insuranceCompany, // 보험사
         LocalDateTime insuranceStartDate, // 보험기간 시작
         LocalDateTime insuranceEndDate, // 보험기간 종료
-        String joinCheck, boolean isRenewalTarget, // 갱신대상 여부,
+        String joinCheck, DisplayStatus displayStatus, // 가입 상태 (가입완료/만기임박/기간만료/임의해지)
         String account, // 제휴사
-        String path // 채널,
+        String path // 채널
 
 ) {
-
-    public boolean isRenewalTarget(LocalDateTime now) {
-        if (insuranceEndDate == null) {
-            return false;
-        }
-        // 기존: now.plusMonths(1) -> 수정: now.plusDays(7)
-        LocalDateTime oneWeekLater = now.plusDays(7);
-
-        // 현재보다는 미래여야 하고(종료 전), 일주일 뒤보다는 과거여야 함(임박)
-        return insuranceEndDate.isAfter(now) && insuranceEndDate.isBefore(oneWeekLater);
-    }
 
 }

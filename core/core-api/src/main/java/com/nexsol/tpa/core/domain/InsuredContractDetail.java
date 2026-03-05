@@ -4,5 +4,6 @@ import lombok.Builder;
 
 @Builder
 public record InsuredContractDetail(Integer id, String referIdx, String prctrNo, InsuredInfo insuredInfo,
-        ContractInfo contractInfo, BusinessLocationInfo location, InsuredSubscriptionInfo subscription) {
+        ContractInfo contractInfo, BusinessLocationInfo location, InsuredSubscriptionInfo subscription,
+        PaymentInfo payment) {
 }
