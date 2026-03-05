@@ -11,6 +11,12 @@ public record FreeContractUpdateInfo(String businessNo, String companyName, Stri
         String insuranceCompany, Long totalPremium, // 총보험료
         Long govPremium, // 국가부담
         Long localPremium, // 지자체부담
-        Long ownerPremium // 개인부담
+        Long ownerPremium, // 개인부담
+        String errorReason // 오류사유 (값이 있으면 가입오류 처리)
 ) {
+
+    public boolean hasError() {
+        return errorReason != null && !errorReason.isBlank();
+    }
+
 }

@@ -181,9 +181,16 @@ include::{snippets}/admin-building-ledger-search/http-response.adoc[]
 ==== Response Fields
 include::{snippets}/admin-building-ledger-search/response-fields.adoc[]
 
-=== 무료계약 엑셀 업로드
-보험사로부터 수령한 무료계약 확정 리스트(엑셀)를 업로드하여 시스템 내 가입 대기 계약들을 일괄적으로 가입 완료 상태로 업데이트합니다.
-삼성, 메리츠, KB, DB 각 보험사의 특정 양식을 자동으로 식별하여 처리합니다.
+=== 무료계약 통합 엑셀 업로드
+보험사로부터 수령한 무료계약 확정 리스트를 통합 템플릿(엑셀)으로 업로드하여 가입 대기 계약들을 일괄 처리합니다.
+
+**통합 템플릿 헤더**: 보험사명, 사업자번호, 상호명, 주소, 증권번호, 보험시작일, 보험종기일, 총보험료, 국가부담, 지자체부담, 개인부담, 오류사유
+
+**처리 규칙**:
+
+* `오류사유` 컬럼이 비어있으면 → 가입완료(`joinCheck=Y`) 처리
+* `오류사유` 컬럼에 내용이 있으면 → 가입오류(`joinCheck=F`) 처리
+* 대상: `joinCheck=N`(보험접수완료) AND `payYn=N`(무료) 상태인 계약만 매칭
 
 ==== Curl Request
 include::{snippets}/admin-insured-free-contract-upload/curl-request.adoc[]

@@ -126,10 +126,17 @@ public class InsuredController {
         return ApiResponse.success(ResultType.SUCCESS);
     }
 
+    // @PostMapping("/contract/free/upload")
+    // public ApiResponse<FreeContractUploadResponse> uploadFreeContract(@RequestPart MultipartFile file,
+    //         @LoginAdmin AdminUser admin) {
+    //     UpdateCount stats = insuredService.updateFreeContracts(file);
+    //     return ApiResponse.success(FreeContractUploadResponse.of(stats));
+    // }
+
     @PostMapping("/contract/free/upload")
-    public ApiResponse<FreeContractUploadResponse> uploadFreeContract(@RequestPart MultipartFile file,
+    public ApiResponse<FreeContractUploadResponse> uploadUnifiedFreeContract(@RequestPart MultipartFile file,
             @LoginAdmin AdminUser admin) {
-        UpdateCount stats = insuredService.updateFreeContracts(file);
+        UpdateCount stats = insuredService.updateUnifiedFreeContracts(file);
         return ApiResponse.success(FreeContractUploadResponse.of(stats));
     }
 

@@ -132,6 +132,11 @@ public class InsuredService {
         return insuredContractorWriter.confirmFreeContract(file);
     }
 
+    @Transactional
+    public UpdateCount updateUnifiedFreeContracts(MultipartFile file) {
+        return insuredContractorWriter.confirmUnifiedFreeContract(file);
+    }
+
     public void send(InsuredContractDetail detail, MailType type, String targetUrl, Long adminId) {
         String token = getJwtToken();
 
