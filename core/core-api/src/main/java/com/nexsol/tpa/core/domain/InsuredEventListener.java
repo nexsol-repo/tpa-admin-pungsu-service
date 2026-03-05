@@ -65,25 +65,22 @@ public class InsuredEventListener {
         Long cId = Long.valueOf(event.contractId());
         String message = buildSmsMessage(event);
 
-        // 1. 메일 발송 및 이력/메모 저장
+        // 1. 메일 발송 및 이력 저장
         try {
             emailSender.send(event.email(), event.type(), event.link(), event.name());
-            String mailMemo = "[메일] " + event.type().getTitleSuffix() + " 발송 완료";
             memoClient.recordNotification(cId,
-                    new CreateNotificationRequest("MAIL", mailMemo, ServiceType.PUNGSU), adminId);
-            memoClient.registerMemo(cId, new CreateMemoRequest(mailMemo, ServiceType.PUNGSU), adminId);
+                    new CreateNotificationRequest("MAIL", event.type().getTitleSuffix() + " 발송 완료", ServiceType.PUNGSU),
+                    adminId);
         }
         catch (Exception e) {
             log.error("메일 발송/이력저장 실패: {}", event.contractId(), e);
         }
 
-        // 2. 문자 발송 및 이력/메모 저장
+        // 2. 문자 발송 및 이력 저장
         try {
             smsSender.sendSms(event.phoneNumber(), message);
-            String smsMemo = "[문자] " + event.type().getTitleSuffix() + " 발송 완료";
             memoClient.recordNotification(cId, new CreateNotificationRequest("SMS", message, ServiceType.PUNGSU),
                     adminId);
-            memoClient.registerMemo(cId, new CreateMemoRequest(smsMemo, ServiceType.PUNGSU), adminId);
         }
         catch (Exception e) {
             log.error("문자 발송/이력저장 실패: {}", event.contractId(), e);
