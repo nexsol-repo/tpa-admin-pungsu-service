@@ -99,4 +99,50 @@ public class InsuredContractorWriter {
         return result;
     }
 
+    @Transactional
+    public UpdateCount confirmUnifiedFreeContract(MultipartFile file) {
+        // 1. 엑셀 파싱 (통합 템플릿)
+        List<FreeContractUpdateInfo> updates = freeContractExcelTool.parseFile(file);
+
+        int totalCount = updates.size();
+        int successCount = 0;
+        int failureCount = 0;
+        int errorCount = 0;
+
+        // 2. 순회하며 업데이트 처리
+        for (FreeContractUpdateInfo info : updates) {
+            // joinCheck=N, payYn=N (무료) 상태인 건만 조회
+            Optional<TotalFormMemberEntity> entityOpt = totalFormMemberRepository
+                .findFirstByBusinessNumberAndPayYnAndInsuranceCompanyAndJoinCheck(
+                        info.businessNo(), "N", info.insuranceCompany(), "N");
+
+            if (entityOpt.isPresent()) {
+                TotalFormMemberEntity entity = entityOpt.get();
+
+                if (info.hasError()) {
+                    // 오류사유가 있으면 가입오류(F) 처리
+                    entity.markAsFailed();
+                    errorCount++;
+                }
+                else {
+                    // 정상: 가입완료(Y) 처리
+                    entity.updateFreeContract(info.securityNo(), info.companyName(), info.insuranceDate(),
+                            info.insuranceEndDate(), info.totalPremium(), info.govPremium(), info.localPremium(),
+                            info.ownerPremium());
+                    successCount++;
+                }
+            }
+            else {
+                failureCount++;
+            }
+        }
+
+        return UpdateCount.builder()
+            .totalCount(totalCount)
+            .successCount(successCount)
+            .failCount(failureCount)
+            .errorCount(errorCount)
+            .build();
+    }
+
 }

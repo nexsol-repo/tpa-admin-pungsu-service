@@ -322,4 +322,8 @@ public class TotalFormMemberEntity {
             .build();
     }
 
+    public void markAsFailed() {
+        this.joinCheck = "F";
+    }
+
 }

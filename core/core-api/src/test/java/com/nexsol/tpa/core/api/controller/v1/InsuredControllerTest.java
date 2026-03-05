@@ -424,15 +424,14 @@ public class InsuredControllerTest extends RestDocsTest {
     }
 
     @Test
-    @DisplayName("무료계약 엑셀 업로드 API 문서화")
-    void uploadFreeContract_success() throws Exception {
+    @DisplayName("무료계약 통합 엑셀 업로드 API 문서화")
+    void uploadUnifiedFreeContract_success() throws Exception {
         // given
-        MockMultipartFile file = new MockMultipartFile("file", "free_contract.xlsx",
+        MockMultipartFile file = new MockMultipartFile("file", "무료계약_통합.xlsx",
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "엑셀 데이터 내용".getBytes());
 
-        // [수정 1] Service가 반환할 Mock 객체 생성 (UpdateStats)
-        UpdateCount mockStats = new UpdateCount(100, 95, 5); // 총 100건, 성공 95, 실패 5
-        given(insuredService.updateFreeContracts(any(MultipartFile.class))).willReturn(mockStats);
+        UpdateCount mockStats = new UpdateCount(100, 90, 5, 5); // 총 100건, 성공 90, 실패 5, 가입오류 5
+        given(insuredService.updateUnifiedFreeContracts(any(MultipartFile.class))).willReturn(mockStats);
 
         // when & then
         mockMvc
@@ -440,18 +439,21 @@ public class InsuredControllerTest extends RestDocsTest {
                 .contentType(MediaType.MULTIPART_FORM_DATA))
             .andExpect(status().isOk())
             .andDo(document("admin-insured-free-contract-upload",
-                    requestParts(partWithName("file").description("업로드할 무료계약 엑셀 파일 (삼성, 메리츠, KB, DB 양식 지원)")),
+                    requestParts(partWithName("file")
+                        .description("통합 무료계약 엑셀 파일 (헤더: 보험사명, 사업자번호, 상호명, 주소, 증권번호, 보험시작일, 보험종기일, 총보험료, 국가부담, 지자체부담, 개인부담, 오류사유)")),
                     responseFields(
                             fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (SUCCESS/ERROR)"),
-                            // [수정 2] 응답 데이터 필드 정의 수정 (DTO 구조 반영)
                             fieldWithPath("data.totalCount").type(JsonFieldType.NUMBER).description("총 처리 건수"),
-                            fieldWithPath("data.successCount").type(JsonFieldType.NUMBER).description("성공 건수"),
+                            fieldWithPath("data.successCount").type(JsonFieldType.NUMBER)
+                                .description("가입완료 처리 건수"),
                             fieldWithPath("data.failureCount").type(JsonFieldType.NUMBER)
                                 .description("실패 건수 (DB 매칭 실패 등)"),
+                            fieldWithPath("data.errorCount").type(JsonFieldType.NUMBER)
+                                .description("가입오류 처리 건수 (오류사유 있는 건)"),
                             fieldWithPath("error").description("에러 정보").optional())));
 
         // verify
-        verify(insuredService, times(1)).updateFreeContracts(any(MultipartFile.class));
+        verify(insuredService, times(1)).updateUnifiedFreeContracts(any(MultipartFile.class));
     }
 
     // --- 헬퍼 메서드 ---
