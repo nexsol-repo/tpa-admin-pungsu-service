@@ -7,15 +7,21 @@ APP_NAME="tpa-admin-pungsu-api"
 ROUTE_PATH="/upstream/pungsu/"
 BASE_PATH="/home/nex3/app/${APP_NAME}"
 
-if [ "$TARGET_ENV" != "prod" ]; then
-  echo "⚠️ 현재 설정은 main 브랜치(prod) 배포만 지원합니다."
+if [ "$TARGET_ENV" != "prod" ] && [ "$TARGET_ENV" != "dev" ]; then
+  echo "⚠️ 사용법: ./deploy.sh [dev|prod]"
   exit 1
 fi
 
-# Prod 환경 설정
-ENV_FILE=".env.prod"
-NGINX_CONF="/etc/nginx/conf.d/tpa-admin-api.conf"
-DEFAULT_PORT="8103"
+# 환경별 설정
+if [ "$TARGET_ENV" == "prod" ]; then
+  ENV_FILE=".env.prod"
+  NGINX_CONF="/etc/nginx/conf.d/tpa-admin-api.conf"
+  DEFAULT_PORT="8103"
+else
+  ENV_FILE=".env.dev"
+  NGINX_CONF="/etc/nginx/conf.d/tpa-admin-api-dev.conf"
+  DEFAULT_PORT="8105"
+fi
 
 echo "🚀 ${APP_NAME} (${TARGET_ENV}) 배포 시작..."
 
@@ -23,12 +29,12 @@ echo "🚀 ${APP_NAME} (${TARGET_ENV}) 배포 시작..."
 if [ -f "${BASE_PATH}/${ENV_FILE}" ]; then
   cp "${BASE_PATH}/${ENV_FILE}" "${BASE_PATH}/.env"
 else
-  echo "❌ .env.prod 파일이 없습니다. 서버에 파일을 생성해주세요."
+  echo "❌ ${ENV_FILE} 파일이 없습니다. 서버에 파일을 생성해주세요."
   exit 1
 fi
 
 # 2. Blue-Green 포트 결정
-CURRENT_PORT_FILE="${BASE_PATH}/current_port.txt"
+CURRENT_PORT_FILE="${BASE_PATH}/current_port_${TARGET_ENV}.txt"
 if [ -f "$CURRENT_PORT_FILE" ]; then
     CURRENT_PORT=$(cat "$CURRENT_PORT_FILE")
 else
@@ -36,16 +42,23 @@ else
 fi
 
 
-if [ "$CURRENT_PORT" == "8103" ]; then
-    TARGET_PORT="8104"
+if [ "$TARGET_ENV" == "prod" ]; then
+    if [ "$CURRENT_PORT" == "8103" ]; then
+        TARGET_PORT="8104"
+    else
+        TARGET_PORT="8103"
+    fi
 else
-    TARGET_PORT="8103"
+    if [ "$CURRENT_PORT" == "8105" ]; then
+        TARGET_PORT="8106"
+    else
+        TARGET_PORT="8105"
+    fi
 fi
 echo "🔄 포트 스위칭 계획: ${CURRENT_PORT} -> ${TARGET_PORT}"
 
 # 3. 신규 컨테이너 실행
 export HOST_PORT=$TARGET_PORT
-export TARGET_ENV="prod"
 export DOCKER_IMAGE="${APP_NAME}:${TARGET_ENV}"
 export COMPOSE_PROJECT_NAME="${APP_NAME}-${TARGET_ENV}-${TARGET_PORT}"
 

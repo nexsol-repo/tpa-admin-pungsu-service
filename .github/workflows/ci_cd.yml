@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - dev
   workflow_dispatch:
 
 env:
@@ -18,12 +19,21 @@ jobs:
       - name: Checkout Source
         uses: actions/checkout@v6
 
+      - name: Determine Environment
+        id: env
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "target=prod" >> $GITHUB_OUTPUT
+          else
+            echo "target=dev" >> $GITHUB_OUTPUT
+          fi
+
       - name: Docker Image Build
         run: |
           echo "🐳 Build Docker Images"
           docker build \
             --network=host \
-            -t ${{ env.IMAGE_NAME }}:prod -f Dockerfile .
+            -t ${{ env.IMAGE_NAME }}:${{ steps.env.outputs.target }} -f Dockerfile .
 
       - name: Prepare & Execute Deployment
         run: |
@@ -34,13 +44,9 @@ jobs:
           cp scripts/deploy.sh ${{ env.DEPLOY_PATH }}/
           chmod +x ${{ env.DEPLOY_PATH }}/deploy.sh
           
-          # 환경 결정 (dev/prod)
-          TARGET_ENV="dev"
-          [[ "${{ github.ref_name }}" == "main" ]] && TARGET_ENV="prod"
-          
           # 배포 스크립트 실행
           cd ${{ env.DEPLOY_PATH }}
-          ./deploy.sh $TARGET_ENV
+          ./deploy.sh ${{ steps.env.outputs.target }}
 
       - name: Cleanup Docker
         run: docker image prune -f

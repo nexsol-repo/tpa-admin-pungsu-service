@@ -66,9 +66,7 @@ spring.config.activate.on-profile: dev
 
 
 ---
-spring.config.activate.on-profile: staging
+spring.config.activate.on-profile: prod
 
 
----
-spring.config.activate.on-profile: live
 
