@@ -57,6 +57,7 @@ public class InsuredContractFinder {
         RefundInfo refundInfo = refundPaymentRepository.findByContractId(id).map(this::mapToRefundInfo).orElse(null);
 
         return new InsuredContractDetail(entity.getId(), entity.getReferIdx(), entity.getPrctrNo(),
+                DisplayStatus.resolve(entity.getJoinCheck(), entity.getInsuranceEndDate()),
                 mapToInsuredInfo(entity), mapToContractorInfo(entity), mapToBusinessLocationInfo(entity),
                 mapToInsuranceSubscriptionInfo(entity), mapToPaymentInfo(entity, refundInfo));
     }
@@ -225,6 +226,7 @@ public class InsuredContractFinder {
 
     private InsuredContractDetail mapToDetail(TotalFormMemberEntity entity) {
         return new InsuredContractDetail(entity.getId(), entity.getReferIdx(), entity.getPrctrNo(),
+                DisplayStatus.resolve(entity.getJoinCheck(), entity.getInsuranceEndDate()),
                 mapToInsuredInfo(entity), // 피보험자 정보 매핑
                 mapToContractorInfo(entity), // 계약자 정보 매핑
                 mapToBusinessLocationInfo(entity), // 사업장 정보 매핑
