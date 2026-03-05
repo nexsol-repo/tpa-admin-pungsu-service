@@ -6,6 +6,7 @@ import com.nexsol.tpa.core.api.controller.v1.request.NotificationSendRequest;
 import com.nexsol.tpa.core.domain.*;
 
 import com.nexsol.tpa.core.domain.LoginAdmin;
+import com.nexsol.tpa.core.enums.DisplayStatus;
 import com.nexsol.tpa.core.enums.MailType;
 import com.nexsol.tpa.core.support.DomainPage;
 import com.nexsol.tpa.core.support.OffsetLimit;
@@ -52,14 +53,11 @@ public class InsuredControllerTest extends RestDocsTest {
 
     private InsuredService insuredService;
 
-    private MeritzService meritzService;
-
     private final JsonMapper jsonMapper = JsonMapper.builder().findAndAddModules().build();
 
     @BeforeEach
     public void setUp(RestDocumentationContextProvider restDocumentation) {
         insuredService = mock(InsuredService.class);
-        meritzService = mock(MeritzService.class);
 
         HandlerMethodArgumentResolver loginAdminResolver = new HandlerMethodArgumentResolver() {
             @Override
@@ -95,7 +93,7 @@ public class InsuredControllerTest extends RestDocsTest {
             .insuranceCompany("메리츠화재")
             .insuranceStartDate(LocalDateTime.of(2025, 12, 1, 0, 0))
             .insuranceEndDate(LocalDateTime.of(2026, 11, 30, 23, 59))
-            .isRenewalTarget(false)
+            .displayStatus(DisplayStatus.JOINED)
             .joinCheck("Y")
             .account("TPA KOREA")
             .path("TPA KOREA")
@@ -142,7 +140,7 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("data.content[].insuranceCompany").description("보험사"),
                             fieldWithPath("data.content[].insuranceStartDate").description("보험시작일"),
                             fieldWithPath("data.content[].insuranceEndDate").description("보험종료일"),
-                            fieldWithPath("data.content[].isRenewalTarget").description("갱신대상여부"),
+                            fieldWithPath("data.content[].displayStatus").description("가입상태 (JOINED:가입완료, EXPIRING_SOON:만기임박, EXPIRED:기간만료, CANCELLED:임의해지)"),
                             fieldWithPath("data.content[].joinCheck").description(
                                     "계약 진행상태(W:가입진행, N:보온접수완료, R: 보험사 접수, Y:가입완료(유효), D:가입반려(보험사 중복), E:가입반려(주소오류), F:결제실패(보험사), X:보험만료)"),
                             fieldWithPath("data.content[].account").description("제휴사"),
@@ -218,7 +216,6 @@ public class InsuredControllerTest extends RestDocsTest {
                 .insuranceNumber("POL-123")
                 .account("TPA")
                 .path("WEB")
-                .isRenewalTarget(true)
                 .insuranceStartDate(LocalDateTime.now())
                 .insuranceEndDate(LocalDateTime.now().plusYears(1))
                 .totalInsuranceCost(500000L)
@@ -232,6 +229,13 @@ public class InsuredControllerTest extends RestDocsTest {
                 .totalGovernmentCost(0L)
                 .totalLocalGovernmentCost(0L)
                 .build())
+            .payment(PaymentInfo.builder()
+                .payStatus("Y")
+                .payMethod("CARD")
+                .payDt(LocalDateTime.of(2025, 3, 15, 16, 7, 39))
+                .applyCost(123123123L)
+                .refund(null)
+                .build())
             .build();
 
         given(insuredService.getDetail(id)).willReturn(response);
@@ -244,6 +248,7 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("data.referIdx").description("참조번호").optional(),
                             insuredFields("data.insuredInfo."), contractFields("data.contractInfo."),
                             locationFields("data.location."), subscriptionFields("data.subscription."),
+                            paymentFields("data.payment."),
                             fieldWithPath("error").description("에러").optional()))));
     }
 
@@ -295,6 +300,8 @@ public class InsuredControllerTest extends RestDocsTest {
                     .build(),
                 "수정 메모");
 
+
+
         given(insuredService.modify(eq(id), any(), any(), any(), any(), any(), eq(adminId))).willReturn(id);
 
         mockMvc
@@ -325,6 +332,7 @@ public class InsuredControllerTest extends RestDocsTest {
             .id(id)
             .referIdx("REF-123")
             .insuredInfo(new InsuredInfo("홍길동", "123-45-67890", "19900101", "test@co.kr", "010-1234-5678"))
+            .payment(null)
             .build();
 
         given(insuredService.getDetail(id)).willReturn(mockDetail);
@@ -471,9 +479,6 @@ public class InsuredControllerTest extends RestDocsTest {
                 fieldWithPath(prefix + "payYn").description("납입여부").optional(),
                 fieldWithPath(prefix + "account").description("제휴사").optional(),
                 fieldWithPath(prefix + "path").description("채널").optional(),
-                fieldWithPath(prefix + "isRenewalTarget").description("갱신대상여부 (조회전용, 수정불가)")
-                    .type(JsonFieldType.BOOLEAN)
-                    .optional(),
                 fieldWithPath(prefix + "insuranceCostBld").description("건물 가입금액").optional(),
                 fieldWithPath(prefix + "insuranceCostFcl").description("시설 가입금액").optional(),
                 fieldWithPath(prefix + "insuranceCostMach").description("기계 가입금액").optional(),
@@ -511,6 +516,19 @@ public class InsuredControllerTest extends RestDocsTest {
         return new FieldDescriptor[] { fieldWithPath(prefix + "contractName").description("계약자명"),
                 fieldWithPath(prefix + "contractBusinessNumber").description("계약자 번호").optional(),
                 fieldWithPath(prefix + "contractAddress").description("계약자 주소").optional() };
+    }
+
+    private FieldDescriptor[] paymentFields(String prefix) {
+        return new FieldDescriptor[] {
+                fieldWithPath(prefix + "payStatus").description("결제 상태 (N:결제전, Y:결제완료, C:환불완료)").optional(),
+                fieldWithPath(prefix + "payMethod").description("결제 방법 (CARD:신용카드, BANK:계좌이체, VBANK:가상계좌, DBANK:무통장입금)").optional(),
+                fieldWithPath(prefix + "payDt").description("결제 일시").optional(),
+                fieldWithPath(prefix + "applyCost").description("결제 금액").optional(),
+                fieldWithPath(prefix + "refund").description("환불 정보").optional(),
+                fieldWithPath(prefix + "refund.refundAmount").description("환불 금액").optional(),
+                fieldWithPath(prefix + "refund.refundMethod").description("환불 방법").optional(),
+                fieldWithPath(prefix + "refund.refundDt").description("환불 일시").optional(),
+                fieldWithPath(prefix + "refund.refundReason").description("환불 사유").optional() };
     }
 
 }
