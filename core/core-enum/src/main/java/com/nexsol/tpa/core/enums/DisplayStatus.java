@@ -4,10 +4,7 @@ import java.time.LocalDateTime;
 
 public enum DisplayStatus {
 
-    JOINED("가입완료"),
-    EXPIRING_SOON("만기임박"),
-    EXPIRED("기간만료"),
-    CANCELLED("임의해지");
+    JOINED("가입완료"), EXPIRING_SOON("만기임박"), EXPIRED("기간만료"), CANCELLED("임의해지");
 
     private final String description;
 

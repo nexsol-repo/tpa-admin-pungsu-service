@@ -54,9 +54,7 @@ public class InsuredContractFinder {
         TotalFormMemberEntity entity = totalFormMemberRepository.findById(id)
             .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND_DATA));
 
-        RefundInfo refundInfo = refundPaymentRepository.findByContractId(id)
-            .map(this::mapToRefundInfo)
-            .orElse(null);
+        RefundInfo refundInfo = refundPaymentRepository.findByContractId(id).map(this::mapToRefundInfo).orElse(null);
 
         return new InsuredContractDetail(entity.getId(), entity.getReferIdx(), entity.getPrctrNo(),
                 mapToInsuredInfo(entity), mapToContractorInfo(entity), mapToBusinessLocationInfo(entity),
