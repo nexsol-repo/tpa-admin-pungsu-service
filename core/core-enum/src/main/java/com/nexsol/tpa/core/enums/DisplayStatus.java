@@ -1,0 +1,39 @@
+package com.nexsol.tpa.core.enums;
+
+import java.time.LocalDateTime;
+
+public enum DisplayStatus {
+
+    JOINED("가입완료"),
+    EXPIRING_SOON("만기임박"),
+    EXPIRED("기간만료"),
+    CANCELLED("임의해지");
+
+    private final String description;
+
+    DisplayStatus(String description) {
+        this.description = description;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public static DisplayStatus resolve(String joinCheck, LocalDateTime insuranceEndDate) {
+        if ("C".equals(joinCheck)) {
+            return CANCELLED;
+        }
+        if ("X".equals(joinCheck)) {
+            return EXPIRED;
+        }
+        if ("Y".equals(joinCheck) && insuranceEndDate != null) {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime sevenDaysLater = now.plusDays(7);
+            if (insuranceEndDate.isAfter(now) && insuranceEndDate.isBefore(sevenDaysLater)) {
+                return EXPIRING_SOON;
+            }
+        }
+        return JOINED;
+    }
+
+}
