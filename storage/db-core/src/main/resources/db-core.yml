@@ -85,8 +85,8 @@ storage:
     boon:
       driver-class-name: org.mariadb.jdbc.Driver
       jdbc-url: jdbc:mariadb://${BOON_DB_URL}
-      username: ${DB_USERNAME}
-      password: ${DB_PASSWORD}
+      username: ${BOON_DB_USERNAME}
+      password: ${BOON_DB_PASSWORD}
       maximum-pool-size: 5
       pool-name: boon-db-pool
       data-source-properties:
@@ -113,8 +113,8 @@ storage:
     boon:
       driver-class-name: org.mariadb.jdbc.Driver
       jdbc-url: jdbc:mariadb://${BOON_DB_URL}
-      username: ${DB_USERNAME}
-      password: ${DB_PASSWORD}
+      username: ${BOON_DB_USERNAME}
+      password: ${BOON_DB_PASSWORD}
       maximum-pool-size: 5
       pool-name: boon-db-pool
       data-source-properties:
