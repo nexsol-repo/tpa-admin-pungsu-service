@@ -158,7 +158,8 @@ public class InsuredEventListener {
                     이운집드림
 
                     010-6855-3638 / uj.lee@tpakorea.com\
-                    """.formatted(event.name(), formattedDate, event.link());
+                    """
+                .formatted(event.name(), formattedDate, event.link());
         }
         return "";
     }
