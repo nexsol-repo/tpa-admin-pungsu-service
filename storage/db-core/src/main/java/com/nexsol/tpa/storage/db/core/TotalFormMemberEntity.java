@@ -266,6 +266,13 @@ public class TotalFormMemberEntity {
         this.path = path;
     }
 
+    public void applyPaymentInfo(String payStatus, String payMethod, LocalDateTime payDt, Long applyCost) {
+        this.payStatus = payStatus;
+        this.payMethod = payMethod;
+        this.payDt = payDt;
+        this.applyCost = applyCost;
+    }
+
     public void applyEntryDiv(String entryDiv) {
         this.entryDiv = entryDiv;
     }

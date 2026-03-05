@@ -111,7 +111,7 @@ public class InsuredController {
         // 서비스 레이어에 수정을 위임
         // (ID와 함께 가입자/계약정보 Record를 전달)
         insuredService.modify(id, request.insuredInfo(), request.contract(), request.location(), request.subscription(),
-                request.memoContent(), admin.userId());
+                request.payment(), request.memoContent(), admin.userId());
 
         return ApiResponse.success(ResultType.SUCCESS);
     }
@@ -121,7 +121,7 @@ public class InsuredController {
 
         // Service는 비즈니스 흐름만 관장 (등록 -> 로그/이벤트 발행)
         insuredService.register(request.insuredInfo(), request.contractInfo(), request.location(),
-                request.subscription(), request.memoContent(), admin.userId());
+                request.subscription(), request.payment(), request.memoContent(), admin.userId());
 
         return ApiResponse.success(ResultType.SUCCESS);
     }

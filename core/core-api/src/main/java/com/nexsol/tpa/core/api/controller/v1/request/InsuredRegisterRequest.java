@@ -4,9 +4,10 @@ import com.nexsol.tpa.core.domain.BusinessLocationInfo;
 import com.nexsol.tpa.core.domain.ContractInfo;
 import com.nexsol.tpa.core.domain.InsuredSubscriptionInfo;
 import com.nexsol.tpa.core.domain.InsuredInfo;
+import com.nexsol.tpa.core.domain.PaymentInfo;
 import lombok.Builder;
 
 @Builder
 public record InsuredRegisterRequest(InsuredInfo insuredInfo, ContractInfo contractInfo, BusinessLocationInfo location,
-        InsuredSubscriptionInfo subscription, String memoContent) {
+        InsuredSubscriptionInfo subscription, PaymentInfo payment, String memoContent) {
 }
