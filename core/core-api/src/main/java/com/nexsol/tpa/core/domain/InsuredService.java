@@ -50,9 +50,9 @@ public class InsuredService {
 
     @Transactional
     public Integer modify(Integer id, InsuredInfo insured, ContractInfo contract, BusinessLocationInfo location,
-            InsuredSubscriptionInfo subscription, String memoContent, Long adminId) {
+            InsuredSubscriptionInfo subscription, PaymentInfo payment, String memoContent, Long adminId) {
         List<ChangeDetail> diffs = insuredContractorWriter.writeAndGetDiff(id, insured, contract, location,
-                subscription);
+                subscription, payment);
         String token = getJwtToken();
 
         if (!diffs.isEmpty()) {
@@ -78,8 +78,8 @@ public class InsuredService {
 
     @Transactional
     public void register(InsuredInfo insured, ContractInfo contract, BusinessLocationInfo location,
-            InsuredSubscriptionInfo subscription, String memoContent, Long adminId) {
-        Integer contractId = insuredContractorWriter.write(insured, contract, location, subscription);
+            InsuredSubscriptionInfo subscription, PaymentInfo payment, String memoContent, Long adminId) {
+        Integer contractId = insuredContractorWriter.write(insured, contract, location, subscription, payment);
 
         String token = getJwtToken();
 
@@ -151,6 +151,8 @@ public class InsuredService {
             .account(detail.subscription().account())
             .payYn(detail.subscription().payYn())
             .policyNumber(detail.subscription().insuranceNumber())
+            .insuranceStartDate(detail.subscription().insuranceStartDate())
+            .insuranceEndDate(detail.subscription().insuranceEndDate())
             .build();
         eventPublisher.publishEvent(event);
 

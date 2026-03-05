@@ -3,6 +3,7 @@ package com.nexsol.tpa.core.domain;
 import com.nexsol.tpa.storage.db.core.CoverageAmount;
 import com.nexsol.tpa.storage.db.core.PremiumAmount;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberEntity;
+import com.nexsol.tpa.core.domain.PaymentInfo;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.Objects;
 public class ContractChangeDetector {
 
     public List<ChangeDetail> detect(TotalFormMemberEntity entity, InsuredInfo insured, ContractInfo contract,
-            BusinessLocationInfo location, InsuredSubscriptionInfo subscription) {
+            BusinessLocationInfo location, InsuredSubscriptionInfo subscription, PaymentInfo payment) {
         List<ChangeDetail> changes = new ArrayList<>();
 
         if (insured != null) {
@@ -74,6 +75,13 @@ public class ContractChangeDetector {
 
             compare("진행상태", entity.getJoinCheck(), subscription.joinCheck(), changes);
             compare("결제여부", entity.getPayYn(), subscription.payYn(), changes);
+        }
+
+        if (payment != null) {
+            compare("결제상태", entity.getPayStatus(), payment.payStatus(), changes);
+            compare("결제방법", entity.getPayMethod(), payment.payMethod(), changes);
+            compare("결제일시", entity.getPayDt(), payment.payDt(), changes);
+            compare("결제금액", entity.getApplyCost(), payment.applyCost(), changes);
         }
 
         return changes;

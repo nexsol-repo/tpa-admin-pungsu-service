@@ -40,6 +40,10 @@ public class InsuredContractQueryGenerator {
                     }
                     case EXPIRED -> predicates.add(cb.equal(root.get("joinCheck"), "X"));
                     case CANCELLED -> predicates.add(cb.equal(root.get("joinCheck"), "C"));
+                    case FAILED -> {
+                        predicates.add(cb.equal(root.get("joinCheck"), "F"));
+                        predicates.add(cb.equal(root.get("payYn"), "N"));
+                    }
                 }
             }
 

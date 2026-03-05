@@ -31,27 +31,27 @@ public class InsuredContractorWriter {
     private final ContractChangeDetector changeDetector;
 
     public List<ChangeDetail> writeAndGetDiff(Integer id, InsuredInfo insured, ContractInfo contract,
-            BusinessLocationInfo location, InsuredSubscriptionInfo subscription) {
+            BusinessLocationInfo location, InsuredSubscriptionInfo subscription, PaymentInfo payment) {
         TotalFormMemberEntity entity = totalFormMemberRepository.findById(id)
             .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND_DATA));
 
         // 1. 수정 전 상태와 새로운 개념 객체들을 비교하여 변경 사항 추출
-        List<ChangeDetail> diffs = changeDetector.detect(entity, insured, contract, location, subscription);
+        List<ChangeDetail> diffs = changeDetector.detect(entity, insured, contract, location, subscription, payment);
 
         // 2. 실제 엔티티 업데이트
-        entityMapper.updateEntity(entity, insured, contract, location, subscription);
+        entityMapper.updateEntity(entity, insured, contract, location, subscription, payment);
 
         return diffs;
     }
 
     public Integer write(InsuredInfo insured, ContractInfo contract, BusinessLocationInfo location,
-            InsuredSubscriptionInfo subscription) {
+            InsuredSubscriptionInfo subscription, PaymentInfo payment) {
         // 1. 키 생성
         String referIdx = keyGenerator.generate();
 
         // 2. 엔티티 변환 및 저장 (Mapper 활용)
         TotalFormMemberEntity entity = entityMapper.toEntity(referIdx, "OFFLINE", insured, contract, location,
-                subscription);
+                subscription, payment);
 
         // 3. 건물급수,지역코드 계산 및 적용
         directRegistration.applyDerivedFields(entity, location);
