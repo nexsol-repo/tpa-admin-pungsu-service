@@ -195,6 +195,7 @@ public class InsuredControllerTest extends RestDocsTest {
         InsuredContractDetail response = InsuredContractDetail.builder()
             .id(id)
             .referIdx("20251217144520zmhadj")
+            .displayStatus(DisplayStatus.JOINED)
             .insuredInfo(new InsuredInfo("홍길동", "1234567890", "19900101", "test@nexsol.com", "01012345678"))
             .contractInfo(new ContractInfo("넥솔", "9876543210", "서울시 강남구"))
             .location(BusinessLocationInfo.builder()
@@ -254,6 +255,8 @@ public class InsuredControllerTest extends RestDocsTest {
                     responseFields(flatten(fieldWithPath("result").description("결과"),
                             fieldWithPath("data.id").description("ID"),
                             fieldWithPath("data.referIdx").description("참조번호").optional(),
+                            fieldWithPath("data.displayStatus")
+                                .description("가입 상태 (JOINED: 가입완료, EXPIRING_SOON: 만기임박, EXPIRED: 기간만료, CANCELLED: 임의해지)"),
                             insuredFields("data.insuredInfo."), contractFields("data.contractInfo."),
                             locationFields("data.location."), subscriptionFields("data.subscription."),
                             paymentFields("data.payment."), fieldWithPath("error").description("에러").optional()))));
