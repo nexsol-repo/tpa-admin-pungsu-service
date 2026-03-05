@@ -93,35 +93,7 @@ storage:
         rewriteBatchedStatements: true
 
 ---
-spring.config.activate.on-profile: staging
-
-storage:
-  datasource:
-    core:
-      driver-class-name: org.mariadb.jdbc.Driver
-      jdbc-url: jdbc:mariadb://${DB_URL}
-      username: ${DB_USERNAME}
-      password: ${DB_PASSWORD}
-      maximum-pool-size: 5
-      connection-timeout: 1100
-      keepalive-time: 30000
-      validation-timeout: 1000
-      max-lifetime: 600000
-      pool-name: core-db-pool
-      data-source-properties:
-        rewriteBatchedStatements: true
-    boon:
-      driver-class-name: org.mariadb.jdbc.Driver
-      jdbc-url: jdbc:mariadb://${BOON_DB_URL}
-      username: ${DB_USERNAME}
-      password: ${DB_PASSWORD}
-      maximum-pool-size: 5
-      pool-name: boon-db-pool
-      data-source-properties:
-        rewriteBatchedStatements: true
-
----
-spring.config.activate.on-profile: live
+spring.config.activate.on-profile: prod
 
 storage:
   datasource:
