@@ -40,6 +40,10 @@ public class InsuredService {
 
     private final ApplicationEventPublisher eventPublisher;
 
+    private static final int BATCH_SIZE = 50;
+
+    private static final long BATCH_DELAY_MS = 1000L;
+
     @Transactional(readOnly = true)
     public DomainPage<InsuredContract> getList(InsuredSearchCondition condition, OffsetLimit offsetLimit) {
         return insuredContractFinder.find(condition, offsetLimit);
@@ -96,9 +100,7 @@ public class InsuredService {
             .publishEvent(new InsuredSystemLogEvent(contractId, "관리자 직접 등록(신규)", String.valueOf(adminId), token));
     }
 
-    private static final int BATCH_SIZE = 50;
 
-    private static final long BATCH_DELAY_MS = 1000L;
 
     @Transactional
     public void sendRenewalNotifications(int days) {
