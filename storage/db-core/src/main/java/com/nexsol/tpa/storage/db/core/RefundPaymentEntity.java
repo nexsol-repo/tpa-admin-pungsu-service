@@ -49,6 +49,13 @@ public class RefundPaymentEntity {
         this.refundReason = refundReason;
     }
 
+    public void update(Long refundAmount, String refundMethod, LocalDateTime refundDt, String refundReason) {
+        this.refundAmount = refundAmount;
+        this.refundMethod = refundMethod;
+        this.refundDt = refundDt;
+        this.refundReason = refundReason;
+    }
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
