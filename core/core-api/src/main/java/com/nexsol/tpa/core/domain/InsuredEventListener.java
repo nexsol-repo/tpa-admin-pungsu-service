@@ -1,15 +1,14 @@
 package com.nexsol.tpa.core.domain;
 
+import com.nexsol.tpa.client.memo.CreateMemoRequest;
+import com.nexsol.tpa.client.memo.CreateSystemLogRequest;
+import com.nexsol.tpa.client.memo.MemoClient;
+import com.nexsol.tpa.client.memo.SendMailRequest;
+import com.nexsol.tpa.client.memo.SendSmsRequest;
 import com.nexsol.tpa.core.enums.MailType;
 import com.nexsol.tpa.core.enums.ServiceType;
 import com.nexsol.tpa.core.support.error.CoreException;
 import com.nexsol.tpa.core.support.error.ErrorType;
-import com.nexsol.tpa.support.mailer.EmailSender;
-import com.nexsol.tpa.client.aligo.SmsSender;
-import com.nexsol.tpa.client.memo.CreateMemoRequest;
-import com.nexsol.tpa.client.memo.CreateNotificationRequest;
-import com.nexsol.tpa.client.memo.CreateSystemLogRequest;
-import com.nexsol.tpa.client.memo.MemoClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -17,6 +16,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -24,10 +24,6 @@ import java.time.format.DateTimeFormatter;
 public class InsuredEventListener {
 
     private final MemoClient memoClient;
-
-    private final EmailSender emailSender;
-
-    private final SmsSender smsSender;
 
     @Async
     @EventListener
@@ -60,31 +56,129 @@ public class InsuredEventListener {
     @Async
     @EventListener
     public void handleIntegratedNotification(InsuredIntegratedNotificationEvent event) {
-        String token = event.token();
         String adminId = event.writerId();
         Long cId = Long.valueOf(event.contractId());
-        String message = buildSmsMessage(event);
+        String smsMessage = buildSmsMessage(event);
+        String mailTitle = event.type().getTitle();
+        String mailContent = buildMailContent(event);
 
-        // 1. 메일 발송 및 이력 저장
+        // 1. 메일 발송 (memo API에서 발송 + 이력 저장)
         try {
-            emailSender.send(event.email(), event.type(), event.link(), event.name());
-            memoClient.recordNotification(cId,
-                    new CreateNotificationRequest("MAIL", event.type().getTitleSuffix() + " 발송 완료", ServiceType.PUNGSU),
+            memoClient.sendMail(cId,
+                    new SendMailRequest(ServiceType.PUNGSU, List.of(event.email()), mailTitle, mailContent),
                     adminId);
         }
         catch (Exception e) {
-            log.error("메일 발송/이력저장 실패: {}", event.contractId(), e);
+            log.error("메일 발송 실패: {}", event.contractId(), e);
         }
 
-        // 2. 문자 발송 및 이력 저장
+        // 2. 문자 발송 (memo API에서 발송 + 이력 저장)
         try {
-            smsSender.sendSms(event.phoneNumber(), message);
-            memoClient.recordNotification(cId, new CreateNotificationRequest("SMS", message, ServiceType.PUNGSU),
+            memoClient.sendSms(cId,
+                    new SendSmsRequest(ServiceType.PUNGSU, List.of(event.phoneNumber()),
+                            event.type().getTitleSuffix(), smsMessage),
                     adminId);
         }
         catch (Exception e) {
-            log.error("문자 발송/이력저장 실패: {}", event.contractId(), e);
+            log.error("문자 발송 실패: {}", event.contractId(), e);
         }
+    }
+
+    private String buildMailContent(InsuredIntegratedNotificationEvent event) {
+        MailType type = event.type();
+        return """
+                <!DOCTYPE html>
+                <html lang="ko">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>TPA KOREA 풍수해</title>
+                  <style>
+                    body { margin: 0; padding: 0; background-color: #eee; -webkit-text-size-adjust: 100%%; -ms-text-size-adjust: 100%%; }
+                    table { border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-spacing: 0; }
+                    img { border: 0; height: auto; line-height: 100%%; outline: none; text-decoration: none; display: block; }
+                    .link-box:hover { text-decoration: underline; }
+                  </style>
+                </head>
+                <body style="margin: 0; padding: 0; background-color: #eee; font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;">
+
+                <table role="presentation" style="width: 100%%; background-color: #eee; border-collapse: collapse;">
+                  <tbody>
+                  <tr>
+                    <td style="padding: 30px 0; text-align: center;">
+
+                      <table role="presentation" style="width: 600px; margin: 0 auto; background-color: #ffffff; padding: 36px; border-radius: 8px; text-align: left;">
+                        <tbody>
+                        <tr>
+                          <td style="border-bottom: 2px solid #000; padding: 8px 0;">
+                            <h1 style="font-size: 28px; margin: 0; color: #333; text-align: left;">%s</h1>
+                          </td>
+                          <td style="border-bottom: 2px solid #000; text-align: right; font-size: 14px; color: #666; vertical-align: bottom; padding-bottom: 8px;">
+                            풍수해6종합보험
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="2" style="padding: 30px 0; border-bottom: 1px solid #e7e9eb;">
+                            <p style="font-size: 16px; line-height: 1.6; margin: 0 0 16px 0; color: #333;">
+                              안녕하세요, <strong>%s</strong> 고객님.<br />
+                              TPA KOREA 풍수해6보험 전담센터입니다.<br />
+                              아래 링크를 클릭하시면 <b>%s</b>으로 이동합니다.
+                            </p>
+                            <div style="margin: 25px 0;">
+                              <a href="%s" target="_blank" style="color: #00B855; font-size: 18px; text-decoration: none; font-weight: bold;">
+                                링크 : %s
+                              </a>
+                            </div>
+                            <p style="margin: 20px 0 0 0; font-size: 15px; line-height: 1.6; color: #555; letter-spacing: -0.5px;">
+                              회원을 등록하지 않은 경우, 이 이메일을 무시하거나<br />
+                              TPA KOREA 풍수해6 고객센터(<strong>1644-9664</strong>)로 문의해 주시기 바랍니다.<br />
+                              좋은 하루 되시길 바랍니다.<br />
+                              감사합니다.
+                            </p>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="2" style="padding: 30px 0;">
+                            <table role="presentation" style="width: 100%%; border-collapse: collapse;">
+                              <tbody>
+                              <tr>
+                                <td colspan="2" style="padding-bottom: 16px;">
+                                  <h2 style="font-size: 18px; margin: 0; color: #000; letter-spacing: -0.5px;">
+                                    TPA KOREA 풍수해6 고객센터
+                                  </h2>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style="width: 90px; padding: 4px 0; font-size: 15px; color: #333;">대표전화</td>
+                                <td style="padding: 4px 0; font-size: 15px; color: #333;">: 1644-9664</td>
+                              </tr>
+                              <tr>
+                                <td style="width: 90px; padding: 4px 0; font-size: 15px; color: #333;">상담 시간</td>
+                                <td style="padding: 4px 0; font-size: 15px; color: #333;">: 평일 09:00~18:00 (점심 12:00~13:00)</td>
+                              </tr>
+                              <tr>
+                                <td style="width: 90px; padding: 4px 0; font-size: 15px; color: #333;">웹사이트</td>
+                                <td style="padding: 4px 0; font-size: 15px; color: #333;">
+                                  : <a href="https://pungsu.tpakorea.com/" target="_blank" style="color: #00B855; text-decoration: underline;">공식 홈페이지 바로가기</a>
+                                </td>
+                              </tr>
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+                </body>
+                </html>
+                """
+            .formatted(type.name().equals("REJOIN") ? "보험료 안내" : "가입확인서 안내", event.name(), type.getTargetName(),
+                    event.link(), type.getLinkText());
     }
 
     private String buildSmsMessage(InsuredIntegratedNotificationEvent event) {
