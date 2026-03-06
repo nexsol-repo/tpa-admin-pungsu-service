@@ -119,7 +119,7 @@ public class InsuredControllerTest extends RestDocsTest {
                     queryParameters(
                             parameterWithName("status")
                                 .description(
-                                        "가입 상태 (JOINED: 가입완료, EXPIRING_SOON: 만기임박, EXPIRED: 기간만료, CANCELLED: 임의해지, FAILED: 가입오류)")
+                                        "가입 상태 (APPLIED: 신청완료, JOINED: 가입완료, EXPIRING_SOON: 만기임박, EXPIRED: 기간만료, CANCELLED: 임의해지, FAILED: 가입오류)")
                                 .optional(),
                             parameterWithName("payYn").description("가입유형 (Y:유료, N:무료)").optional(),
                             parameterWithName("keyword").description("검색어 (사업자번호, 휴대폰번호, 상호명)").optional(),
@@ -145,7 +145,7 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("data.content[].insuranceStartDate").description("보험시작일"),
                             fieldWithPath("data.content[].insuranceEndDate").description("보험종료일"),
                             fieldWithPath("data.content[].displayStatus")
-                                .description("가입상태 (JOINED:가입완료, EXPIRING_SOON:만기임박, EXPIRED:기간만료, CANCELLED:임의해지, FAILED:가입오류)"),
+                                .description("가입상태 (APPLIED:신청완료, JOINED:가입완료, EXPIRING_SOON:만기임박, EXPIRED:기간만료, CANCELLED:임의해지, FAILED:가입오류)"),
                             fieldWithPath("data.content[].joinCheck").description(
                                     "계약 진행상태(W:가입진행, N:보온접수완료, R: 보험사 접수, Y:가입완료(유효), D:가입반려(보험사 중복), E:가입반려(주소오류), F:결제실패(보험사), X:보험만료)"),
                             fieldWithPath("data.content[].account").description("제휴사"),
@@ -178,7 +178,7 @@ public class InsuredControllerTest extends RestDocsTest {
                                 .optional(),
                             parameterWithName("status")
                                 .description(
-                                        "가입 상태 (JOINED: 가입완료, EXPIRING_SOON: 만기임박, EXPIRED: 기간만료, CANCELLED: 임의해지, FAILED: 가입오류)")
+                                        "가입 상태 (APPLIED: 신청완료, JOINED: 가입완료, EXPIRING_SOON: 만기임박, EXPIRED: 기간만료, CANCELLED: 임의해지, FAILED: 가입오류)")
                                 .optional(),
                             parameterWithName("payYn").description("가입유형 (Y:유료, N:무료)").optional(),
                             parameterWithName("startDate").description("조회 시작일 (보험 신청일 기준, yyyy-MM-dd)").optional(),
@@ -256,7 +256,7 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("data.id").description("ID"),
                             fieldWithPath("data.referIdx").description("참조번호").optional(),
                             fieldWithPath("data.displayStatus")
-                                .description("가입 상태 (JOINED: 가입완료, EXPIRING_SOON: 만기임박, EXPIRED: 기간만료, CANCELLED: 임의해지, FAILED: 가입오류)"),
+                                .description("가입 상태 (APPLIED: 신청완료, JOINED: 가입완료, EXPIRING_SOON: 만기임박, EXPIRED: 기간만료, CANCELLED: 임의해지, FAILED: 가입오류)"),
                             insuredFields("data.insuredInfo."), contractFields("data.contractInfo."),
                             locationFields("data.location."), subscriptionFields("data.subscription."),
                             paymentFields("data.payment."), fieldWithPath("error").description("에러").optional()))));
