@@ -15,7 +15,7 @@ This is the Core API documentation for TPA Admin Back-office.
 
 === 가입신청내역 조회
 가입 신청 내역 리스트를 조회합니다. 사업자번호, 상호명, 연락처 등을 통한 키워드 검색과 가입 상태별 필터링을 지원합니다.
-각 계약에는 `displayStatus`(가입완료/만기임박/기간만료/임의해지)가 포함됩니다.
+각 계약에는 `displayStatus`(신청완료/가입완료/만기임박/기간만료/임의해지/가입오류)가 포함됩니다.
 
 ==== Curl Request
 include::{snippets}/admin-insured-contract-list/curl-request.adoc[]
