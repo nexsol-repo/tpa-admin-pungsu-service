@@ -7,6 +7,7 @@ import com.nexsol.tpa.core.support.error.CoreException;
 import com.nexsol.tpa.core.support.error.ErrorType;
 import com.nexsol.tpa.storage.file.core.FileStorageClient;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class InsuredService {
@@ -94,19 +96,39 @@ public class InsuredService {
             .publishEvent(new InsuredSystemLogEvent(contractId, "관리자 직접 등록(신규)", String.valueOf(adminId), token));
     }
 
+    private static final int BATCH_SIZE = 50;
+
+    private static final long BATCH_DELAY_MS = 1000L;
+
     @Transactional
     public void sendRenewalNotifications(int days) {
-        // 1. 7일 뒤 만료 대상자 조회 (Implement Layer에 위임)
         List<InsuredContractDetail> targets = insuredContractFinder.findExpiringContracts(days);
 
-        // 2. 비즈니스 흐름 중계
-        targets.forEach(detail -> {
-            // 재가입 URL 생성 (비즈니스 정책상 필요한 URL 조합)
+        for (int i = 0; i < targets.size(); i++) {
+            InsuredContractDetail detail = targets.get(i);
             String rejoinUrl = "http://pungsu.tpakorea.com/rejoin/feeGuide?idx=" + detail.referIdx();
 
-            // 알림 발송 명령 (기존 send 메서드 재사용하여 이벤트 발행)
-            this.send(detail, MailType.REJOIN, rejoinUrl, 0L); // 시스템 자동 발송은 adminId 0 처리
-        });
+            try {
+                this.send(detail, MailType.REJOIN, rejoinUrl, 0L);
+            }
+            catch (Exception e) {
+                log.error("재가입 알림 발송 실패 contractId={}", detail.id(), e);
+            }
+
+            // 배치 단위마다 딜레이
+            if ((i + 1) % BATCH_SIZE == 0 && i + 1 < targets.size()) {
+                try {
+                    Thread.sleep(BATCH_DELAY_MS);
+                }
+                catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    log.warn("재가입 알림 배치 발송 중단");
+                    return;
+                }
+            }
+        }
+
+        log.info("재가입 알림 발송 완료: 총 {}건", targets.size());
     }
 
     @Transactional(readOnly = true)
