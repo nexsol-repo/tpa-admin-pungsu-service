@@ -4,6 +4,8 @@ import com.nexsol.tpa.core.support.error.CoreException;
 import com.nexsol.tpa.core.support.error.ErrorType;
 import com.nexsol.tpa.storage.db.core.MeritzAreaCodeEntity;
 import com.nexsol.tpa.storage.db.core.MeritzAreaCodeRepository;
+import com.nexsol.tpa.storage.db.core.RefundPaymentEntity;
+import com.nexsol.tpa.storage.db.core.RefundPaymentRepository;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberEntity;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberRepository;
 import jakarta.transaction.Transactional;
@@ -19,6 +21,8 @@ import java.util.Optional;
 public class InsuredContractorWriter {
 
     private final TotalFormMemberRepository totalFormMemberRepository;
+
+    private final RefundPaymentRepository refundPaymentRepository;
 
     private final FreeContractExcelTool freeContractExcelTool;
 
@@ -40,6 +44,26 @@ public class InsuredContractorWriter {
 
         // 2. 실제 엔티티 업데이트
         entityMapper.updateEntity(entity, insured, contract, location, subscription, payment);
+
+        // 3. 환불 정보 처리 (별도 테이블)
+        if (payment != null && payment.refund() != null) {
+            RefundInfo refund = payment.refund();
+            Optional<RefundPaymentEntity> existing = refundPaymentRepository.findByContractId(id);
+
+            if (existing.isPresent()) {
+                existing.get().update(refund.refundAmount(), refund.refundMethod(), refund.refundDt(),
+                        refund.refundReason());
+            }
+            else {
+                refundPaymentRepository.save(RefundPaymentEntity.builder()
+                    .contractId(id)
+                    .refundAmount(refund.refundAmount())
+                    .refundMethod(refund.refundMethod())
+                    .refundDt(refund.refundDt())
+                    .refundReason(refund.refundReason())
+                    .build());
+            }
+        }
 
         return diffs;
     }
