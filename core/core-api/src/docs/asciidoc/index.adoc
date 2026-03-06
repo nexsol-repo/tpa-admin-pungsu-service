@@ -90,8 +90,8 @@ include::{snippets}/insured-register-direct/http-response.adoc[]
 
 
 
-=== 풍수해 알림(문자+메일) 발송 API 문서화
-문자,메일 보내기
+=== 풍수해 알림(문자+메일) 발송
+Memo API를 통해 문자(SMS)와 메일을 발송하고 이력을 저장합니다.
 ==== Curl Request
 include::{snippets}/admin-insured-notification-send/curl-request.adoc[]
 
