@@ -24,6 +24,11 @@ public class InsuredContractQueryGenerator {
                 LocalDateTime sevenDaysLater = now.plusDays(7);
 
                 switch (condition.status()) {
+                    case DRAFT -> predicates.add(cb.equal(root.get("joinCheck"), "W"));
+                    case APPLIED -> {
+                        predicates.add(cb.equal(root.get("joinCheck"), "N"));
+                        predicates.add(cb.equal(root.get("payYn"), "N"));
+                    }
                     case JOINED -> {
                         // joinCheck = Y AND (insuranceEndDate is null OR insuranceEndDate
                         // >= 7일 후)
