@@ -129,10 +129,11 @@ public class InsuredController {
     }
 
     // @PostMapping("/contract/free/upload")
-    // public ApiResponse<FreeContractUploadResponse> uploadFreeContract(@RequestPart MultipartFile file,
-    //         @LoginAdmin AdminUser admin) {
-    //     UpdateCount stats = insuredService.updateFreeContracts(file);
-    //     return ApiResponse.success(FreeContractUploadResponse.of(stats));
+    // public ApiResponse<FreeContractUploadResponse> uploadFreeContract(@RequestPart
+    // MultipartFile file,
+    // @LoginAdmin AdminUser admin) {
+    // UpdateCount stats = insuredService.updateFreeContracts(file);
+    // return ApiResponse.success(FreeContractUploadResponse.of(stats));
     // }
 
     @PostMapping("/contract/free/upload")
@@ -195,7 +196,8 @@ public class InsuredController {
 
     // 3. 보험시작일 기준 일괄 발송 (예: startDate=2023-03-31)
     @PostMapping("/trigger-renewal-by-start-date")
-    public ApiResponse<String> triggerByStartDate(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate) {
+    public ApiResponse<String> triggerByStartDate(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate) {
         int count = insuredService.sendRenewalNotificationsByStartDate(startDate);
         return ApiResponse.success(String.format("보험시작일 %s 대상 %d건 발송 완료", startDate, count));
     }

@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 
 public enum DisplayStatus {
 
-    DRAFT("임시저장"), APPLIED("신청완료"), JOINED("가입완료"), EXPIRING_SOON("만기임박"), EXPIRED("기간만료"),
-    CANCELLED("임의해지"), FAILED("가입오류");
+    DRAFT("임시저장"), APPLIED("신청완료"), JOINED("가입완료"), EXPIRING_SOON("만기임박"), EXPIRED("기간만료"), CANCELLED("임의해지"),
+    FAILED("가입오류");
 
     private final String description;
 
