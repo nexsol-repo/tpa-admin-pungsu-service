@@ -80,6 +80,18 @@ public class TotalFormMemberEntity {
     @Column(name = "pay_yn")
     private String payYn; // 결제 여부 (Y/N)
 
+    @Column(name = "pay_status")
+    private String payStatus; // 결제 상태 (N:결제전, Y:결제완료, C:환불완료)
+
+    @Column(name = "pay_method")
+    private String payMethod; // 결제수단
+
+    @Column(name = "pay_dt")
+    private LocalDateTime payDt; // 결제일시
+
+    @Column(name = "apply_cost")
+    private Long applyCost; // 적용 보험료 (결제 보험료)
+
     @Column(name = "bizcategory")
     private String bizCategory;
 
@@ -254,6 +266,13 @@ public class TotalFormMemberEntity {
         this.path = path;
     }
 
+    public void applyPaymentInfo(String payStatus, String payMethod, LocalDateTime payDt, Long applyCost) {
+        this.payStatus = payStatus;
+        this.payMethod = payMethod;
+        this.payDt = payDt;
+        this.applyCost = applyCost;
+    }
+
     public void applyEntryDiv(String entryDiv) {
         this.entryDiv = entryDiv;
     }
@@ -301,6 +320,10 @@ public class TotalFormMemberEntity {
             .totalLocalGovernmentCost(localPremium)
             .totalInsuranceMyCost(ownerPremium)
             .build();
+    }
+
+    public void markAsFailed() {
+        this.joinCheck = "F";
     }
 
 }

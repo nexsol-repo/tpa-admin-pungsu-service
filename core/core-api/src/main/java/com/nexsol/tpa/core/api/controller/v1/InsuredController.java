@@ -111,7 +111,7 @@ public class InsuredController {
         // 서비스 레이어에 수정을 위임
         // (ID와 함께 가입자/계약정보 Record를 전달)
         insuredService.modify(id, request.insuredInfo(), request.contract(), request.location(), request.subscription(),
-                request.memoContent(), admin.userId());
+                request.payment(), request.memoContent(), admin.userId());
 
         return ApiResponse.success(ResultType.SUCCESS);
     }
@@ -121,15 +121,22 @@ public class InsuredController {
 
         // Service는 비즈니스 흐름만 관장 (등록 -> 로그/이벤트 발행)
         insuredService.register(request.insuredInfo(), request.contractInfo(), request.location(),
-                request.subscription(), request.memoContent(), admin.userId());
+                request.subscription(), request.payment(), request.memoContent(), admin.userId());
 
         return ApiResponse.success(ResultType.SUCCESS);
     }
 
+    // @PostMapping("/contract/free/upload")
+    // public ApiResponse<FreeContractUploadResponse> uploadFreeContract(@RequestPart MultipartFile file,
+    //         @LoginAdmin AdminUser admin) {
+    //     UpdateCount stats = insuredService.updateFreeContracts(file);
+    //     return ApiResponse.success(FreeContractUploadResponse.of(stats));
+    // }
+
     @PostMapping("/contract/free/upload")
-    public ApiResponse<FreeContractUploadResponse> uploadFreeContract(@RequestPart MultipartFile file,
+    public ApiResponse<FreeContractUploadResponse> uploadUnifiedFreeContract(@RequestPart MultipartFile file,
             @LoginAdmin AdminUser admin) {
-        UpdateCount stats = insuredService.updateFreeContracts(file);
+        UpdateCount stats = insuredService.updateUnifiedFreeContracts(file);
         return ApiResponse.success(FreeContractUploadResponse.of(stats));
     }
 

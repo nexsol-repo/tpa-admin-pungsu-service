@@ -19,4 +19,7 @@ public interface TotalFormMemberRepository
                                                                                               // 추가
             String addressKeyword);
 
+    Optional<TotalFormMemberEntity> findFirstByBusinessNumberAndPayYnAndInsuranceCompanyAndJoinCheck(
+            String businessNumber, String payYn, String insuranceCompany, String joinCheck);
+
 }

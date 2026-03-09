@@ -21,4 +21,12 @@ public interface MemoClient {
     void recordNotification(@PathVariable("contractId") Long contractId, @RequestBody CreateNotificationRequest request,
             @RequestHeader("X-User-Id") String userId);
 
+    @PostMapping("/v1/admin/memo/{contractId}/send/sms")
+    void sendSms(@PathVariable("contractId") Long contractId, @RequestBody SendSmsRequest request,
+            @RequestHeader("X-User-Id") String userId);
+
+    @PostMapping("/v1/admin/memo/{contractId}/send/mail")
+    void sendMail(@PathVariable("contractId") Long contractId, @RequestBody SendMailRequest request,
+            @RequestHeader("X-User-Id") String userId);
+
 }

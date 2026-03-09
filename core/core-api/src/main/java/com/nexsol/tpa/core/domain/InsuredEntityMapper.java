@@ -1,5 +1,6 @@
 package com.nexsol.tpa.core.domain;
 
+import com.nexsol.tpa.core.domain.PaymentInfo;
 import com.nexsol.tpa.storage.db.core.CoverageAmount;
 import com.nexsol.tpa.storage.db.core.PremiumAmount;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberEntity;
@@ -11,16 +12,16 @@ import java.time.LocalDateTime;
 public class InsuredEntityMapper {
 
     public TotalFormMemberEntity toEntity(String referIdx, String entryDiv, InsuredInfo insured, ContractInfo contract,
-            BusinessLocationInfo location, InsuredSubscriptionInfo subscription) {
+            BusinessLocationInfo location, InsuredSubscriptionInfo subscription, PaymentInfo payment) {
         TotalFormMemberEntity entity = new TotalFormMemberEntity();
         entity.assignReferIdx(referIdx);
         entity.applyEntryDiv(entryDiv);
-        updateEntity(entity, insured, contract, location, subscription);
+        updateEntity(entity, insured, contract, location, subscription, payment);
         return entity;
     }
 
     public void updateEntity(TotalFormMemberEntity entity, InsuredInfo insured, ContractInfo contract,
-            BusinessLocationInfo location, InsuredSubscriptionInfo subscription) {
+            BusinessLocationInfo location, InsuredSubscriptionInfo subscription, PaymentInfo payment) {
 
         if (insured != null) {
             entity.applyInsuredBasic(insured.name(), insured.businessNumber(), insured.phoneNumber(), insured.email(),
@@ -72,6 +73,10 @@ public class InsuredEntityMapper {
 
             // 채널 정보
             entity.applyChannelInfo(subscription.account(), subscription.path());
+        }
+
+        if (payment != null) {
+            entity.applyPaymentInfo(payment.payStatus(), payment.payMethod(), payment.payDt(), payment.applyCost());
         }
 
     }
