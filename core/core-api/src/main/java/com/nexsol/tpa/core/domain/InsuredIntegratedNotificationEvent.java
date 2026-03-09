@@ -9,5 +9,6 @@ import java.time.LocalDateTime;
 public record InsuredIntegratedNotificationEvent(
 
         Integer contractId, String name, String email, String phoneNumber, MailType type, String link, String writerId,
-        String token, LocalDateTime applicationDate, String account, String payYn, String policyNumber) {
+        String token, LocalDateTime applicationDate, String account, String payYn, String policyNumber,
+        LocalDateTime insuranceStartDate, LocalDateTime insuranceEndDate) {
 }

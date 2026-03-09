@@ -7,6 +7,7 @@ import com.nexsol.tpa.core.support.error.CoreException;
 import com.nexsol.tpa.core.support.error.ErrorType;
 import com.nexsol.tpa.storage.file.core.FileStorageClient;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +23,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class InsuredService {
@@ -38,6 +39,10 @@ public class InsuredService {
 
     private final ApplicationEventPublisher eventPublisher;
 
+    private static final int BATCH_SIZE = 50;
+
+    private static final long BATCH_DELAY_MS = 1000L;
+
     @Transactional(readOnly = true)
     public DomainPage<InsuredContract> getList(InsuredSearchCondition condition, OffsetLimit offsetLimit) {
         return insuredContractFinder.find(condition, offsetLimit);
@@ -50,19 +55,13 @@ public class InsuredService {
 
     @Transactional
     public Integer modify(Integer id, InsuredInfo insured, ContractInfo contract, BusinessLocationInfo location,
-            InsuredSubscriptionInfo subscription, String memoContent, Long adminId) {
-        List<ChangeDetail> diffs = insuredContractorWriter.writeAndGetDiff(id, insured, contract, location,
-                subscription);
+            InsuredSubscriptionInfo subscription, PaymentInfo payment, String memoContent, Long adminId) {
+        List<String> changedSections = insuredContractorWriter.writeAndGetDiff(id, insured, contract, location,
+                subscription, payment);
         String token = getJwtToken();
 
-        if (!diffs.isEmpty()) {
-            // [수정 포인트] 이전/이후 값 상세 표시(toString) 대신 필드명(fieldName)만 추출하여 연결합니다.
-            String changedFields = diffs.stream()
-                .map(ChangeDetail::fieldName) // 필드명(예: 피보험자명, 업종 등)만 가져옴
-                .collect(Collectors.joining(", "));
-
-            // 사용자의 요구사항에 맞춰 "필드명1, 필드명2 정보가 변경되었습니다." 포맷으로 생성
-            String systemLogContent = changedFields + " 정보가 변경되었습니다.";
+        if (!changedSections.isEmpty()) {
+            String systemLogContent = String.join(", ", changedSections) + "가 변경되었습니다.";
 
             eventPublisher
                 .publishEvent(new InsuredSystemLogEvent(id, systemLogContent, String.valueOf(adminId), token));
@@ -78,8 +77,8 @@ public class InsuredService {
 
     @Transactional
     public void register(InsuredInfo insured, ContractInfo contract, BusinessLocationInfo location,
-            InsuredSubscriptionInfo subscription, String memoContent, Long adminId) {
-        Integer contractId = insuredContractorWriter.write(insured, contract, location, subscription);
+            InsuredSubscriptionInfo subscription, PaymentInfo payment, String memoContent, Long adminId) {
+        Integer contractId = insuredContractorWriter.write(insured, contract, location, subscription, payment);
 
         String token = getJwtToken();
 
@@ -96,17 +95,45 @@ public class InsuredService {
 
     @Transactional
     public void sendRenewalNotifications(int days) {
-        // 1. 7일 뒤 만료 대상자 조회 (Implement Layer에 위임)
         List<InsuredContractDetail> targets = insuredContractFinder.findExpiringContracts(days);
 
-        // 2. 비즈니스 흐름 중계
-        targets.forEach(detail -> {
-            // 재가입 URL 생성 (비즈니스 정책상 필요한 URL 조합)
+        for (int i = 0; i < targets.size(); i++) {
+            InsuredContractDetail detail = targets.get(i);
             String rejoinUrl = "http://pungsu.tpakorea.com/rejoin/feeGuide?idx=" + detail.referIdx();
 
-            // 알림 발송 명령 (기존 send 메서드 재사용하여 이벤트 발행)
-            this.send(detail, MailType.REJOIN, rejoinUrl, 0L); // 시스템 자동 발송은 adminId 0 처리
+            try {
+                this.send(detail, MailType.REJOIN, rejoinUrl, 0L);
+            }
+            catch (Exception e) {
+                log.error("재가입 알림 발송 실패 contractId={}", detail.id(), e);
+            }
+
+            // 배치 단위마다 딜레이
+            if ((i + 1) % BATCH_SIZE == 0 && i + 1 < targets.size()) {
+                try {
+                    Thread.sleep(BATCH_DELAY_MS);
+                }
+                catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    log.warn("재가입 알림 배치 발송 중단");
+                    return;
+                }
+            }
+        }
+
+        log.info("재가입 알림 발송 완료: 총 {}건", targets.size());
+    }
+
+    @Transactional
+    public int sendRenewalNotificationsByStartDate(LocalDate startDate) {
+        List<InsuredContractDetail> targets = insuredContractFinder.findContractsByStartDate(startDate);
+
+        targets.forEach(detail -> {
+            String rejoinUrl = "http://pungsu.tpakorea.com/rejoin/feeGuide?idx=" + detail.referIdx();
+            this.send(detail, MailType.REJOIN, rejoinUrl, 0L);
         });
+
+        return targets.size();
     }
 
     @Transactional(readOnly = true)
@@ -132,6 +159,11 @@ public class InsuredService {
         return insuredContractorWriter.confirmFreeContract(file);
     }
 
+    @Transactional
+    public UpdateCount updateUnifiedFreeContracts(MultipartFile file) {
+        return insuredContractorWriter.confirmUnifiedFreeContract(file);
+    }
+
     public void send(InsuredContractDetail detail, MailType type, String targetUrl, Long adminId) {
         String token = getJwtToken();
 
@@ -151,6 +183,8 @@ public class InsuredService {
             .account(detail.subscription().account())
             .payYn(detail.subscription().payYn())
             .policyNumber(detail.subscription().insuranceNumber())
+            .insuranceStartDate(detail.subscription().insuranceStartDate())
+            .insuranceEndDate(detail.subscription().insuranceEndDate())
             .build();
         eventPublisher.publishEvent(event);
 

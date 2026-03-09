@@ -15,7 +15,5 @@ include 'storage:db-core'
 include 'storage:file-core'
 include 'tests:api-docs'
 include 'support:logging'
-include 'support:mailer'
 include 'client:client-memo'
-include 'client:client-aligo'
 

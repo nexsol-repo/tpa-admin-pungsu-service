@@ -18,12 +18,14 @@ import feign.template.UriUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -111,7 +113,7 @@ public class InsuredController {
         // 서비스 레이어에 수정을 위임
         // (ID와 함께 가입자/계약정보 Record를 전달)
         insuredService.modify(id, request.insuredInfo(), request.contract(), request.location(), request.subscription(),
-                request.memoContent(), admin.userId());
+                request.payment(), request.memoContent(), admin.userId());
 
         return ApiResponse.success(ResultType.SUCCESS);
     }
@@ -121,15 +123,23 @@ public class InsuredController {
 
         // Service는 비즈니스 흐름만 관장 (등록 -> 로그/이벤트 발행)
         insuredService.register(request.insuredInfo(), request.contractInfo(), request.location(),
-                request.subscription(), request.memoContent(), admin.userId());
+                request.subscription(), request.payment(), request.memoContent(), admin.userId());
 
         return ApiResponse.success(ResultType.SUCCESS);
     }
 
+    // @PostMapping("/contract/free/upload")
+    // public ApiResponse<FreeContractUploadResponse> uploadFreeContract(@RequestPart
+    // MultipartFile file,
+    // @LoginAdmin AdminUser admin) {
+    // UpdateCount stats = insuredService.updateFreeContracts(file);
+    // return ApiResponse.success(FreeContractUploadResponse.of(stats));
+    // }
+
     @PostMapping("/contract/free/upload")
-    public ApiResponse<FreeContractUploadResponse> uploadFreeContract(@RequestPart MultipartFile file,
+    public ApiResponse<FreeContractUploadResponse> uploadUnifiedFreeContract(@RequestPart MultipartFile file,
             @LoginAdmin AdminUser admin) {
-        UpdateCount stats = insuredService.updateFreeContracts(file);
+        UpdateCount stats = insuredService.updateUnifiedFreeContracts(file);
         return ApiResponse.success(FreeContractUploadResponse.of(stats));
     }
 
@@ -182,6 +192,14 @@ public class InsuredController {
     public ApiResponse<String> triggerSeven() {
         insuredService.sendRenewalNotifications(7); // 비즈니스 규칙인 '7'을 명시
         return ApiResponse.success("7일 전 대상자(운영 규칙) 발송 트리거 완료");
+    }
+
+    // 3. 보험시작일 기준 일괄 발송 (예: startDate=2023-03-31)
+    @PostMapping("/trigger-renewal-by-start-date")
+    public ApiResponse<String> triggerByStartDate(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate) {
+        int count = insuredService.sendRenewalNotificationsByStartDate(startDate);
+        return ApiResponse.success(String.format("보험시작일 %s 대상 %d건 발송 완료", startDate, count));
     }
 
 }

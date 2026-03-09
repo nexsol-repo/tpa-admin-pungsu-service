@@ -1,11 +1,14 @@
 package com.nexsol.tpa.core.domain;
 
+import com.nexsol.tpa.core.enums.DisplayStatus;
 import com.nexsol.tpa.core.support.DomainPage;
 import com.nexsol.tpa.core.support.OffsetLimit;
 import com.nexsol.tpa.core.support.error.CoreException;
 import com.nexsol.tpa.core.support.error.ErrorType;
 import com.nexsol.tpa.storage.db.core.CoverageAmount;
 import com.nexsol.tpa.storage.db.core.PremiumAmount;
+import com.nexsol.tpa.storage.db.core.RefundPaymentEntity;
+import com.nexsol.tpa.storage.db.core.RefundPaymentRepository;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberEntity;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberRepository;
 import jakarta.persistence.EntityManager;
@@ -28,6 +31,8 @@ public class InsuredContractFinder {
 
     private final TotalFormMemberRepository totalFormMemberRepository;
 
+    private final RefundPaymentRepository refundPaymentRepository;
+
     private final InsuredContractQueryGenerator queryGenerator;
 
     private final EntityManager em;
@@ -49,9 +54,12 @@ public class InsuredContractFinder {
         TotalFormMemberEntity entity = totalFormMemberRepository.findById(id)
             .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND_DATA));
 
+        RefundInfo refundInfo = refundPaymentRepository.findByContractId(id).map(this::mapToRefundInfo).orElse(null);
+
         return new InsuredContractDetail(entity.getId(), entity.getReferIdx(), entity.getPrctrNo(),
+                DisplayStatus.resolve(entity.getJoinCheck(), entity.getPayYn(), entity.getInsuranceEndDate()),
                 mapToInsuredInfo(entity), mapToContractorInfo(entity), mapToBusinessLocationInfo(entity),
-                mapToInsuranceSubscriptionInfo(entity));
+                mapToInsuranceSubscriptionInfo(entity), mapToPaymentInfo(entity, refundInfo));
     }
 
     public List<InsuredContractDetail> findExpiringContracts(int days) {
@@ -62,6 +70,16 @@ public class InsuredContractFinder {
         return totalFormMemberRepository.findAllByInsuranceEndDateBetween(start, end)
             .stream()
             .map(this::mapToDetail) // 기존 매핑 로직 재사용
+            .toList();
+    }
+
+    public List<InsuredContractDetail> findContractsByStartDate(LocalDate startDate) {
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = start.plusDays(1).minusNanos(1);
+
+        return totalFormMemberRepository.findAllByInsuranceStartDateBetween(start, end)
+            .stream()
+            .map(this::mapToDetail)
             .toList();
     }
 
@@ -115,6 +133,8 @@ public class InsuredContractFinder {
             .payYn(entity.getPayYn())
             .address(entity.getAddress())
             .joinCheck(entity.getJoinCheck())
+            .displayStatus(
+                    DisplayStatus.resolve(entity.getJoinCheck(), entity.getPayYn(), entity.getInsuranceEndDate()))
             .account(entity.getAccount())
             .path(entity.getPath())
             .applicationDate(entity.getCreatedAt())
@@ -170,7 +190,6 @@ public class InsuredContractFinder {
     private InsuredSubscriptionInfo mapToInsuranceSubscriptionInfo(TotalFormMemberEntity entity) {
         CoverageAmount coverage = entity.getCoverage();
         PremiumAmount premium = entity.getPremium();
-        LocalDateTime now = LocalDateTime.now();
 
         return InsuredSubscriptionInfo.builder()
             .joinCheck(entity.getJoinCheck())
@@ -193,16 +212,37 @@ public class InsuredContractFinder {
             .totalGovernmentCost(getSafeAmount(premium, PremiumAmount::getTotalGovernmentCost))
             .totalLocalGovernmentCost(getSafeAmount(premium, PremiumAmount::getTotalLocalGovernmentCost))
             .totalInsuranceMyCost(getSafeAmount(premium, PremiumAmount::getTotalInsuranceMyCost))
-            .isRenewalTarget(InsuredSubscriptionInfo.calculateRenewalTarget(entity.getInsuranceEndDate(), now))
+            .build();
+    }
+
+    // [개념 5] 결제 정보 매핑
+    private PaymentInfo mapToPaymentInfo(TotalFormMemberEntity entity, RefundInfo refundInfo) {
+        return PaymentInfo.builder()
+            .payStatus(entity.getPayStatus())
+            .payMethod(entity.getPayMethod())
+            .payDt(entity.getPayDt())
+            .applyCost(entity.getApplyCost())
+            .refund(refundInfo)
+            .build();
+    }
+
+    private RefundInfo mapToRefundInfo(RefundPaymentEntity entity) {
+        return RefundInfo.builder()
+            .refundAmount(entity.getRefundAmount())
+            .refundMethod(entity.getRefundMethod())
+            .refundDt(entity.getRefundDt())
+            .refundReason(entity.getRefundReason())
             .build();
     }
 
     private InsuredContractDetail mapToDetail(TotalFormMemberEntity entity) {
         return new InsuredContractDetail(entity.getId(), entity.getReferIdx(), entity.getPrctrNo(),
+                DisplayStatus.resolve(entity.getJoinCheck(), entity.getPayYn(), entity.getInsuranceEndDate()),
                 mapToInsuredInfo(entity), // 피보험자 정보 매핑
                 mapToContractorInfo(entity), // 계약자 정보 매핑
                 mapToBusinessLocationInfo(entity), // 사업장 정보 매핑
-                mapToInsuranceSubscriptionInfo(entity) // 보험 가입 정보 매핑
+                mapToInsuranceSubscriptionInfo(entity), // 보험 가입 정보 매핑
+                mapToPaymentInfo(entity, null) // 결제 정보 매핑 (환불 정보는 상세 조회에서만)
         );
     }
 

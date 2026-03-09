@@ -4,6 +4,8 @@ import com.nexsol.tpa.core.support.error.CoreException;
 import com.nexsol.tpa.core.support.error.ErrorType;
 import com.nexsol.tpa.storage.db.core.MeritzAreaCodeEntity;
 import com.nexsol.tpa.storage.db.core.MeritzAreaCodeRepository;
+import com.nexsol.tpa.storage.db.core.RefundPaymentEntity;
+import com.nexsol.tpa.storage.db.core.RefundPaymentRepository;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberEntity;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberRepository;
 import jakarta.transaction.Transactional;
@@ -20,6 +22,8 @@ public class InsuredContractorWriter {
 
     private final TotalFormMemberRepository totalFormMemberRepository;
 
+    private final RefundPaymentRepository refundPaymentRepository;
+
     private final FreeContractExcelTool freeContractExcelTool;
 
     private final DirectRegistration directRegistration;
@@ -30,28 +34,48 @@ public class InsuredContractorWriter {
 
     private final ContractChangeDetector changeDetector;
 
-    public List<ChangeDetail> writeAndGetDiff(Integer id, InsuredInfo insured, ContractInfo contract,
-            BusinessLocationInfo location, InsuredSubscriptionInfo subscription) {
+    public List<String> writeAndGetDiff(Integer id, InsuredInfo insured, ContractInfo contract,
+            BusinessLocationInfo location, InsuredSubscriptionInfo subscription, PaymentInfo payment) {
         TotalFormMemberEntity entity = totalFormMemberRepository.findById(id)
             .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND_DATA));
 
-        // 1. 수정 전 상태와 새로운 개념 객체들을 비교하여 변경 사항 추출
-        List<ChangeDetail> diffs = changeDetector.detect(entity, insured, contract, location, subscription);
+        // 1. 수정 전 상태와 새로운 개념 객체들을 비교하여 변경된 섹션 추출
+        List<String> diffs = changeDetector.detect(entity, insured, contract, location, subscription, payment);
 
         // 2. 실제 엔티티 업데이트
-        entityMapper.updateEntity(entity, insured, contract, location, subscription);
+        entityMapper.updateEntity(entity, insured, contract, location, subscription, payment);
+
+        // 3. 환불 정보 처리 (별도 테이블)
+        if (payment != null && payment.refund() != null) {
+            RefundInfo refund = payment.refund();
+            Optional<RefundPaymentEntity> existing = refundPaymentRepository.findByContractId(id);
+
+            if (existing.isPresent()) {
+                existing.get()
+                    .update(refund.refundAmount(), refund.refundMethod(), refund.refundDt(), refund.refundReason());
+            }
+            else {
+                refundPaymentRepository.save(RefundPaymentEntity.builder()
+                    .contractId(id)
+                    .refundAmount(refund.refundAmount())
+                    .refundMethod(refund.refundMethod())
+                    .refundDt(refund.refundDt())
+                    .refundReason(refund.refundReason())
+                    .build());
+            }
+        }
 
         return diffs;
     }
 
     public Integer write(InsuredInfo insured, ContractInfo contract, BusinessLocationInfo location,
-            InsuredSubscriptionInfo subscription) {
+            InsuredSubscriptionInfo subscription, PaymentInfo payment) {
         // 1. 키 생성
         String referIdx = keyGenerator.generate();
 
         // 2. 엔티티 변환 및 저장 (Mapper 활용)
         TotalFormMemberEntity entity = entityMapper.toEntity(referIdx, "OFFLINE", insured, contract, location,
-                subscription);
+                subscription, payment);
 
         // 3. 건물급수,지역코드 계산 및 적용
         directRegistration.applyDerivedFields(entity, location);
@@ -97,6 +121,52 @@ public class InsuredContractorWriter {
             .build();
 
         return result;
+    }
+
+    @Transactional
+    public UpdateCount confirmUnifiedFreeContract(MultipartFile file) {
+        // 1. 엑셀 파싱 (통합 템플릿)
+        List<FreeContractUpdateInfo> updates = freeContractExcelTool.parseFile(file);
+
+        int totalCount = updates.size();
+        int successCount = 0;
+        int failureCount = 0;
+        int errorCount = 0;
+
+        // 2. 순회하며 업데이트 처리
+        for (FreeContractUpdateInfo info : updates) {
+            // joinCheck=N, payYn=N (무료) 상태인 건만 조회
+            Optional<TotalFormMemberEntity> entityOpt = totalFormMemberRepository
+                .findFirstByBusinessNumberAndPayYnAndInsuranceCompanyAndJoinCheck(info.businessNo(), "N",
+                        info.insuranceCompany(), "N");
+
+            if (entityOpt.isPresent()) {
+                TotalFormMemberEntity entity = entityOpt.get();
+
+                if (info.hasError()) {
+                    // 오류사유가 있으면 가입오류(F) 처리
+                    entity.markAsFailed();
+                    errorCount++;
+                }
+                else {
+                    // 정상: 가입완료(Y) 처리
+                    entity.updateFreeContract(info.securityNo(), info.companyName(), info.insuranceDate(),
+                            info.insuranceEndDate(), info.totalPremium(), info.govPremium(), info.localPremium(),
+                            info.ownerPremium());
+                    successCount++;
+                }
+            }
+            else {
+                failureCount++;
+            }
+        }
+
+        return UpdateCount.builder()
+            .totalCount(totalCount)
+            .successCount(successCount)
+            .failCount(failureCount)
+            .errorCount(errorCount)
+            .build();
     }
 
 }

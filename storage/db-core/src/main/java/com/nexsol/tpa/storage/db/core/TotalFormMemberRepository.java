@@ -11,6 +11,8 @@ public interface TotalFormMemberRepository
         extends JpaRepository<TotalFormMemberEntity, Integer>, JpaSpecificationExecutor<TotalFormMemberEntity> {
 
     List<TotalFormMemberEntity> findAllByInsuranceEndDateBetween(LocalDateTime start, LocalDateTime end);
+
+    List<TotalFormMemberEntity> findAllByInsuranceStartDateBetween(LocalDateTime start, LocalDateTime end);
     // Page<TotalFormMemberEntity> findAll(Specification<TotalFormMemberEntity> spec,
     // Pageable pageable);
 
@@ -18,5 +20,8 @@ public interface TotalFormMemberRepository
             String businessNumber, String companyName, String payYn, String insuranceCompany, // 파라미터
                                                                                               // 추가
             String addressKeyword);
+
+    Optional<TotalFormMemberEntity> findFirstByBusinessNumberAndPayYnAndInsuranceCompanyAndJoinCheck(
+            String businessNumber, String payYn, String insuranceCompany, String joinCheck);
 
 }
