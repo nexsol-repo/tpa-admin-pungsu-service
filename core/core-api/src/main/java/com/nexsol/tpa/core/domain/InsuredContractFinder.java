@@ -73,6 +73,16 @@ public class InsuredContractFinder {
             .toList();
     }
 
+    public List<InsuredContractDetail> findContractsByStartDate(LocalDate startDate) {
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = start.plusDays(1).minusNanos(1);
+
+        return totalFormMemberRepository.findAllByInsuranceStartDateBetween(start, end)
+            .stream()
+            .map(this::mapToDetail)
+            .toList();
+    }
+
     public List<ContractExcelData> findAll(InsuredSearchCondition condition) {
         StringBuilder jpql = new StringBuilder();
         // 1. Root Entity는 반드시 JPA 엔티티인 TotalFormMemberEntity여야 함

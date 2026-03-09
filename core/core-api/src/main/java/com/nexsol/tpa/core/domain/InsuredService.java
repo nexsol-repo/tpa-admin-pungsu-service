@@ -133,6 +133,18 @@ public class InsuredService {
         log.info("재가입 알림 발송 완료: 총 {}건", targets.size());
     }
 
+    @Transactional
+    public int sendRenewalNotificationsByStartDate(LocalDate startDate) {
+        List<InsuredContractDetail> targets = insuredContractFinder.findContractsByStartDate(startDate);
+
+        targets.forEach(detail -> {
+            String rejoinUrl = "http://pungsu.tpakorea.com/rejoin/feeGuide?idx=" + detail.referIdx();
+            this.send(detail, MailType.REJOIN, rejoinUrl, 0L);
+        });
+
+        return targets.size();
+    }
+
     @Transactional(readOnly = true)
     public void downloadExcel(String insuranceCompany, InsuredSearchCondition condition, OutputStream outputStream) {
         // 1. 기간 필수 체크

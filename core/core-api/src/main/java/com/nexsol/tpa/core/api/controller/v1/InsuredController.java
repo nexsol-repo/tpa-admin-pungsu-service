@@ -18,12 +18,14 @@ import feign.template.UriUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -189,6 +191,13 @@ public class InsuredController {
     public ApiResponse<String> triggerSeven() {
         insuredService.sendRenewalNotifications(7); // 비즈니스 규칙인 '7'을 명시
         return ApiResponse.success("7일 전 대상자(운영 규칙) 발송 트리거 완료");
+    }
+
+    // 3. 보험시작일 기준 일괄 발송 (예: startDate=2023-03-31)
+    @PostMapping("/trigger-renewal-by-start-date")
+    public ApiResponse<String> triggerByStartDate(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate) {
+        int count = insuredService.sendRenewalNotificationsByStartDate(startDate);
+        return ApiResponse.success(String.format("보험시작일 %s 대상 %d건 발송 완료", startDate, count));
     }
 
 }
