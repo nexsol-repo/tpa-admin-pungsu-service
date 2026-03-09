@@ -115,24 +115,19 @@ public class InsuredControllerTest extends RestDocsTest {
                 .contentType(MediaType.APPLICATION_JSON))
 
             .andExpect(status().isOk())
-            .andDo(document("admin-insured-contract-list",
-                    queryParameters(
-                            parameterWithName("status")
-                                .description(
-                                        "가입 상태 (APPLIED: 신청완료, JOINED: 가입완료, EXPIRING_SOON: 만기임박, EXPIRED: 기간만료, CANCELLED: 임의해지, FAILED: 가입오류)")
-                                .optional(),
-                            parameterWithName("payYn").description("가입유형 (Y:유료, N:무료)").optional(),
-                            parameterWithName("keyword").description("검색어 (사업자번호, 휴대폰번호, 상호명)").optional(),
-                            parameterWithName("insuranceCompany").description("보험사").optional(),
-                            parameterWithName("account").description("제휴사").optional(),
-                            parameterWithName("path").description("채널").optional(),
-                            parameterWithName("startDate").description("조회 시작일 (보험 신청일 기준, yyyy-MM-dd)").optional(),
-                            parameterWithName("endDate").description("조회 종료일 (보험 신청일 기준, yyyy-MM-dd)").optional(),
-                            parameterWithName("offset").description("오프셋").optional(),
-                            parameterWithName("limit").description("리미트").optional(),
-                            parameterWithName("sortBy").description("정렬 기준 (예: insuranceStartDate, createdAt)")
-                                .optional(),
-                            parameterWithName("direction").description("정렬 방향 (ASC 또는 DESC)").optional()),
+            .andDo(document("admin-insured-contract-list", queryParameters(parameterWithName("status").description(
+                    "가입 상태 (APPLIED: 신청완료, JOINED: 가입완료, EXPIRING_SOON: 만기임박, EXPIRED: 기간만료, CANCELLED: 임의해지, FAILED: 가입오류)")
+                .optional(), parameterWithName("payYn").description("가입유형 (Y:유료, N:무료)").optional(),
+                    parameterWithName("keyword").description("검색어 (사업자번호, 휴대폰번호, 상호명)").optional(),
+                    parameterWithName("insuranceCompany").description("보험사").optional(),
+                    parameterWithName("account").description("제휴사").optional(),
+                    parameterWithName("path").description("채널").optional(),
+                    parameterWithName("startDate").description("조회 시작일 (보험 신청일 기준, yyyy-MM-dd)").optional(),
+                    parameterWithName("endDate").description("조회 종료일 (보험 신청일 기준, yyyy-MM-dd)").optional(),
+                    parameterWithName("offset").description("오프셋").optional(),
+                    parameterWithName("limit").description("리미트").optional(),
+                    parameterWithName("sortBy").description("정렬 기준 (예: insuranceStartDate, createdAt)").optional(),
+                    parameterWithName("direction").description("정렬 방향 (ASC 또는 DESC)").optional()),
                     responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과"),
                             fieldWithPath("data.content").type(JsonFieldType.ARRAY).description("내역 리스트"),
                             fieldWithPath("data.content[].id").description("ID"),
@@ -144,8 +139,8 @@ public class InsuredControllerTest extends RestDocsTest {
                             fieldWithPath("data.content[].insuranceCompany").description("보험사"),
                             fieldWithPath("data.content[].insuranceStartDate").description("보험시작일"),
                             fieldWithPath("data.content[].insuranceEndDate").description("보험종료일"),
-                            fieldWithPath("data.content[].displayStatus")
-                                .description("가입상태 (APPLIED:신청완료, JOINED:가입완료, EXPIRING_SOON:만기임박, EXPIRED:기간만료, CANCELLED:임의해지, FAILED:가입오류)"),
+                            fieldWithPath("data.content[].displayStatus").description(
+                                    "가입상태 (APPLIED:신청완료, JOINED:가입완료, EXPIRING_SOON:만기임박, EXPIRED:기간만료, CANCELLED:임의해지, FAILED:가입오류)"),
                             fieldWithPath("data.content[].joinCheck").description(
                                     "계약 진행상태(W:가입진행, N:보온접수완료, R: 보험사 접수, Y:가입완료(유효), D:가입반려(보험사 중복), E:가입반려(주소오류), F:결제실패(보험사), X:보험만료)"),
                             fieldWithPath("data.content[].account").description("제휴사"),
@@ -176,9 +171,8 @@ public class InsuredControllerTest extends RestDocsTest {
                     queryParameters(
                             parameterWithName("insuranceCompany").description("다운로드할 보험사 양식 (메리츠, 삼성, DB 등)")
                                 .optional(),
-                            parameterWithName("status")
-                                .description(
-                                        "가입 상태 (APPLIED: 신청완료, JOINED: 가입완료, EXPIRING_SOON: 만기임박, EXPIRED: 기간만료, CANCELLED: 임의해지, FAILED: 가입오류)")
+                            parameterWithName("status").description(
+                                    "가입 상태 (APPLIED: 신청완료, JOINED: 가입완료, EXPIRING_SOON: 만기임박, EXPIRED: 기간만료, CANCELLED: 임의해지, FAILED: 가입오류)")
                                 .optional(),
                             parameterWithName("payYn").description("가입유형 (Y:유료, N:무료)").optional(),
                             parameterWithName("startDate").description("조회 시작일 (보험 신청일 기준, yyyy-MM-dd)").optional(),
@@ -255,8 +249,8 @@ public class InsuredControllerTest extends RestDocsTest {
                     responseFields(flatten(fieldWithPath("result").description("결과"),
                             fieldWithPath("data.id").description("ID"),
                             fieldWithPath("data.referIdx").description("참조번호").optional(),
-                            fieldWithPath("data.displayStatus")
-                                .description("가입 상태 (APPLIED: 신청완료, JOINED: 가입완료, EXPIRING_SOON: 만기임박, EXPIRED: 기간만료, CANCELLED: 임의해지, FAILED: 가입오류)"),
+                            fieldWithPath("data.displayStatus").description(
+                                    "가입 상태 (APPLIED: 신청완료, JOINED: 가입완료, EXPIRING_SOON: 만기임박, EXPIRED: 기간만료, CANCELLED: 임의해지, FAILED: 가입오류)"),
                             insuredFields("data.insuredInfo."), contractFields("data.contractInfo."),
                             locationFields("data.location."), subscriptionFields("data.subscription."),
                             paymentFields("data.payment."), fieldWithPath("error").description("에러").optional()))));
@@ -358,7 +352,9 @@ public class InsuredControllerTest extends RestDocsTest {
             .andExpect(status().isOk())
             .andDo(document("admin-insured-notification-send",
                     pathParameters(parameterWithName("id").description("계약 PK ID")),
-                    requestFields(fieldWithPath("type").description("알림 유형 (REJOIN: 재가입안내, CERTIFICATE: 가입확인서안내, JOINED: 가입완료안내, CANCELLED: 임의해지안내)"),
+                    requestFields(
+                            fieldWithPath("type").description(
+                                    "알림 유형 (REJOIN: 재가입안내, CERTIFICATE: 가입확인서안내, JOINED: 가입완료안내, CANCELLED: 임의해지안내)"),
                             fieldWithPath("certificateUrl").description("가입확인서 URL (link4)").optional()
                     // record 필드가 type 하나뿐이므로 content, serviceType 제거
                     ),
@@ -404,9 +400,7 @@ public class InsuredControllerTest extends RestDocsTest {
                 .totalGovernmentCost(0L)
                 .totalLocalGovernmentCost(0L)
                 .build())
-            .payment(PaymentInfo.builder()
-                .payStatus("N")
-                .build())
+            .payment(PaymentInfo.builder().payStatus("N").build())
             .memoContent("신규 등록")
             .build();
 
@@ -417,8 +411,7 @@ public class InsuredControllerTest extends RestDocsTest {
             .andDo(document("insured-register-direct",
                     requestFields(flatten(insuredFields("insuredInfo."), contractFields("contractInfo."),
                             locationFields("location."), subscriptionFields("subscription."),
-                            paymentRequestFields("payment."),
-                            fieldWithPath("memoContent").description("메모")))));
+                            paymentRequestFields("payment."), fieldWithPath("memoContent").description("메모")))));
 
         verify(insuredService).register(any(), any(), any(), any(), any(), any(), any());
     }
@@ -430,7 +423,8 @@ public class InsuredControllerTest extends RestDocsTest {
         MockMultipartFile file = new MockMultipartFile("file", "무료계약_통합.xlsx",
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "엑셀 데이터 내용".getBytes());
 
-        UpdateCount mockStats = new UpdateCount(100, 90, 5, 5); // 총 100건, 성공 90, 실패 5, 가입오류 5
+        UpdateCount mockStats = new UpdateCount(100, 90, 5, 5); // 총 100건, 성공 90, 실패 5,
+                                                                // 가입오류 5
         given(insuredService.updateUnifiedFreeContracts(any(MultipartFile.class))).willReturn(mockStats);
 
         // when & then
@@ -438,14 +432,12 @@ public class InsuredControllerTest extends RestDocsTest {
             .perform(multipart("/v1/admin/pungsu/contract/free/upload").file(file)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
             .andExpect(status().isOk())
-            .andDo(document("admin-insured-free-contract-upload",
-                    requestParts(partWithName("file")
-                        .description("통합 무료계약 엑셀 파일 (헤더: 보험사명, 사업자번호, 상호명, 주소, 증권번호, 보험시작일, 보험종기일, 총보험료, 국가부담, 지자체부담, 개인부담, 오류사유)")),
+            .andDo(document("admin-insured-free-contract-upload", requestParts(partWithName("file").description(
+                    "통합 무료계약 엑셀 파일 (헤더: 보험사명, 사업자번호, 상호명, 주소, 증권번호, 보험시작일, 보험종기일, 총보험료, 국가부담, 지자체부담, 개인부담, 오류사유)")),
                     responseFields(
                             fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (SUCCESS/ERROR)"),
                             fieldWithPath("data.totalCount").type(JsonFieldType.NUMBER).description("총 처리 건수"),
-                            fieldWithPath("data.successCount").type(JsonFieldType.NUMBER)
-                                .description("가입완료 처리 건수"),
+                            fieldWithPath("data.successCount").type(JsonFieldType.NUMBER).description("가입완료 처리 건수"),
                             fieldWithPath("data.failureCount").type(JsonFieldType.NUMBER)
                                 .description("실패 건수 (DB 매칭 실패 등)"),
                             fieldWithPath("data.errorCount").type(JsonFieldType.NUMBER)
@@ -490,9 +482,11 @@ public class InsuredControllerTest extends RestDocsTest {
     }
 
     private FieldDescriptor[] subscriptionFields(String prefix) {
-        return new FieldDescriptor[] { fieldWithPath(prefix + "joinCheck").description(
-                "계약 진행상태 (W:가입진행, N:보험접수완료, R:보험사접수, Y:가입완료, D:가입반려(중복), E:가입반려(주소오류), F:결제실패, X:보험만료, C:임의해지)")
-            .optional(), fieldWithPath(prefix + "insuranceStartDate").description("보험기간 시작일").optional(),
+        return new FieldDescriptor[] {
+                fieldWithPath(prefix + "joinCheck").description(
+                        "계약 진행상태 (W:가입진행, N:보험접수완료, R:보험사접수, Y:가입완료, D:가입반려(중복), E:가입반려(주소오류), F:결제실패, X:보험만료, C:임의해지)")
+                    .optional(),
+                fieldWithPath(prefix + "insuranceStartDate").description("보험기간 시작일").optional(),
                 fieldWithPath(prefix + "insuranceEndDate").description("보험기간 종료일").optional(),
                 fieldWithPath(prefix + "insuranceCompany").description("보험사").optional(),
                 fieldWithPath(prefix + "insuranceNumber").description("증권번호").optional(),
@@ -573,10 +567,16 @@ public class InsuredControllerTest extends RestDocsTest {
                 fieldWithPath(prefix + "payDt").type(JsonFieldType.STRING).description("결제 일시").optional(),
                 fieldWithPath(prefix + "applyCost").type(JsonFieldType.NUMBER).description("결제 금액").optional(),
                 fieldWithPath(prefix + "refund").type(JsonFieldType.OBJECT).description("환불 정보").optional(),
-                fieldWithPath(prefix + "refund.refundAmount").type(JsonFieldType.NUMBER).description("환불 금액").optional(),
-                fieldWithPath(prefix + "refund.refundMethod").type(JsonFieldType.STRING).description("환불 방법").optional(),
+                fieldWithPath(prefix + "refund.refundAmount").type(JsonFieldType.NUMBER)
+                    .description("환불 금액")
+                    .optional(),
+                fieldWithPath(prefix + "refund.refundMethod").type(JsonFieldType.STRING)
+                    .description("환불 방법")
+                    .optional(),
                 fieldWithPath(prefix + "refund.refundDt").type(JsonFieldType.STRING).description("환불 일시").optional(),
-                fieldWithPath(prefix + "refund.refundReason").type(JsonFieldType.STRING).description("환불 사유").optional() };
+                fieldWithPath(prefix + "refund.refundReason").type(JsonFieldType.STRING)
+                    .description("환불 사유")
+                    .optional() };
     }
 
 }

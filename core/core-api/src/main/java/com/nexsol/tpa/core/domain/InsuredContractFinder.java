@@ -133,7 +133,8 @@ public class InsuredContractFinder {
             .payYn(entity.getPayYn())
             .address(entity.getAddress())
             .joinCheck(entity.getJoinCheck())
-            .displayStatus(DisplayStatus.resolve(entity.getJoinCheck(), entity.getPayYn(), entity.getInsuranceEndDate()))
+            .displayStatus(
+                    DisplayStatus.resolve(entity.getJoinCheck(), entity.getPayYn(), entity.getInsuranceEndDate()))
             .account(entity.getAccount())
             .path(entity.getPath())
             .applicationDate(entity.getCreatedAt())

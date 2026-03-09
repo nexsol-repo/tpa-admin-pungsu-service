@@ -23,7 +23,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -57,18 +56,12 @@ public class InsuredService {
     @Transactional
     public Integer modify(Integer id, InsuredInfo insured, ContractInfo contract, BusinessLocationInfo location,
             InsuredSubscriptionInfo subscription, PaymentInfo payment, String memoContent, Long adminId) {
-        List<ChangeDetail> diffs = insuredContractorWriter.writeAndGetDiff(id, insured, contract, location,
+        List<String> changedSections = insuredContractorWriter.writeAndGetDiff(id, insured, contract, location,
                 subscription, payment);
         String token = getJwtToken();
 
-        if (!diffs.isEmpty()) {
-            // [수정 포인트] 이전/이후 값 상세 표시(toString) 대신 필드명(fieldName)만 추출하여 연결합니다.
-            String changedFields = diffs.stream()
-                .map(ChangeDetail::fieldName) // 필드명(예: 피보험자명, 업종 등)만 가져옴
-                .collect(Collectors.joining(", "));
-
-            // 사용자의 요구사항에 맞춰 "필드명1, 필드명2 정보가 변경되었습니다." 포맷으로 생성
-            String systemLogContent = changedFields + " 정보가 변경되었습니다.";
+        if (!changedSections.isEmpty()) {
+            String systemLogContent = String.join(", ", changedSections) + "가 변경되었습니다.";
 
             eventPublisher
                 .publishEvent(new InsuredSystemLogEvent(id, systemLogContent, String.valueOf(adminId), token));
@@ -99,8 +92,6 @@ public class InsuredService {
         eventPublisher
             .publishEvent(new InsuredSystemLogEvent(contractId, "관리자 직접 등록(신규)", String.valueOf(adminId), token));
     }
-
-
 
     @Transactional
     public void sendRenewalNotifications(int days) {

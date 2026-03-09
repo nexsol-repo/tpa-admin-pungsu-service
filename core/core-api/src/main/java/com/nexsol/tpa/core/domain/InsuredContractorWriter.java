@@ -34,13 +34,13 @@ public class InsuredContractorWriter {
 
     private final ContractChangeDetector changeDetector;
 
-    public List<ChangeDetail> writeAndGetDiff(Integer id, InsuredInfo insured, ContractInfo contract,
+    public List<String> writeAndGetDiff(Integer id, InsuredInfo insured, ContractInfo contract,
             BusinessLocationInfo location, InsuredSubscriptionInfo subscription, PaymentInfo payment) {
         TotalFormMemberEntity entity = totalFormMemberRepository.findById(id)
             .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND_DATA));
 
-        // 1. 수정 전 상태와 새로운 개념 객체들을 비교하여 변경 사항 추출
-        List<ChangeDetail> diffs = changeDetector.detect(entity, insured, contract, location, subscription, payment);
+        // 1. 수정 전 상태와 새로운 개념 객체들을 비교하여 변경된 섹션 추출
+        List<String> diffs = changeDetector.detect(entity, insured, contract, location, subscription, payment);
 
         // 2. 실제 엔티티 업데이트
         entityMapper.updateEntity(entity, insured, contract, location, subscription, payment);
@@ -51,8 +51,8 @@ public class InsuredContractorWriter {
             Optional<RefundPaymentEntity> existing = refundPaymentRepository.findByContractId(id);
 
             if (existing.isPresent()) {
-                existing.get().update(refund.refundAmount(), refund.refundMethod(), refund.refundDt(),
-                        refund.refundReason());
+                existing.get()
+                    .update(refund.refundAmount(), refund.refundMethod(), refund.refundDt(), refund.refundReason());
             }
             else {
                 refundPaymentRepository.save(RefundPaymentEntity.builder()
@@ -137,8 +137,8 @@ public class InsuredContractorWriter {
         for (FreeContractUpdateInfo info : updates) {
             // joinCheck=N, payYn=N (무료) 상태인 건만 조회
             Optional<TotalFormMemberEntity> entityOpt = totalFormMemberRepository
-                .findFirstByBusinessNumberAndPayYnAndInsuranceCompanyAndJoinCheck(
-                        info.businessNo(), "N", info.insuranceCompany(), "N");
+                .findFirstByBusinessNumberAndPayYnAndInsuranceCompanyAndJoinCheck(info.businessNo(), "N",
+                        info.insuranceCompany(), "N");
 
             if (entityOpt.isPresent()) {
                 TotalFormMemberEntity entity = entityOpt.get();
