@@ -18,6 +18,9 @@ public class InsuredContractQueryGenerator {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+            // 삭제되지 않은 데이터만 조회
+            predicates.add(cb.isNull(root.get("deletedAt")));
+
             // 가입 상태 (DisplayStatus 기반)
             if (condition.status() != null) {
                 LocalDateTime now = LocalDateTime.now();
