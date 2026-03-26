@@ -170,6 +170,9 @@ public class TotalFormMemberEntity {
     @Column(name = "`createdAt`")
     private LocalDateTime createdAt;
 
+    @Column(name = "`deletedAt`")
+    private LocalDateTime deletedAt;
+
     @Embedded
     private CoverageAmount coverage;
 
