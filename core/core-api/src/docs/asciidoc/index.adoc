@@ -108,6 +108,44 @@ include::{snippets}/admin-insured-notification-send/http-response.adoc[]
 include::{snippets}/admin-insured-notification-send/response-fields.adoc[]
 
 
+=== 대량 발송 대상 조회 (Preview)
+보험종료일/시작일/신청일 기준으로 대량 재가입 안내 발송 대상(기간만료/만기임박) 건수를 조회합니다.
+발송 전 대상 건수 확인 용도입니다.
+
+==== Curl Request
+include::{snippets}/admin-bulk-notification-preview/curl-request.adoc[]
+
+==== HTTP Request
+include::{snippets}/admin-bulk-notification-preview/http-request.adoc[]
+
+==== Query Parameters
+include::{snippets}/admin-bulk-notification-preview/query-parameters.adoc[]
+
+==== HTTP Response
+include::{snippets}/admin-bulk-notification-preview/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/admin-bulk-notification-preview/response-fields.adoc[]
+
+=== 대량 재가입 안내 발송
+Preview에서 확인한 대상에게 문자+메일을 일괄 발송합니다.
+50건 단위 배치 처리되며, displayStatus에 따라 만기임박(REJOIN)/기간만료(EXPIRED) 템플릿이 자동 적용됩니다.
+
+==== Curl Request
+include::{snippets}/admin-bulk-notification-send/curl-request.adoc[]
+
+==== HTTP Request
+include::{snippets}/admin-bulk-notification-send/http-request.adoc[]
+
+==== Request Fields
+include::{snippets}/admin-bulk-notification-send/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/admin-bulk-notification-send/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/admin-bulk-notification-send/response-fields.adoc[]
+
 === 가입확인서 파일 업로드
 가입확인서 PDF 파일을 서버에 업로드하고, 저장된 파일의 경로(Key)를 반환받습니다.
 

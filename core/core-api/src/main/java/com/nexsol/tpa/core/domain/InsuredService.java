@@ -1,5 +1,7 @@
 package com.nexsol.tpa.core.domain;
 
+import com.nexsol.tpa.core.enums.DateType;
+import com.nexsol.tpa.core.enums.DisplayStatus;
 import com.nexsol.tpa.core.enums.MailType;
 import com.nexsol.tpa.core.support.DomainPage;
 import com.nexsol.tpa.core.support.OffsetLimit;
@@ -134,6 +136,53 @@ public class InsuredService {
         });
 
         return targets.size();
+    }
+
+    @Transactional(readOnly = true)
+    public BulkNotificationPreview getBulkNotificationPreview(DateType dateType, LocalDate startDate,
+            LocalDate endDate) {
+        return insuredContractFinder.countByStatusForPreview(dateType, startDate, endDate);
+    }
+
+    public int sendBulkRenewalNotifications(DateType dateType, LocalDate startDate, LocalDate endDate,
+            List<DisplayStatus> statuses, Long adminId) {
+        List<InsuredContractDetail> targets = insuredContractFinder.findBulkNotificationTargets(dateType, startDate,
+                endDate, statuses);
+
+        for (int i = 0; i < targets.size(); i++) {
+            InsuredContractDetail detail = targets.get(i);
+            MailType mailType = resolveMailType(detail.displayStatus());
+            String rejoinUrl = "http://pungsu.tpakorea.com/rejoin/feeGuide?idx=" + detail.referIdx();
+
+            try {
+                this.send(detail, mailType, rejoinUrl, adminId);
+            }
+            catch (Exception e) {
+                log.error("대량 발송 실패 contractId={}", detail.id(), e);
+            }
+
+            if ((i + 1) % BATCH_SIZE == 0 && i + 1 < targets.size()) {
+                try {
+                    Thread.sleep(BATCH_DELAY_MS);
+                }
+                catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    log.warn("대량 발송 배치 처리 중단");
+                    return i + 1;
+                }
+            }
+        }
+
+        log.info("대량 재가입 안내 발송 완료: 총 {}건", targets.size());
+        return targets.size();
+    }
+
+    private MailType resolveMailType(DisplayStatus status) {
+        return switch (status) {
+            case EXPIRING_SOON -> MailType.REJOIN;
+            case EXPIRED -> MailType.EXPIRED;
+            default -> MailType.REJOIN;
+        };
     }
 
     @Transactional(readOnly = true)

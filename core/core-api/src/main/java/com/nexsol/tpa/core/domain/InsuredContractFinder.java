@@ -1,5 +1,6 @@
 package com.nexsol.tpa.core.domain;
 
+import com.nexsol.tpa.core.enums.DateType;
 import com.nexsol.tpa.core.enums.DisplayStatus;
 import com.nexsol.tpa.core.support.DomainPage;
 import com.nexsol.tpa.core.support.OffsetLimit;
@@ -11,14 +12,12 @@ import com.nexsol.tpa.storage.db.core.RefundPaymentEntity;
 import com.nexsol.tpa.storage.db.core.RefundPaymentRepository;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberEntity;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -34,8 +33,6 @@ public class InsuredContractFinder {
     private final RefundPaymentRepository refundPaymentRepository;
 
     private final InsuredContractQueryGenerator queryGenerator;
-
-    private final EntityManager em;
 
     public DomainPage<InsuredContract> find(InsuredSearchCondition condition, OffsetLimit offsetLimit) {
 
@@ -83,37 +80,42 @@ public class InsuredContractFinder {
             .toList();
     }
 
+    public List<InsuredContractDetail> findBulkNotificationTargets(DateType dateType, LocalDate startDate,
+            LocalDate endDate, List<DisplayStatus> statuses) {
+        return statuses.stream().flatMap(status -> {
+            InsuredSearchCondition condition = InsuredSearchCondition.builder()
+                .dateType(dateType)
+                .startDate(startDate)
+                .endDate(endDate)
+                .status(status)
+                .build();
+            Specification<TotalFormMemberEntity> spec = queryGenerator.generate(condition);
+            return totalFormMemberRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "id")).stream();
+        }).map(this::mapToDetail).toList();
+    }
+
+    public BulkNotificationPreview countByStatusForPreview(DateType dateType, LocalDate startDate, LocalDate endDate) {
+        long expiredCount = countByCondition(dateType, startDate, endDate, DisplayStatus.EXPIRED);
+        long expiringSoonCount = countByCondition(dateType, startDate, endDate, DisplayStatus.EXPIRING_SOON);
+        return new BulkNotificationPreview(expiredCount, expiringSoonCount, expiredCount + expiringSoonCount);
+    }
+
+    private long countByCondition(DateType dateType, LocalDate startDate, LocalDate endDate, DisplayStatus status) {
+        InsuredSearchCondition condition = InsuredSearchCondition.builder()
+            .dateType(dateType)
+            .startDate(startDate)
+            .endDate(endDate)
+            .status(status)
+            .build();
+        Specification<TotalFormMemberEntity> spec = queryGenerator.generate(condition);
+        return totalFormMemberRepository.count(spec);
+    }
+
     public List<ContractExcelData> findAll(InsuredSearchCondition condition) {
-        StringBuilder jpql = new StringBuilder();
-        // 1. Root Entity는 반드시 JPA 엔티티인 TotalFormMemberEntity여야 함
-        jpql.append("SELECT e FROM TotalFormMemberEntity e WHERE 1=1 ");
+        Specification<TotalFormMemberEntity> spec = queryGenerator.generate(condition);
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");
 
-        // 시작일과 종료일 조건이 모두 있을 때만 필터링
-        if (condition.startDate() != null && condition.endDate() != null) {
-            // 신청일(createdAt) 기준으로 조회 기간 필터링
-            jpql.append("AND e.createdAt >= :startDate ");
-            jpql.append("AND e.createdAt <= :endDate ");
-        }
-
-        if (StringUtils.hasText(condition.insuranceCompany())) {
-            jpql.append("AND e.insuranceCompany = :insuranceCompany ");
-        }
-
-        jpql.append("ORDER BY e.id DESC");
-
-        TypedQuery<TotalFormMemberEntity> query = em.createQuery(jpql.toString(), TotalFormMemberEntity.class);
-
-        if (condition.startDate() != null && condition.endDate() != null) {
-            query.setParameter("startDate", condition.startDate().atStartOfDay());
-            query.setParameter("endDate", condition.endDate().atTime(23, 59, 59));
-        }
-
-        if (StringUtils.hasText(condition.insuranceCompany())) {
-            query.setParameter("insuranceCompany", condition.insuranceCompany());
-        }
-
-        // 2. 조회된 엔티티를 상세 정보가 포함된 ExcelData 객체로 매핑
-        return query.getResultList()
+        return totalFormMemberRepository.findAll(spec, sort)
             .stream()
             .map(entity -> new ContractExcelData(mapToContract(entity), mapToInsuredInfo(entity),
                     mapToBusinessLocationInfo(entity), mapToInsuranceSubscriptionInfo(entity)))
