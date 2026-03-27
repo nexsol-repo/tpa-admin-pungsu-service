@@ -1,5 +1,6 @@
 package com.nexsol.tpa.core.domain;
 
+import com.nexsol.tpa.core.enums.DateType;
 import com.nexsol.tpa.core.enums.DisplayStatus;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberEntity;
 import jakarta.persistence.criteria.Predicate;
@@ -74,12 +75,17 @@ public class InsuredContractQueryGenerator {
                 predicates.add(cb.equal(root.get("payYn"), condition.payYn()));
             }
 
-            // 조회 기간 (보험 신청일 기준)
+            // 조회 기간 (dateType에 따라 대상 컬럼 분기)
+            String dateField = switch (condition.dateType() != null ? condition.dateType() : DateType.CREATED_AT) {
+                case INSURANCE_START -> "insuranceStartDate";
+                case INSURANCE_END -> "insuranceEndDate";
+                case CREATED_AT -> "createdAt";
+            };
             if (condition.startDate() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), condition.startDate().atStartOfDay()));
+                predicates.add(cb.greaterThanOrEqualTo(root.get(dateField), condition.startDate().atStartOfDay()));
             }
             if (condition.endDate() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), condition.endDate().atTime(23, 59, 59)));
+                predicates.add(cb.lessThanOrEqualTo(root.get(dateField), condition.endDate().atTime(23, 59, 59)));
             }
 
             // 키워드 검색
