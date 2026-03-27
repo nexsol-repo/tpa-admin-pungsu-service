@@ -1,5 +1,6 @@
 package com.nexsol.tpa.core.domain;
 
+import com.nexsol.tpa.core.enums.DateType;
 import com.nexsol.tpa.core.enums.DisplayStatus;
 import com.nexsol.tpa.core.support.DomainPage;
 import com.nexsol.tpa.core.support.OffsetLimit;
@@ -77,6 +78,37 @@ public class InsuredContractFinder {
             .stream()
             .map(this::mapToDetail)
             .toList();
+    }
+
+    public List<InsuredContractDetail> findBulkNotificationTargets(DateType dateType, LocalDate startDate,
+            LocalDate endDate, List<DisplayStatus> statuses) {
+        return statuses.stream().flatMap(status -> {
+            InsuredSearchCondition condition = InsuredSearchCondition.builder()
+                .dateType(dateType)
+                .startDate(startDate)
+                .endDate(endDate)
+                .status(status)
+                .build();
+            Specification<TotalFormMemberEntity> spec = queryGenerator.generate(condition);
+            return totalFormMemberRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "id")).stream();
+        }).map(this::mapToDetail).toList();
+    }
+
+    public BulkNotificationPreview countByStatusForPreview(DateType dateType, LocalDate startDate, LocalDate endDate) {
+        long expiredCount = countByCondition(dateType, startDate, endDate, DisplayStatus.EXPIRED);
+        long expiringSoonCount = countByCondition(dateType, startDate, endDate, DisplayStatus.EXPIRING_SOON);
+        return new BulkNotificationPreview(expiredCount, expiringSoonCount, expiredCount + expiringSoonCount);
+    }
+
+    private long countByCondition(DateType dateType, LocalDate startDate, LocalDate endDate, DisplayStatus status) {
+        InsuredSearchCondition condition = InsuredSearchCondition.builder()
+            .dateType(dateType)
+            .startDate(startDate)
+            .endDate(endDate)
+            .status(status)
+            .build();
+        Specification<TotalFormMemberEntity> spec = queryGenerator.generate(condition);
+        return totalFormMemberRepository.count(spec);
     }
 
     public List<ContractExcelData> findAll(InsuredSearchCondition condition) {

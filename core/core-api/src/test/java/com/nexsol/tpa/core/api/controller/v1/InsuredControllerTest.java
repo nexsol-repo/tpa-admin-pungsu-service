@@ -1,11 +1,13 @@
 package com.nexsol.tpa.core.api.controller.v1;
 
+import com.nexsol.tpa.core.api.controller.v1.request.BulkNotificationSendRequest;
 import com.nexsol.tpa.core.api.controller.v1.request.InsuredModifyRequest;
 import com.nexsol.tpa.core.api.controller.v1.request.InsuredRegisterRequest;
 import com.nexsol.tpa.core.api.controller.v1.request.NotificationSendRequest;
 import com.nexsol.tpa.core.domain.*;
 
 import com.nexsol.tpa.core.domain.LoginAdmin;
+import com.nexsol.tpa.core.enums.DateType;
 import com.nexsol.tpa.core.enums.DisplayStatus;
 import com.nexsol.tpa.core.enums.MailType;
 import com.nexsol.tpa.core.support.DomainPage;
@@ -46,7 +48,6 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class InsuredControllerTest extends RestDocsTest {
@@ -122,8 +123,9 @@ public class InsuredControllerTest extends RestDocsTest {
                     parameterWithName("insuranceCompany").description("보험사").optional(),
                     parameterWithName("account").description("제휴사").optional(),
                     parameterWithName("path").description("채널").optional(),
-                    parameterWithName("startDate").description("조회 시작일 (보험 신청일 기준, yyyy-MM-dd)").optional(),
-                    parameterWithName("endDate").description("조회 종료일 (보험 신청일 기준, yyyy-MM-dd)").optional(),
+                    parameterWithName("dateType").description("날짜 기준 (CREATED_AT: 신청일, INSURANCE_START: 보험시작일, INSURANCE_END: 보험종료일, 기본: CREATED_AT)").optional(),
+                    parameterWithName("startDate").description("조회 시작일 (yyyy-MM-dd)").optional(),
+                    parameterWithName("endDate").description("조회 종료일 (yyyy-MM-dd)").optional(),
                     parameterWithName("offset").description("오프셋").optional(),
                     parameterWithName("limit").description("리미트").optional(),
                     parameterWithName("sortBy").description("정렬 기준 (예: insuranceStartDate, createdAt)").optional(),
@@ -175,8 +177,9 @@ public class InsuredControllerTest extends RestDocsTest {
                                     "가입 상태 (APPLIED: 신청완료, JOINED: 가입완료, EXPIRING_SOON: 만기임박, EXPIRED: 기간만료, CANCELLED: 임의해지, FAILED: 가입오류)")
                                 .optional(),
                             parameterWithName("payYn").description("가입유형 (Y:유료, N:무료)").optional(),
-                            parameterWithName("startDate").description("조회 시작일 (보험 신청일 기준, yyyy-MM-dd)").optional(),
-                            parameterWithName("endDate").description("조회 종료일 (보험 신청일 기준, yyyy-MM-dd)").optional(),
+                            parameterWithName("dateType").description("날짜 기준 (CREATED_AT: 신청일, INSURANCE_START: 보험시작일, INSURANCE_END: 보험종료일, 기본: CREATED_AT)").optional(),
+                            parameterWithName("startDate").description("조회 시작일 (yyyy-MM-dd)").optional(),
+                            parameterWithName("endDate").description("조회 종료일 (yyyy-MM-dd)").optional(),
                             parameterWithName("keyword").description("검색어 (사업자번호, 휴대폰번호, 상호명)").optional(),
                             parameterWithName("account").description("제휴사").optional(),
                             parameterWithName("path").description("채널").optional())));
@@ -446,6 +449,61 @@ public class InsuredControllerTest extends RestDocsTest {
 
         // verify
         verify(insuredService, times(1)).updateUnifiedFreeContracts(any(MultipartFile.class));
+    }
+
+    @Test
+    @DisplayName("대량 발송 대상 조회 (Preview) API 문서화")
+    void getBulkNotificationPreview() throws Exception {
+        BulkNotificationPreview mockPreview = new BulkNotificationPreview(1234, 567, 1801);
+        given(insuredService.getBulkNotificationPreview(any(), any(), any())).willReturn(mockPreview);
+
+        mockMvc
+            .perform(get("/v1/admin/pungsu/bulk-notification/preview")
+                .param("dateType", "INSURANCE_END")
+                .param("startDate", "2025-11-01")
+                .param("endDate", "2026-02-28")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andDo(document("admin-bulk-notification-preview",
+                    queryParameters(
+                            parameterWithName("dateType").description("날짜 기준 (CREATED_AT: 신청일, INSURANCE_START: 보험시작일, INSURANCE_END: 보험종료일, 기본: CREATED_AT)").optional(),
+                            parameterWithName("startDate").description("조회 시작일 (yyyy-MM-dd)"),
+                            parameterWithName("endDate").description("조회 종료일 (yyyy-MM-dd)")),
+                    responseFields(
+                            fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과"),
+                            fieldWithPath("data.expiredCount").type(JsonFieldType.NUMBER).description("기간만료 건수"),
+                            fieldWithPath("data.expiringSoonCount").type(JsonFieldType.NUMBER).description("만기임박 건수"),
+                            fieldWithPath("data.totalCount").type(JsonFieldType.NUMBER).description("총 대상 건수"),
+                            fieldWithPath("error").description("에러 정보").optional())));
+    }
+
+    @Test
+    @DisplayName("대량 재가입 안내 발송 API 문서화")
+    void sendBulkNotification() throws Exception {
+        BulkNotificationSendRequest request = new BulkNotificationSendRequest(
+                DateType.INSURANCE_END,
+                java.time.LocalDate.of(2025, 11, 1),
+                java.time.LocalDate.of(2026, 2, 28),
+                List.of(DisplayStatus.EXPIRED, DisplayStatus.EXPIRING_SOON));
+
+        given(insuredService.sendBulkRenewalNotifications(any(), any(), any(), any(), any())).willReturn(1801);
+
+        mockMvc
+            .perform(post("/v1/admin/pungsu/bulk-notification/send")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andDo(document("admin-bulk-notification-send",
+                    requestFields(
+                            fieldWithPath("dateType").description("날짜 기준 (CREATED_AT: 신청일, INSURANCE_START: 보험시작일, INSURANCE_END: 보험종료일)"),
+                            fieldWithPath("startDate").description("조회 시작일 (yyyy-MM-dd)"),
+                            fieldWithPath("endDate").description("조회 종료일 (yyyy-MM-dd)"),
+                            fieldWithPath("statuses").description("발송 대상 상태 목록 (EXPIRED: 기간만료, EXPIRING_SOON: 만기임박)")),
+                    responseFields(
+                            fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과"),
+                            fieldWithPath("data.totalCount").type(JsonFieldType.NUMBER).description("발송 대상 건수"),
+                            fieldWithPath("data.message").type(JsonFieldType.STRING).description("결과 메시지"),
+                            fieldWithPath("error").description("에러 정보").optional())));
     }
 
     // --- 헬퍼 메서드 ---

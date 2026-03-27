@@ -116,8 +116,7 @@ public class ContractChangeDetector {
         }
 
         return changed(entity.getPayStatus(), payment.payStatus())
-                || changed(entity.getPayMethod(), payment.payMethod())
-                || changed(entity.getPayDt(), payment.payDt())
+                || changed(entity.getPayMethod(), payment.payMethod()) || changed(entity.getPayDt(), payment.payDt())
                 || changed(entity.getApplyCost(), payment.applyCost());
     }
 
