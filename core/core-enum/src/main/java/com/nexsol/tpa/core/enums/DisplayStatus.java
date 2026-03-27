@@ -1,5 +1,6 @@
 package com.nexsol.tpa.core.enums;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public enum DisplayStatus {
@@ -15,6 +16,34 @@ public enum DisplayStatus {
 
     public String getDescription() {
         return description;
+    }
+
+    /**
+     * 보험종료일 기준 만기임박 시작일 계산.
+     * - 종료일 16~말일: D-30 (종료 30일 전)
+     * - 종료일 1~15일: 전월 16일
+     */
+    public static LocalDate calculateExpiringSoonStart(LocalDate insuranceEndDate) {
+        int dayOfMonth = insuranceEndDate.getDayOfMonth();
+        if (dayOfMonth >= 16) {
+            return insuranceEndDate.minusDays(30);
+        }
+        else {
+            return insuranceEndDate.minusMonths(1).withDayOfMonth(16);
+        }
+    }
+
+    public static boolean isExpiringSoon(LocalDateTime insuranceEndDate) {
+        if (insuranceEndDate == null) {
+            return false;
+        }
+        LocalDate today = LocalDate.now();
+        LocalDate endDate = insuranceEndDate.toLocalDate();
+        if (!endDate.isAfter(today)) {
+            return false;
+        }
+        LocalDate expiringSoonStart = calculateExpiringSoonStart(endDate);
+        return !today.isBefore(expiringSoonStart);
     }
 
     public static DisplayStatus resolve(String joinCheck, String payYn, LocalDateTime insuranceEndDate) {
@@ -33,12 +62,8 @@ public enum DisplayStatus {
         if ("N".equals(joinCheck) && "N".equals(payYn)) {
             return APPLIED;
         }
-        if ("Y".equals(joinCheck) && insuranceEndDate != null) {
-            LocalDateTime now = LocalDateTime.now();
-            LocalDateTime sevenDaysLater = now.plusDays(7);
-            if (insuranceEndDate.isAfter(now) && insuranceEndDate.isBefore(sevenDaysLater)) {
-                return EXPIRING_SOON;
-            }
+        if ("Y".equals(joinCheck) && isExpiringSoon(insuranceEndDate)) {
+            return EXPIRING_SOON;
         }
         return JOINED;
     }
