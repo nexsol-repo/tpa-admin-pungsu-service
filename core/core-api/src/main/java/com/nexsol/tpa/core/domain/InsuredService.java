@@ -96,8 +96,8 @@ public class InsuredService {
     }
 
     @Transactional
-    public void sendRenewalNotifications(int days) {
-        List<InsuredContractDetail> targets = insuredContractFinder.findExpiringContracts(days);
+    public void sendRenewalNotifications() {
+        List<InsuredContractDetail> targets = insuredContractFinder.findExpiringContracts();
 
         for (int i = 0; i < targets.size(); i++) {
             InsuredContractDetail detail = targets.get(i);

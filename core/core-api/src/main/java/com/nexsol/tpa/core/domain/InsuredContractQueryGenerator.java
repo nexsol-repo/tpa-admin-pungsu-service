@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,10 @@ public class InsuredContractQueryGenerator {
             // 가입 상태 (DisplayStatus 기반)
             if (condition.status() != null) {
                 LocalDateTime now = LocalDateTime.now();
-                LocalDateTime sevenDaysLater = now.plusDays(7);
+                // 만기임박 시작일: 오늘이 만기임박 윈도우에 해당하는 보험종료일의 경계값 계산
+                // → "오늘부터 만기임박인 보험종료일"의 최대값을 구하기 위해 역산
+                // 만기임박 조건: 보험종료일 > today AND today >= expiringSoonStart(보험종료일)
+                // DB 쿼리에서는 보험종료일의 범위로 표현해야 함
 
                 switch (condition.status()) {
                     case DRAFT -> predicates.add(cb.equal(root.get("joinCheck"), "W"));
@@ -34,18 +38,25 @@ public class InsuredContractQueryGenerator {
                         predicates.add(cb.equal(root.get("payYn"), "N"));
                     }
                     case JOINED -> {
-                        // joinCheck = Y AND (insuranceEndDate is null OR insuranceEndDate
-                        // >= 7일 후)
+                        // joinCheck = Y AND 만기임박이 아닌 것
+                        // (insuranceEndDate is null OR 아직 만기임박 윈도우 진입 전)
+                        LocalDate today = LocalDate.now();
+                        // 오늘 기준 만기임박 대상이 되는 최대 보험종료일 계산
+                        // 종료일 16~말일: today >= endDate - 30 → endDate <= today + 30
+                        // 종료일 1~15일: today >= endDate전월16일 → endDate <= today가 속한 다음달 15일
+                        LocalDateTime maxExpiringSoonEnd = today.plusDays(30).atTime(23, 59, 59);
                         predicates.add(cb.equal(root.get("joinCheck"), "Y"));
-                        predicates.add(cb.or(cb.isNull(root.get("insuranceEndDate")),
-                                cb.greaterThanOrEqualTo(root.get("insuranceEndDate"), sevenDaysLater)));
+                        predicates.add(cb.or(
+                                cb.isNull(root.get("insuranceEndDate")),
+                                cb.greaterThan(root.get("insuranceEndDate"), maxExpiringSoonEnd)));
                     }
                     case EXPIRING_SOON -> {
-                        // joinCheck = Y AND insuranceEndDate > now AND insuranceEndDate <
-                        // 7일 후
+                        // joinCheck = Y AND insuranceEndDate > today AND 만기임박 윈도우 내
+                        LocalDate today = LocalDate.now();
+                        LocalDateTime maxExpiringSoonEnd = today.plusDays(30).atTime(23, 59, 59);
                         predicates.add(cb.equal(root.get("joinCheck"), "Y"));
                         predicates.add(cb.greaterThan(root.get("insuranceEndDate"), now));
-                        predicates.add(cb.lessThan(root.get("insuranceEndDate"), sevenDaysLater));
+                        predicates.add(cb.lessThanOrEqualTo(root.get("insuranceEndDate"), maxExpiringSoonEnd));
                     }
                     case EXPIRED -> predicates.add(cb.equal(root.get("joinCheck"), "X"));
                     case CANCELLED -> predicates.add(cb.equal(root.get("joinCheck"), "C"));

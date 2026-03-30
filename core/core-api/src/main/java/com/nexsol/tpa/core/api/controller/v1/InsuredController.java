@@ -200,18 +200,11 @@ public class InsuredController {
         return ApiResponse.success(new BulkNotificationSendResponse(totalCount, "발송이 시작되었습니다."));
     }
 
-    // 1. 자유로운 날짜 테스트용 (D-Day를 파라미터로 받음)
+    // 만기임박 대상 발송 트리거 (테스트용)
     @PostMapping("/trigger-renewal-check")
-    public ApiResponse<String> triggerAny(@RequestParam int days) {
-        insuredService.sendRenewalNotifications(days);
-        return ApiResponse.success(days + "일 전 대상자 발송 트리거 완료");
-    }
-
-    // 2. 실제 운영 규칙(7일) 테스트용
-    @PostMapping("/trigger-renewal-check-seven")
-    public ApiResponse<String> triggerSeven() {
-        insuredService.sendRenewalNotifications(7); // 비즈니스 규칙인 '7'을 명시
-        return ApiResponse.success("7일 전 대상자(운영 규칙) 발송 트리거 완료");
+    public ApiResponse<String> triggerRenewalCheck() {
+        insuredService.sendRenewalNotifications();
+        return ApiResponse.success("만기임박 대상자 발송 트리거 완료");
     }
 
     // 3. 보험시작일 기준 일괄 발송 (예: startDate=2023-03-31)

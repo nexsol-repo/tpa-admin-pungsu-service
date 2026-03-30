@@ -13,7 +13,7 @@ public class RenewalScheduler {
 
     @Scheduled(cron = "0 0 10 * * *")
     public void run() {
-        insuredService.sendRenewalNotifications(7);
+        insuredService.sendRenewalNotifications();
     }
 
 }
