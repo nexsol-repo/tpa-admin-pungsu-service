@@ -8,6 +8,7 @@ import com.nexsol.tpa.core.api.controller.v1.request.NotificationSendRequest;
 import com.nexsol.tpa.core.api.controller.v1.response.BulkNotificationSendResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.FreeContractUploadResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractDetailResponse;
+import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractListResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractResponse;
 import com.nexsol.tpa.core.domain.*;
 import com.nexsol.tpa.core.enums.DateType;
@@ -42,16 +43,21 @@ public class InsuredController {
     // private final MeritzService meritzService;
 
     @GetMapping("/contract")
-    public ApiResponse<PageResponse<InsuredContractResponse>> getContract(@ModelAttribute InsuredSearchRequest request,
+    public ApiResponse<InsuredContractListResponse> getContract(@ModelAttribute InsuredSearchRequest request,
             @LoginAdmin AdminUser admin) {
 
-        DomainPage<InsuredContract> contract = insuredService.getList(request.toInsuredSearchCondition(),
-                request.toOffsetLimit());
+        InsuredSearchCondition condition = request.toInsuredSearchCondition();
+
+        DomainPage<InsuredContract> contract = insuredService.getList(condition, request.toOffsetLimit());
+
+        long renewalTargetCount = insuredService.getRenewalTargetCount(condition);
 
         List<InsuredContractResponse> responses = contract.content().stream().map(InsuredContractResponse::of).toList();
 
-        return ApiResponse.success(
-                new PageResponse<>(responses, contract.hasNext(), contract.totalElements(), contract.totalPages()));
+        PageResponse<InsuredContractResponse> page = new PageResponse<>(responses, contract.hasNext(),
+                contract.totalElements(), contract.totalPages());
+
+        return ApiResponse.success(new InsuredContractListResponse(page, renewalTargetCount));
 
     }
 

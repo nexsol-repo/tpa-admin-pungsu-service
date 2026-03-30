@@ -59,19 +59,23 @@ public class InsuredContractFinder {
                 mapToInsuranceSubscriptionInfo(entity), mapToPaymentInfo(entity, refundInfo));
     }
 
+    public long countRenewalTargets(InsuredSearchCondition condition) {
+        Specification<TotalFormMemberEntity> spec = queryGenerator.generateRenewalTargetSpec(condition);
+        return totalFormMemberRepository.count(spec);
+    }
+
     public List<InsuredContractDetail> findExpiringContracts() {
         // 만기임박 대상: joinCheck='Y' + 보험종료일이 만기임박 윈도우 내
         LocalDateTime now = LocalDateTime.now();
         LocalDate today = LocalDate.now();
         LocalDateTime maxEnd = today.plusDays(30).atTime(23, 59, 59);
 
-        Specification<TotalFormMemberEntity> spec = (root, query, cb) -> cb.and(
-                cb.isNull(root.get("deletedAt")),
-                cb.equal(root.get("joinCheck"), "Y"),
-                cb.greaterThan(root.get("insuranceEndDate"), now),
+        Specification<TotalFormMemberEntity> spec = (root, query, cb) -> cb.and(cb.isNull(root.get("deletedAt")),
+                cb.equal(root.get("joinCheck"), "Y"), cb.greaterThan(root.get("insuranceEndDate"), now),
                 cb.lessThanOrEqualTo(root.get("insuranceEndDate"), maxEnd));
 
-        return totalFormMemberRepository.findAll(spec).stream()
+        return totalFormMemberRepository.findAll(spec)
+            .stream()
             .filter(entity -> DisplayStatus.isExpiringSoon(entity.getInsuranceEndDate()))
             .map(this::mapToDetail)
             .toList();
@@ -100,8 +104,10 @@ public class InsuredContractFinder {
     }
 
     public BulkNotificationPreview countByStatusForPreview(DateType dateType, LocalDate startDate, LocalDate endDate) {
-        long expiredCount = totalFormMemberRepository.count(buildBulkSpec(DisplayStatus.EXPIRED, dateType, startDate, endDate));
-        long expiringSoonCount = totalFormMemberRepository.count(buildBulkSpec(DisplayStatus.EXPIRING_SOON, null, null, null));
+        long expiredCount = totalFormMemberRepository
+            .count(buildBulkSpec(DisplayStatus.EXPIRED, dateType, startDate, endDate));
+        long expiringSoonCount = totalFormMemberRepository
+            .count(buildBulkSpec(DisplayStatus.EXPIRING_SOON, null, null, null));
         return new BulkNotificationPreview(expiredCount, expiringSoonCount, expiredCount + expiringSoonCount);
     }
 

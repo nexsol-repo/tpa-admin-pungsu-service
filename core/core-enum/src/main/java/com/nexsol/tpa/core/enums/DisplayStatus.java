@@ -19,9 +19,7 @@ public enum DisplayStatus {
     }
 
     /**
-     * 보험종료일 기준 만기임박 시작일 계산.
-     * - 종료일 16~말일: D-30 (종료 30일 전)
-     * - 종료일 1~15일: 전월 16일
+     * 보험종료일 기준 만기임박 시작일 계산. - 종료일 16~말일: D-30 (종료 30일 전) - 종료일 1~15일: 전월 16일
      */
     public static LocalDate calculateExpiringSoonStart(LocalDate insuranceEndDate) {
         int dayOfMonth = insuranceEndDate.getDayOfMonth();
