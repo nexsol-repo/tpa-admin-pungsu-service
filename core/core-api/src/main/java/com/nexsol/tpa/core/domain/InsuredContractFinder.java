@@ -119,8 +119,10 @@ public class InsuredContractFinder {
 
             switch (status) {
                 case EXPIRED -> {
-                    // 기간만료: joinCheck='X' + 사용자 지정 날짜 범위
-                    predicates.add(cb.equal(root.get("joinCheck"), "X"));
+                    // 기간만료: joinCheck='Y' + insuranceEndDate <= now
+                    predicates.add(cb.equal(root.get("joinCheck"), "Y"));
+                    predicates.add(cb.lessThanOrEqualTo(root.get("insuranceEndDate"),
+                            LocalDateTime.now()));
                     if (dateType != null && startDate != null && endDate != null) {
                         String dateField = switch (dateType) {
                             case INSURANCE_START -> "insuranceStartDate";
