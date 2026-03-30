@@ -51,6 +51,11 @@ public class InsuredService {
     }
 
     @Transactional(readOnly = true)
+    public long getRenewalTargetCount(InsuredSearchCondition condition) {
+        return insuredContractFinder.countRenewalTargets(condition);
+    }
+
+    @Transactional(readOnly = true)
     public InsuredContractDetail getDetail(Integer id) {
         return insuredContractFinder.findDetail(id);
     }

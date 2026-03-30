@@ -104,6 +104,7 @@ public class InsuredControllerTest extends RestDocsTest {
         DomainPage<InsuredContract> mockPage = new DomainPage<>(List.of(mockContract), true, 20, 2);
 
         given(insuredService.getList(any(InsuredSearchCondition.class), any(OffsetLimit.class))).willReturn(mockPage);
+        given(insuredService.getRenewalTargetCount(any(InsuredSearchCondition.class))).willReturn(5L);
 
         mockMvc
             .perform(get("/v1/admin/pungsu/contract").param("payYn", "Y")
@@ -123,7 +124,10 @@ public class InsuredControllerTest extends RestDocsTest {
                     parameterWithName("insuranceCompany").description("보험사").optional(),
                     parameterWithName("account").description("제휴사").optional(),
                     parameterWithName("path").description("채널").optional(),
-                    parameterWithName("dateType").description("날짜 기준 (CREATED_AT: 신청일, INSURANCE_START: 보험시작일, INSURANCE_END: 보험종료일, 기본: CREATED_AT)").optional(),
+                    parameterWithName("dateType")
+                        .description(
+                                "날짜 기준 (CREATED_AT: 신청일, INSURANCE_START: 보험시작일, INSURANCE_END: 보험종료일, 기본: CREATED_AT)")
+                        .optional(),
                     parameterWithName("startDate").description("조회 시작일 (yyyy-MM-dd)").optional(),
                     parameterWithName("endDate").description("조회 종료일 (yyyy-MM-dd)").optional(),
                     parameterWithName("offset").description("오프셋").optional(),
@@ -131,28 +135,30 @@ public class InsuredControllerTest extends RestDocsTest {
                     parameterWithName("sortBy").description("정렬 기준 (예: insuranceStartDate, createdAt)").optional(),
                     parameterWithName("direction").description("정렬 방향 (ASC 또는 DESC)").optional()),
                     responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과"),
-                            fieldWithPath("data.content").type(JsonFieldType.ARRAY).description("내역 리스트"),
-                            fieldWithPath("data.content[].id").description("ID"),
-                            fieldWithPath("data.content[].businessNumber").description("사업자번호"),
-                            fieldWithPath("data.content[].companyName").description("사업장명"),
-                            fieldWithPath("data.content[].address").description("사업장 주소"),
-                            fieldWithPath("data.content[].phoneNumber").description("전화번호"),
-                            fieldWithPath("data.content[].applicationDate").description("가입신청일"),
-                            fieldWithPath("data.content[].insuranceCompany").description("보험사"),
-                            fieldWithPath("data.content[].insuranceStartDate").description("보험시작일"),
-                            fieldWithPath("data.content[].insuranceEndDate").description("보험종료일"),
-                            fieldWithPath("data.content[].displayStatus").description(
+                            fieldWithPath("data.renewalTargetCount").type(JsonFieldType.NUMBER)
+                                .description("갱신 대상 건수 (기간만료 + 만기임박)"),
+                            fieldWithPath("data.page.content").type(JsonFieldType.ARRAY).description("내역 리스트"),
+                            fieldWithPath("data.page.content[].id").description("ID"),
+                            fieldWithPath("data.page.content[].businessNumber").description("사업자번호"),
+                            fieldWithPath("data.page.content[].companyName").description("사업장명"),
+                            fieldWithPath("data.page.content[].address").description("사업장 주소"),
+                            fieldWithPath("data.page.content[].phoneNumber").description("전화번호"),
+                            fieldWithPath("data.page.content[].applicationDate").description("가입신청일"),
+                            fieldWithPath("data.page.content[].insuranceCompany").description("보험사"),
+                            fieldWithPath("data.page.content[].insuranceStartDate").description("보험시작일"),
+                            fieldWithPath("data.page.content[].insuranceEndDate").description("보험종료일"),
+                            fieldWithPath("data.page.content[].displayStatus").description(
                                     "가입상태 (APPLIED:신청완료, JOINED:가입완료, EXPIRING_SOON:만기임박, EXPIRED:기간만료, CANCELLED:임의해지, FAILED:가입오류)"),
-                            fieldWithPath("data.content[].joinCheck").description(
+                            fieldWithPath("data.page.content[].joinCheck").description(
                                     "계약 진행상태(W:가입진행, N:보온접수완료, R: 보험사 접수, Y:가입완료(유효), D:가입반려(보험사 중복), E:가입반려(주소오류), F:결제실패(보험사), X:보험만료)"),
-                            fieldWithPath("data.content[].account").description("제휴사"),
-                            fieldWithPath("data.content[].path").description("채널"),
-                            fieldWithPath("data.content[].payYn").description("결제여부"),
-                            fieldWithPath("data.content[].referIdx").description("참조번호"),
-                            fieldWithPath("data.content[].applicationDate").description("가입신청일").optional(),
-                            fieldWithPath("data.hasNext").description("다음 페이지 여부"),
-                            fieldWithPath("data.totalElements").description("총 item 수"),
-                            fieldWithPath("data.totalPages").description("총 page 수"),
+                            fieldWithPath("data.page.content[].account").description("제휴사"),
+                            fieldWithPath("data.page.content[].path").description("채널"),
+                            fieldWithPath("data.page.content[].payYn").description("결제여부"),
+                            fieldWithPath("data.page.content[].referIdx").description("참조번호"),
+                            fieldWithPath("data.page.content[].applicationDate").description("가입신청일").optional(),
+                            fieldWithPath("data.page.hasNext").description("다음 페이지 여부"),
+                            fieldWithPath("data.page.totalElements").description("총 item 수"),
+                            fieldWithPath("data.page.totalPages").description("총 page 수"),
                             fieldWithPath("error").description("에러 정보").optional())));
     }
 
@@ -177,7 +183,9 @@ public class InsuredControllerTest extends RestDocsTest {
                                     "가입 상태 (APPLIED: 신청완료, JOINED: 가입완료, EXPIRING_SOON: 만기임박, EXPIRED: 기간만료, CANCELLED: 임의해지, FAILED: 가입오류)")
                                 .optional(),
                             parameterWithName("payYn").description("가입유형 (Y:유료, N:무료)").optional(),
-                            parameterWithName("dateType").description("날짜 기준 (CREATED_AT: 신청일, INSURANCE_START: 보험시작일, INSURANCE_END: 보험종료일, 기본: CREATED_AT)").optional(),
+                            parameterWithName("dateType").description(
+                                    "날짜 기준 (CREATED_AT: 신청일, INSURANCE_START: 보험시작일, INSURANCE_END: 보험종료일, 기본: CREATED_AT)")
+                                .optional(),
                             parameterWithName("startDate").description("조회 시작일 (yyyy-MM-dd)").optional(),
                             parameterWithName("endDate").description("조회 종료일 (yyyy-MM-dd)").optional(),
                             parameterWithName("keyword").description("검색어 (사업자번호, 휴대폰번호, 상호명)").optional(),
@@ -458,19 +466,19 @@ public class InsuredControllerTest extends RestDocsTest {
         given(insuredService.getBulkNotificationPreview(any(), any(), any())).willReturn(mockPreview);
 
         mockMvc
-            .perform(get("/v1/admin/pungsu/bulk-notification/preview")
-                .param("dateType", "INSURANCE_END")
+            .perform(get("/v1/admin/pungsu/bulk-notification/preview").param("dateType", "INSURANCE_END")
                 .param("startDate", "2025-11-01")
                 .param("endDate", "2026-02-28")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andDo(document("admin-bulk-notification-preview",
-                    queryParameters(
-                            parameterWithName("dateType").description("날짜 기준 (CREATED_AT: 신청일, INSURANCE_START: 보험시작일, INSURANCE_END: 보험종료일, 기본: CREATED_AT)").optional(),
-                            parameterWithName("startDate").description("조회 시작일 (yyyy-MM-dd)"),
-                            parameterWithName("endDate").description("조회 종료일 (yyyy-MM-dd)")),
-                    responseFields(
-                            fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과"),
+            .andDo(document("admin-bulk-notification-preview", queryParameters(
+                    parameterWithName("dateType")
+                        .description(
+                                "날짜 기준 (CREATED_AT: 신청일, INSURANCE_START: 보험시작일, INSURANCE_END: 보험종료일, 기본: CREATED_AT)")
+                        .optional(),
+                    parameterWithName("startDate").description("조회 시작일 (yyyy-MM-dd)"),
+                    parameterWithName("endDate").description("조회 종료일 (yyyy-MM-dd)")),
+                    responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과"),
                             fieldWithPath("data.expiredCount").type(JsonFieldType.NUMBER).description("기간만료 건수"),
                             fieldWithPath("data.expiringSoonCount").type(JsonFieldType.NUMBER).description("만기임박 건수"),
                             fieldWithPath("data.totalCount").type(JsonFieldType.NUMBER).description("총 대상 건수"),
@@ -480,27 +488,24 @@ public class InsuredControllerTest extends RestDocsTest {
     @Test
     @DisplayName("대량 재가입 안내 발송 API 문서화")
     void sendBulkNotification() throws Exception {
-        BulkNotificationSendRequest request = new BulkNotificationSendRequest(
-                DateType.INSURANCE_END,
-                java.time.LocalDate.of(2025, 11, 1),
-                java.time.LocalDate.of(2026, 2, 28),
+        BulkNotificationSendRequest request = new BulkNotificationSendRequest(DateType.INSURANCE_END,
+                java.time.LocalDate.of(2025, 11, 1), java.time.LocalDate.of(2026, 2, 28),
                 List.of(DisplayStatus.EXPIRED, DisplayStatus.EXPIRING_SOON));
 
         given(insuredService.sendBulkRenewalNotifications(any(), any(), any(), any(), any())).willReturn(1801);
 
         mockMvc
-            .perform(post("/v1/admin/pungsu/bulk-notification/send")
-                .contentType(MediaType.APPLICATION_JSON)
+            .perform(post("/v1/admin/pungsu/bulk-notification/send").contentType(MediaType.APPLICATION_JSON)
                 .content(jsonMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
             .andDo(document("admin-bulk-notification-send",
                     requestFields(
-                            fieldWithPath("dateType").description("날짜 기준 (CREATED_AT: 신청일, INSURANCE_START: 보험시작일, INSURANCE_END: 보험종료일)"),
+                            fieldWithPath("dateType")
+                                .description("날짜 기준 (CREATED_AT: 신청일, INSURANCE_START: 보험시작일, INSURANCE_END: 보험종료일)"),
                             fieldWithPath("startDate").description("조회 시작일 (yyyy-MM-dd)"),
                             fieldWithPath("endDate").description("조회 종료일 (yyyy-MM-dd)"),
                             fieldWithPath("statuses").description("발송 대상 상태 목록 (EXPIRED: 기간만료, EXPIRING_SOON: 만기임박)")),
-                    responseFields(
-                            fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과"),
+                    responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과"),
                             fieldWithPath("data.totalCount").type(JsonFieldType.NUMBER).description("발송 대상 건수"),
                             fieldWithPath("data.message").type(JsonFieldType.STRING).description("결과 메시지"),
                             fieldWithPath("error").description("에러 정보").optional())));

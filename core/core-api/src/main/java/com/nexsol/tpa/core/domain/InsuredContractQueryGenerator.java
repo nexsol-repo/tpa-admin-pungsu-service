@@ -46,8 +46,7 @@ public class InsuredContractQueryGenerator {
                         // 종료일 1~15일: today >= endDate전월16일 → endDate <= today가 속한 다음달 15일
                         LocalDateTime maxExpiringSoonEnd = today.plusDays(30).atTime(23, 59, 59);
                         predicates.add(cb.equal(root.get("joinCheck"), "Y"));
-                        predicates.add(cb.or(
-                                cb.isNull(root.get("insuranceEndDate")),
+                        predicates.add(cb.or(cb.isNull(root.get("insuranceEndDate")),
                                 cb.greaterThan(root.get("insuranceEndDate"), maxExpiringSoonEnd)));
                     }
                     case EXPIRING_SOON -> {
@@ -109,6 +108,68 @@ public class InsuredContractQueryGenerator {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
+    }
+
+    public Specification<TotalFormMemberEntity> generateRenewalTargetSpec(InsuredSearchCondition condition) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // 삭제되지 않은 데이터만 조회
+            predicates.add(cb.isNull(root.get("deletedAt")));
+
+            // 체크 가능한 상태: EXPIRED OR EXPIRING_SOON
+            LocalDateTime now = LocalDateTime.now();
+            LocalDate today = LocalDate.now();
+            LocalDateTime maxExpiringSoonEnd = today.plusDays(30).atTime(23, 59, 59);
+
+            Predicate expired = cb.equal(root.get("joinCheck"), "X");
+            Predicate expiringSoon = cb.and(cb.equal(root.get("joinCheck"), "Y"),
+                    cb.greaterThan(root.get("insuranceEndDate"), now),
+                    cb.lessThanOrEqualTo(root.get("insuranceEndDate"), maxExpiringSoonEnd));
+
+            predicates.add(cb.or(expired, expiringSoon));
+
+            // 제휴사
+            if (StringUtils.hasText(condition.path())) {
+                predicates.add(cb.equal(root.get("path"), condition.path()));
+            }
+            // 채널
+            if (StringUtils.hasText(condition.account())) {
+                predicates.add(cb.equal(root.get("account"), condition.account()));
+            }
+
+            // 보험사
+            if (StringUtils.hasText(condition.insuranceCompany())) {
+                predicates.add(cb.equal(root.get("insuranceCompany"), condition.insuranceCompany()));
+            }
+
+            // 결제 여부
+            if (StringUtils.hasText(condition.payYn())) {
+                predicates.add(cb.equal(root.get("payYn"), condition.payYn()));
+            }
+
+            // 조회 기간
+            String dateField = switch (condition.dateType() != null ? condition.dateType() : DateType.CREATED_AT) {
+                case INSURANCE_START -> "insuranceStartDate";
+                case INSURANCE_END -> "insuranceEndDate";
+                case CREATED_AT -> "createdAt";
+            };
+            if (condition.startDate() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get(dateField), condition.startDate().atStartOfDay()));
+            }
+            if (condition.endDate() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get(dateField), condition.endDate().atTime(23, 59, 59)));
+            }
+
+            // 키워드 검색
+            if (StringUtils.hasText(condition.keyword())) {
+                String likePattern = "%" + condition.keyword() + "%";
+                predicates.add(cb.or(cb.like(root.get("businessNumber"), likePattern),
+                        cb.like(root.get("phoneNumber"), likePattern), cb.like(root.get("companyName"), likePattern)));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
     }
 
 }
