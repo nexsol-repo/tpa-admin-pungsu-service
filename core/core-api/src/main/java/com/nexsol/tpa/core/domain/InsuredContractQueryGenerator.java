@@ -38,14 +38,13 @@ public class InsuredContractQueryGenerator {
                         predicates.add(cb.equal(root.get("payYn"), "N"));
                     }
                     case JOINED -> {
-                        // joinCheck = Y AND 만기임박이 아닌 것
-                        // (insuranceEndDate is null OR 아직 만기임박 윈도우 진입 전)
+                        // joinCheck = Y AND 만료되지 않았고 만기임박도 아닌 것
                         LocalDate today = LocalDate.now();
-                        // 오늘 기준 만기임박 대상이 되는 최대 보험종료일 계산
-                        // 종료일 16~말일: today >= endDate - 30 → endDate <= today + 30
-                        // 종료일 1~15일: today >= endDate전월16일 → endDate <= today가 속한 다음달 15일
                         LocalDateTime maxExpiringSoonEnd = today.plusDays(30).atTime(23, 59, 59);
                         predicates.add(cb.equal(root.get("joinCheck"), "Y"));
+                        // insuranceEndDate > today (만료되지 않은 것)
+                        predicates.add(cb.greaterThan(root.get("insuranceEndDate"), now));
+                        // 만기임박 윈도우 밖 (insuranceEndDate is null OR endDate > maxExpiringSoonEnd)
                         predicates.add(cb.or(cb.isNull(root.get("insuranceEndDate")),
                                 cb.greaterThan(root.get("insuranceEndDate"), maxExpiringSoonEnd)));
                     }
@@ -57,7 +56,11 @@ public class InsuredContractQueryGenerator {
                         predicates.add(cb.greaterThan(root.get("insuranceEndDate"), now));
                         predicates.add(cb.lessThanOrEqualTo(root.get("insuranceEndDate"), maxExpiringSoonEnd));
                     }
-                    case EXPIRED -> predicates.add(cb.equal(root.get("joinCheck"), "X"));
+                    case EXPIRED -> {
+                        // joinCheck = Y AND insuranceEndDate <= now (보험기간 만료)
+                        predicates.add(cb.equal(root.get("joinCheck"), "Y"));
+                        predicates.add(cb.lessThanOrEqualTo(root.get("insuranceEndDate"), now));
+                    }
                     case CANCELLED -> predicates.add(cb.equal(root.get("joinCheck"), "C"));
                     case FAILED -> {
                         predicates.add(cb.equal(root.get("joinCheck"), "F"));
@@ -117,12 +120,13 @@ public class InsuredContractQueryGenerator {
             // 삭제되지 않은 데이터만 조회
             predicates.add(cb.isNull(root.get("deletedAt")));
 
-            // 체크 가능한 상태: EXPIRED OR EXPIRING_SOON
+            // 갱신 대상: EXPIRED(기간만료) OR EXPIRING_SOON(만기임박)
             LocalDateTime now = LocalDateTime.now();
             LocalDate today = LocalDate.now();
             LocalDateTime maxExpiringSoonEnd = today.plusDays(30).atTime(23, 59, 59);
 
-            Predicate expired = cb.equal(root.get("joinCheck"), "X");
+            Predicate expired = cb.and(cb.equal(root.get("joinCheck"), "Y"),
+                    cb.lessThanOrEqualTo(root.get("insuranceEndDate"), now));
             Predicate expiringSoon = cb.and(cb.equal(root.get("joinCheck"), "Y"),
                     cb.greaterThan(root.get("insuranceEndDate"), now),
                     cb.lessThanOrEqualTo(root.get("insuranceEndDate"), maxExpiringSoonEnd));

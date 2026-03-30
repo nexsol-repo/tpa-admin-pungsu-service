@@ -54,14 +54,17 @@ public enum DisplayStatus {
         if ("C".equals(joinCheck)) {
             return CANCELLED;
         }
-        if ("X".equals(joinCheck)) {
-            return EXPIRED;
-        }
         if ("N".equals(joinCheck) && "N".equals(payYn)) {
             return APPLIED;
         }
-        if ("Y".equals(joinCheck) && isExpiringSoon(insuranceEndDate)) {
-            return EXPIRING_SOON;
+        if ("Y".equals(joinCheck)) {
+            if (insuranceEndDate != null && !insuranceEndDate.toLocalDate().isAfter(LocalDate.now())) {
+                return EXPIRED;
+            }
+            if (isExpiringSoon(insuranceEndDate)) {
+                return EXPIRING_SOON;
+            }
+            return JOINED;
         }
         return JOINED;
     }
