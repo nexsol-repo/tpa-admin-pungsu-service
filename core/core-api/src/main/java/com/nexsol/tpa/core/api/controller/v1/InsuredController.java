@@ -1,13 +1,17 @@
 package com.nexsol.tpa.core.api.controller.v1;
 
+import com.nexsol.tpa.core.api.controller.v1.request.BulkNotificationSendRequest;
 import com.nexsol.tpa.core.api.controller.v1.request.InsuredModifyRequest;
 import com.nexsol.tpa.core.api.controller.v1.request.InsuredRegisterRequest;
 import com.nexsol.tpa.core.api.controller.v1.request.InsuredSearchRequest;
 import com.nexsol.tpa.core.api.controller.v1.request.NotificationSendRequest;
+import com.nexsol.tpa.core.api.controller.v1.response.BulkNotificationSendResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.FreeContractUploadResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractDetailResponse;
+import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractListResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractResponse;
 import com.nexsol.tpa.core.domain.*;
+import com.nexsol.tpa.core.enums.DateType;
 import com.nexsol.tpa.core.enums.MailType;
 import com.nexsol.tpa.core.support.DomainPage;
 import com.nexsol.tpa.core.support.response.ApiResponse;
@@ -39,16 +43,21 @@ public class InsuredController {
     // private final MeritzService meritzService;
 
     @GetMapping("/contract")
-    public ApiResponse<PageResponse<InsuredContractResponse>> getContract(@ModelAttribute InsuredSearchRequest request,
+    public ApiResponse<InsuredContractListResponse> getContract(@ModelAttribute InsuredSearchRequest request,
             @LoginAdmin AdminUser admin) {
 
-        DomainPage<InsuredContract> contract = insuredService.getList(request.toInsuredSearchCondition(),
-                request.toOffsetLimit());
+        InsuredSearchCondition condition = request.toInsuredSearchCondition();
+
+        DomainPage<InsuredContract> contract = insuredService.getList(condition, request.toOffsetLimit());
+
+        long renewalTargetCount = insuredService.getRenewalTargetCount(condition);
 
         List<InsuredContractResponse> responses = contract.content().stream().map(InsuredContractResponse::of).toList();
 
-        return ApiResponse.success(
-                new PageResponse<>(responses, contract.hasNext(), contract.totalElements(), contract.totalPages()));
+        PageResponse<InsuredContractResponse> page = new PageResponse<>(responses, contract.hasNext(),
+                contract.totalElements(), contract.totalPages());
+
+        return ApiResponse.success(new InsuredContractListResponse(page, renewalTargetCount));
 
     }
 
@@ -180,18 +189,28 @@ public class InsuredController {
     // return ApiResponse.success("파일이 업로드되었습니다. 처리가 완료되면 알림을 드립니다.");
     // }
 
-    // 1. 자유로운 날짜 테스트용 (D-Day를 파라미터로 받음)
-    @PostMapping("/trigger-renewal-check")
-    public ApiResponse<String> triggerAny(@RequestParam int days) {
-        insuredService.sendRenewalNotifications(days);
-        return ApiResponse.success(days + "일 전 대상자 발송 트리거 완료");
+    @GetMapping("/bulk-notification/preview")
+    public ApiResponse<BulkNotificationPreview> getBulkNotificationPreview(
+            @RequestParam(required = false) DateType dateType,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+        BulkNotificationPreview preview = insuredService.getBulkNotificationPreview(dateType, startDate, endDate);
+        return ApiResponse.success(preview);
     }
 
-    // 2. 실제 운영 규칙(7일) 테스트용
-    @PostMapping("/trigger-renewal-check-seven")
-    public ApiResponse<String> triggerSeven() {
-        insuredService.sendRenewalNotifications(7); // 비즈니스 규칙인 '7'을 명시
-        return ApiResponse.success("7일 전 대상자(운영 규칙) 발송 트리거 완료");
+    @PostMapping("/bulk-notification/send")
+    public ApiResponse<BulkNotificationSendResponse> sendBulkNotification(
+            @RequestBody BulkNotificationSendRequest request, @LoginAdmin AdminUser admin) {
+        int totalCount = insuredService.sendBulkRenewalNotifications(request.dateType(), request.startDate(),
+                request.endDate(), request.statuses(), admin.userId());
+        return ApiResponse.success(new BulkNotificationSendResponse(totalCount, "발송이 시작되었습니다."));
+    }
+
+    // 만기임박 대상 발송 트리거 (테스트용)
+    @PostMapping("/trigger-renewal-check")
+    public ApiResponse<String> triggerRenewalCheck() {
+        insuredService.sendRenewalNotifications();
+        return ApiResponse.success("만기임박 대상자 발송 트리거 완료");
     }
 
     // 3. 보험시작일 기준 일괄 발송 (예: startDate=2023-03-31)

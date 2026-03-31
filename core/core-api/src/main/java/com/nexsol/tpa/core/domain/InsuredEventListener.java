@@ -61,22 +61,30 @@ public class InsuredEventListener {
         String mailTitle = event.type().getTitle();
         String mailContent = buildMailContent(event);
 
-        // 1. 메일 발송 (memo API에서 발송 + 이력 저장)
-        try {
-            memoClient.sendMail(cId,
-                    new SendMailRequest(ServiceType.PUNGSU, List.of(event.email()), mailTitle, mailContent), adminId);
-        }
-        catch (Exception e) {
-            log.error("메일 발송 실패: {}", event.contractId(), e);
+        // 1. 메일 발송 (memo API에서 발송 + 이력 저장) - 이메일이 없으면 스킵
+        if (event.email() != null && !event.email().isBlank()) {
+            try {
+                memoClient.sendMail(cId,
+                        new SendMailRequest(ServiceType.PUNGSU, List.of(event.email()), mailTitle, mailContent), adminId);
+            }
+            catch (Exception e) {
+                log.error("메일 발송 실패: {}", event.contractId(), e);
+            }
+        } else {
+            log.info("이메일 없음 - 메일 발송 스킵: contractId={}", event.contractId());
         }
 
-        // 2. 문자 발송 (memo API에서 발송 + 이력 저장)
-        try {
-            memoClient.sendSms(cId, new SendSmsRequest(ServiceType.PUNGSU, List.of(event.phoneNumber()),
-                    event.type().getTitleSuffix(), smsMessage), adminId);
-        }
-        catch (Exception e) {
-            log.error("문자 발송 실패: {}", event.contractId(), e);
+        // 2. 문자 발송 (memo API에서 발송 + 이력 저장) - 전화번호가 없으면 스킵
+        if (event.phoneNumber() != null && !event.phoneNumber().isBlank()) {
+            try {
+                memoClient.sendSms(cId, new SendSmsRequest(ServiceType.PUNGSU, List.of(event.phoneNumber()),
+                        event.type().getTitleSuffix(), smsMessage), adminId);
+            }
+            catch (Exception e) {
+                log.error("문자 발송 실패: {}", event.contractId(), e);
+            }
+        } else {
+            log.info("전화번호 없음 - 문자 발송 스킵: contractId={}", event.contractId());
         }
     }
 
@@ -217,6 +225,30 @@ public class InsuredEventListener {
                         기존 무상 지원 프로모션은 종료되었으나 정부와 지자체의 60%% 보험료 지원은 계속됩니다.
                         올해는 본인 부담금 40%%만으로 사업장의 예기치 못한 재난 손실에 대비하실 수 있습니다.
                         아래 링크를 통해 간편하게 갱신 및 보험료 확인이 가능합니다.
+
+                        ■ 메리츠화재 간편 재가입 바로가기 ▶ %s
+
+                        보험가입 시 알아두실 사항
+
+                        ⊙ 이 보험계약은 예금자보호법에 따라 해약환급금(또는 만기 시 보험금)에 기타지급금을 합한 금액이 1인당 "1억원까지"(본 보험회사의 여타 보호상품과 합산) 보호됩니다. 이와 별도로 본 보험회사 보호상품의 사고보험금을 합산한 금액이 1인당 "1억원까지" 보호됩니다.
+                        (다만, 보험계약자 및 보험료 납부자가 법인인 보험계약의 경우에는 보호되지 않습니다.)
+                        ⊙ 보험계약자가 기존 보험계약을 해지하고 새로운 보험계약을 체결할 경우 인수거절, 보험료 인상, 보장내용 축소 등 불이익이 생길 수 있습니다.
+                        ⊙ 보험계약 전 가입 시 유의사항, 상품안내 및 약관을 반드시 확인하십시오.
+                        ⊙ (주)티피에이코리아 준법감시인 심의필 제2026-광고-230호 (유효기간 2026.02.05 ~ 2027-02-04)
+
+                        수신거부 : 고객센터 02-6952-6525 (평일 09:00~18:00)
+                        """
+                    .formatted(event.name(), formattedDate, event.link());
+            case EXPIRED ->
+                """
+                        (광고) [풍수해·지진재해보험 만기 및 갱신 안내]
+
+                        %s 님, 안녕하세요.
+
+                        가입하신 [소상공인 풍수해·지진재해보험(VI)]의 보장 유지기간이 %s 만료 되었습니다.
+                        기존 무상 지원 프로모션은 종료되었으나 정부와 지자체의 60%% 보험료 지원은 계속됩니다.
+                        올해는 본인 부담금 40%%만으로 사업장의 예기치 못한 재난 손실에 대비하실 수 있습니다.
+                        재계약이 필요하시면 아래 가입 바로가기를 눌러 바로 간편하게 가입 가능합니다.
 
                         ■ 메리츠화재 간편 재가입 바로가기 ▶ %s
 

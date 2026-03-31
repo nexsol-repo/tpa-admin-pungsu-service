@@ -1,6 +1,7 @@
 package com.nexsol.tpa.core.api.controller.v1.request;
 
 import com.nexsol.tpa.core.domain.InsuredSearchCondition;
+import com.nexsol.tpa.core.enums.DateType;
 import com.nexsol.tpa.core.enums.DisplayStatus;
 import com.nexsol.tpa.core.support.OffsetLimit;
 import lombok.Builder;
@@ -8,9 +9,9 @@ import lombok.Builder;
 import java.time.LocalDate;
 
 @Builder
-public record InsuredSearchRequest(DisplayStatus status, String payYn, LocalDate startDate, LocalDate endDate,
-        String keyword, String account, String path, String insuranceCompany, Integer offset, Integer limit,
-        String sortBy, String direction) {
+public record InsuredSearchRequest(DisplayStatus status, String payYn, DateType dateType, LocalDate startDate,
+        LocalDate endDate, String keyword, String account, String path, String insuranceCompany, Integer offset,
+        Integer limit, String sortBy, String direction) {
 
     public InsuredSearchRequest {
         if (offset == null)
@@ -26,6 +27,7 @@ public record InsuredSearchRequest(DisplayStatus status, String payYn, LocalDate
         return InsuredSearchCondition.builder()
             .status(status)
             .payYn(payYn)
+            .dateType(dateType)
             .startDate(startDate)
             .endDate(endDate)
             .keyword(keyword)

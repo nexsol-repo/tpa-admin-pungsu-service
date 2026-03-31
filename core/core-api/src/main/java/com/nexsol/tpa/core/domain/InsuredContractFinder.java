@@ -1,5 +1,6 @@
 package com.nexsol.tpa.core.domain;
 
+import com.nexsol.tpa.core.enums.DateType;
 import com.nexsol.tpa.core.enums.DisplayStatus;
 import com.nexsol.tpa.core.support.DomainPage;
 import com.nexsol.tpa.core.support.OffsetLimit;
@@ -11,14 +12,12 @@ import com.nexsol.tpa.storage.db.core.RefundPaymentEntity;
 import com.nexsol.tpa.storage.db.core.RefundPaymentRepository;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberEntity;
 import com.nexsol.tpa.storage.db.core.TotalFormMemberRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -34,8 +33,6 @@ public class InsuredContractFinder {
     private final RefundPaymentRepository refundPaymentRepository;
 
     private final InsuredContractQueryGenerator queryGenerator;
-
-    private final EntityManager em;
 
     public DomainPage<InsuredContract> find(InsuredSearchCondition condition, OffsetLimit offsetLimit) {
 
@@ -62,14 +59,25 @@ public class InsuredContractFinder {
                 mapToInsuranceSubscriptionInfo(entity), mapToPaymentInfo(entity, refundInfo));
     }
 
-    public List<InsuredContractDetail> findExpiringContracts(int days) {
-        LocalDateTime start = LocalDate.now().plusDays(days).atStartOfDay();
-        LocalDateTime end = start.plusDays(1).minusNanos(1);
+    public long countRenewalTargets(InsuredSearchCondition condition) {
+        Specification<TotalFormMemberEntity> spec = queryGenerator.generateRenewalTargetSpec(condition);
+        return totalFormMemberRepository.count(spec);
+    }
 
-        // Specification을 활용하거나 Repository 직접 호출 (Implement -> Data Access)
-        return totalFormMemberRepository.findAllByInsuranceEndDateBetween(start, end)
+    public List<InsuredContractDetail> findExpiringContracts() {
+        // 만기임박 대상: joinCheck='Y' + 보험종료일이 만기임박 윈도우 내
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate today = LocalDate.now();
+        LocalDateTime maxEnd = today.plusDays(30).atTime(23, 59, 59);
+
+        Specification<TotalFormMemberEntity> spec = (root, query, cb) -> cb.and(cb.isNull(root.get("deletedAt")),
+                cb.equal(root.get("joinCheck"), "Y"), cb.greaterThan(root.get("insuranceEndDate"), now),
+                cb.lessThanOrEqualTo(root.get("insuranceEndDate"), maxEnd));
+
+        return totalFormMemberRepository.findAll(spec)
             .stream()
-            .map(this::mapToDetail) // 기존 매핑 로직 재사용
+            .filter(entity -> DisplayStatus.isExpiringSoon(entity.getInsuranceEndDate()))
+            .map(this::mapToDetail)
             .toList();
     }
 
@@ -83,37 +91,69 @@ public class InsuredContractFinder {
             .toList();
     }
 
+    public List<InsuredContractDetail> findBulkNotificationTargets(DateType dateType, LocalDate startDate,
+            LocalDate endDate, List<DisplayStatus> statuses) {
+        List<InsuredContractDetail> results = new java.util.ArrayList<>();
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+
+        for (DisplayStatus status : statuses) {
+            Specification<TotalFormMemberEntity> spec = buildBulkSpec(status, dateType, startDate, endDate);
+            results.addAll(totalFormMemberRepository.findAll(spec, sort).stream().map(this::mapToDetail).toList());
+        }
+        return results;
+    }
+
+    public BulkNotificationPreview countByStatusForPreview(DateType dateType, LocalDate startDate, LocalDate endDate) {
+        long expiredCount = totalFormMemberRepository
+            .count(buildBulkSpec(DisplayStatus.EXPIRED, dateType, startDate, endDate));
+        long expiringSoonCount = totalFormMemberRepository
+            .count(buildBulkSpec(DisplayStatus.EXPIRING_SOON, null, null, null));
+        return new BulkNotificationPreview(expiredCount, expiringSoonCount, expiredCount + expiringSoonCount);
+    }
+
+    private Specification<TotalFormMemberEntity> buildBulkSpec(DisplayStatus status, DateType dateType,
+            LocalDate startDate, LocalDate endDate) {
+        return (root, query, cb) -> {
+            List<jakarta.persistence.criteria.Predicate> predicates = new java.util.ArrayList<>();
+            predicates.add(cb.isNull(root.get("deletedAt")));
+
+            switch (status) {
+                case EXPIRED -> {
+                    // 기간만료: joinCheck='Y' + insuranceEndDate <= now
+                    predicates.add(cb.equal(root.get("joinCheck"), "Y"));
+                    predicates.add(cb.lessThanOrEqualTo(root.get("insuranceEndDate"),
+                            LocalDateTime.now()));
+                    if (dateType != null && startDate != null && endDate != null) {
+                        String dateField = switch (dateType) {
+                            case INSURANCE_START -> "insuranceStartDate";
+                            case INSURANCE_END -> "insuranceEndDate";
+                            case CREATED_AT -> "createdAt";
+                        };
+                        predicates.add(cb.greaterThanOrEqualTo(root.get(dateField), startDate.atStartOfDay()));
+                        predicates.add(cb.lessThanOrEqualTo(root.get(dateField), endDate.atTime(23, 59, 59)));
+                    }
+                }
+                case EXPIRING_SOON -> {
+                    // 만기임박: joinCheck='Y' + 만기임박 윈도우 (종료일 16~말일: D-30, 1~15일: 전월 16일)
+                    LocalDateTime now = LocalDateTime.now();
+                    LocalDate today = LocalDate.now();
+                    LocalDateTime maxExpiringSoonEnd = today.plusDays(30).atTime(23, 59, 59);
+                    predicates.add(cb.equal(root.get("joinCheck"), "Y"));
+                    predicates.add(cb.greaterThan(root.get("insuranceEndDate"), now));
+                    predicates.add(cb.lessThanOrEqualTo(root.get("insuranceEndDate"), maxExpiringSoonEnd));
+                }
+                default -> throw new IllegalArgumentException("지원하지 않는 상태: " + status);
+            }
+
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+    }
+
     public List<ContractExcelData> findAll(InsuredSearchCondition condition) {
-        StringBuilder jpql = new StringBuilder();
-        // 1. Root Entity는 반드시 JPA 엔티티인 TotalFormMemberEntity여야 함
-        jpql.append("SELECT e FROM TotalFormMemberEntity e WHERE 1=1 ");
+        Specification<TotalFormMemberEntity> spec = queryGenerator.generate(condition);
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");
 
-        // 시작일과 종료일 조건이 모두 있을 때만 필터링
-        if (condition.startDate() != null && condition.endDate() != null) {
-            // 신청일(createdAt) 기준으로 조회 기간 필터링
-            jpql.append("AND e.createdAt >= :startDate ");
-            jpql.append("AND e.createdAt <= :endDate ");
-        }
-
-        if (StringUtils.hasText(condition.insuranceCompany())) {
-            jpql.append("AND e.insuranceCompany = :insuranceCompany ");
-        }
-
-        jpql.append("ORDER BY e.id DESC");
-
-        TypedQuery<TotalFormMemberEntity> query = em.createQuery(jpql.toString(), TotalFormMemberEntity.class);
-
-        if (condition.startDate() != null && condition.endDate() != null) {
-            query.setParameter("startDate", condition.startDate().atStartOfDay());
-            query.setParameter("endDate", condition.endDate().atTime(23, 59, 59));
-        }
-
-        if (StringUtils.hasText(condition.insuranceCompany())) {
-            query.setParameter("insuranceCompany", condition.insuranceCompany());
-        }
-
-        // 2. 조회된 엔티티를 상세 정보가 포함된 ExcelData 객체로 매핑
-        return query.getResultList()
+        return totalFormMemberRepository.findAll(spec, sort)
             .stream()
             .map(entity -> new ContractExcelData(mapToContract(entity), mapToInsuredInfo(entity),
                     mapToBusinessLocationInfo(entity), mapToInsuranceSubscriptionInfo(entity)))
