@@ -61,22 +61,30 @@ public class InsuredEventListener {
         String mailTitle = event.type().getTitle();
         String mailContent = buildMailContent(event);
 
-        // 1. 메일 발송 (memo API에서 발송 + 이력 저장)
-        try {
-            memoClient.sendMail(cId,
-                    new SendMailRequest(ServiceType.PUNGSU, List.of(event.email()), mailTitle, mailContent), adminId);
-        }
-        catch (Exception e) {
-            log.error("메일 발송 실패: {}", event.contractId(), e);
+        // 1. 메일 발송 (memo API에서 발송 + 이력 저장) - 이메일이 없으면 스킵
+        if (event.email() != null && !event.email().isBlank()) {
+            try {
+                memoClient.sendMail(cId,
+                        new SendMailRequest(ServiceType.PUNGSU, List.of(event.email()), mailTitle, mailContent), adminId);
+            }
+            catch (Exception e) {
+                log.error("메일 발송 실패: {}", event.contractId(), e);
+            }
+        } else {
+            log.info("이메일 없음 - 메일 발송 스킵: contractId={}", event.contractId());
         }
 
-        // 2. 문자 발송 (memo API에서 발송 + 이력 저장)
-        try {
-            memoClient.sendSms(cId, new SendSmsRequest(ServiceType.PUNGSU, List.of(event.phoneNumber()),
-                    event.type().getTitleSuffix(), smsMessage), adminId);
-        }
-        catch (Exception e) {
-            log.error("문자 발송 실패: {}", event.contractId(), e);
+        // 2. 문자 발송 (memo API에서 발송 + 이력 저장) - 전화번호가 없으면 스킵
+        if (event.phoneNumber() != null && !event.phoneNumber().isBlank()) {
+            try {
+                memoClient.sendSms(cId, new SendSmsRequest(ServiceType.PUNGSU, List.of(event.phoneNumber()),
+                        event.type().getTitleSuffix(), smsMessage), adminId);
+            }
+            catch (Exception e) {
+                log.error("문자 발송 실패: {}", event.contractId(), e);
+            }
+        } else {
+            log.info("전화번호 없음 - 문자 발송 스킵: contractId={}", event.contractId());
         }
     }
 
