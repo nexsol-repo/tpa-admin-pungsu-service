@@ -144,15 +144,13 @@ public class InsuredService {
     }
 
     @Transactional(readOnly = true)
-    public BulkNotificationPreview getBulkNotificationPreview(DateType dateType, LocalDate startDate,
-            LocalDate endDate) {
-        return insuredContractFinder.countByStatusForPreview(dateType, startDate, endDate);
+    public BulkNotificationPreview getBulkNotificationPreview(InsuredSearchCondition condition) {
+        return insuredContractFinder.countByStatusForPreview(condition);
     }
 
-    public int sendBulkRenewalNotifications(DateType dateType, LocalDate startDate, LocalDate endDate,
-            List<DisplayStatus> statuses, Long adminId) {
-        List<InsuredContractDetail> targets = insuredContractFinder.findBulkNotificationTargets(dateType, startDate,
-                endDate, statuses);
+    public int sendBulkRenewalNotifications(InsuredSearchCondition condition, List<DisplayStatus> statuses,
+            Long adminId) {
+        List<InsuredContractDetail> targets = insuredContractFinder.findBulkNotificationTargets(condition, statuses);
 
         for (int i = 0; i < targets.size(); i++) {
             InsuredContractDetail detail = targets.get(i);

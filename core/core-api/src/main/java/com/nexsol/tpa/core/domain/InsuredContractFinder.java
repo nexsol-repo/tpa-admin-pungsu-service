@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -91,28 +92,34 @@ public class InsuredContractFinder {
             .toList();
     }
 
-    public List<InsuredContractDetail> findBulkNotificationTargets(DateType dateType, LocalDate startDate,
-            LocalDate endDate, List<DisplayStatus> statuses) {
+    public List<InsuredContractDetail> findBulkNotificationTargets(InsuredSearchCondition condition,
+            List<DisplayStatus> statuses) {
         List<InsuredContractDetail> results = new java.util.ArrayList<>();
         Sort sort = Sort.by(Sort.Direction.DESC, "id");
 
         for (DisplayStatus status : statuses) {
-            Specification<TotalFormMemberEntity> spec = buildBulkSpec(status, dateType, startDate, endDate);
+            Specification<TotalFormMemberEntity> spec = buildBulkSpec(status, condition);
             results.addAll(totalFormMemberRepository.findAll(spec, sort).stream().map(this::mapToDetail).toList());
         }
         return results;
     }
 
-    public BulkNotificationPreview countByStatusForPreview(DateType dateType, LocalDate startDate, LocalDate endDate) {
+    public BulkNotificationPreview countByStatusForPreview(InsuredSearchCondition condition) {
         long expiredCount = totalFormMemberRepository
-            .count(buildBulkSpec(DisplayStatus.EXPIRED, dateType, startDate, endDate));
+            .count(buildBulkSpec(DisplayStatus.EXPIRED, condition));
+        InsuredSearchCondition expiringSoonCondition = InsuredSearchCondition.builder()
+            .account(condition.account())
+            .path(condition.path())
+            .insuranceCompany(condition.insuranceCompany())
+            .keyword(condition.keyword())
+            .build();
         long expiringSoonCount = totalFormMemberRepository
-            .count(buildBulkSpec(DisplayStatus.EXPIRING_SOON, null, null, null));
+            .count(buildBulkSpec(DisplayStatus.EXPIRING_SOON, expiringSoonCondition));
         return new BulkNotificationPreview(expiredCount, expiringSoonCount, expiredCount + expiringSoonCount);
     }
 
-    private Specification<TotalFormMemberEntity> buildBulkSpec(DisplayStatus status, DateType dateType,
-            LocalDate startDate, LocalDate endDate) {
+    private Specification<TotalFormMemberEntity> buildBulkSpec(DisplayStatus status,
+            InsuredSearchCondition condition) {
         return (root, query, cb) -> {
             List<jakarta.persistence.criteria.Predicate> predicates = new java.util.ArrayList<>();
             predicates.add(cb.isNull(root.get("deletedAt")));
@@ -123,18 +130,18 @@ public class InsuredContractFinder {
                     predicates.add(cb.equal(root.get("joinCheck"), "Y"));
                     predicates.add(cb.lessThanOrEqualTo(root.get("insuranceEndDate"),
                             LocalDateTime.now()));
-                    if (dateType != null && startDate != null && endDate != null) {
-                        String dateField = switch (dateType) {
+                    if (condition.dateType() != null && condition.startDate() != null && condition.endDate() != null) {
+                        String dateField = switch (condition.dateType()) {
                             case INSURANCE_START -> "insuranceStartDate";
                             case INSURANCE_END -> "insuranceEndDate";
                             case CREATED_AT -> "createdAt";
                         };
-                        predicates.add(cb.greaterThanOrEqualTo(root.get(dateField), startDate.atStartOfDay()));
-                        predicates.add(cb.lessThanOrEqualTo(root.get(dateField), endDate.atTime(23, 59, 59)));
+                        predicates.add(cb.greaterThanOrEqualTo(root.get(dateField), condition.startDate().atStartOfDay()));
+                        predicates.add(cb.lessThanOrEqualTo(root.get(dateField), condition.endDate().atTime(23, 59, 59)));
                     }
                 }
                 case EXPIRING_SOON -> {
-                    // 만기임박: joinCheck='Y' + 만기임박 윈도우 (종료일 16~말일: D-30, 1~15일: 전월 16일)
+                    // 만기임박: joinCheck='Y' + 만기임박 윈도우
                     LocalDateTime now = LocalDateTime.now();
                     LocalDate today = LocalDate.now();
                     LocalDateTime maxExpiringSoonEnd = today.plusDays(30).atTime(23, 59, 59);
@@ -143,6 +150,22 @@ public class InsuredContractFinder {
                     predicates.add(cb.lessThanOrEqualTo(root.get("insuranceEndDate"), maxExpiringSoonEnd));
                 }
                 default -> throw new IllegalArgumentException("지원하지 않는 상태: " + status);
+            }
+
+            // 검색 조건 적용 (제휴사, 채널, 보험사, 키워드)
+            if (StringUtils.hasText(condition.path())) {
+                predicates.add(cb.equal(root.get("path"), condition.path()));
+            }
+            if (StringUtils.hasText(condition.account())) {
+                predicates.add(cb.equal(root.get("account"), condition.account()));
+            }
+            if (StringUtils.hasText(condition.insuranceCompany())) {
+                predicates.add(cb.equal(root.get("insuranceCompany"), condition.insuranceCompany()));
+            }
+            if (StringUtils.hasText(condition.keyword())) {
+                String likePattern = "%" + condition.keyword() + "%";
+                predicates.add(cb.or(cb.like(root.get("businessNumber"), likePattern),
+                        cb.like(root.get("phoneNumber"), likePattern), cb.like(root.get("companyName"), likePattern)));
             }
 
             return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
