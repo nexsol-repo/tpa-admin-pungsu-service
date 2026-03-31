@@ -11,7 +11,6 @@ import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractDetailRespo
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractListResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractResponse;
 import com.nexsol.tpa.core.domain.*;
-import com.nexsol.tpa.core.enums.DateType;
 import com.nexsol.tpa.core.enums.MailType;
 import com.nexsol.tpa.core.support.DomainPage;
 import com.nexsol.tpa.core.support.response.ApiResponse;
@@ -191,18 +190,25 @@ public class InsuredController {
 
     @GetMapping("/bulk-notification/preview")
     public ApiResponse<BulkNotificationPreview> getBulkNotificationPreview(
-            @RequestParam(required = false) DateType dateType,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
-        BulkNotificationPreview preview = insuredService.getBulkNotificationPreview(dateType, startDate, endDate);
+            @ModelAttribute InsuredSearchRequest request) {
+        InsuredSearchCondition condition = request.toInsuredSearchCondition();
+        BulkNotificationPreview preview = insuredService.getBulkNotificationPreview(condition);
         return ApiResponse.success(preview);
     }
 
     @PostMapping("/bulk-notification/send")
     public ApiResponse<BulkNotificationSendResponse> sendBulkNotification(
             @RequestBody BulkNotificationSendRequest request, @LoginAdmin AdminUser admin) {
-        int totalCount = insuredService.sendBulkRenewalNotifications(request.dateType(), request.startDate(),
-                request.endDate(), request.statuses(), admin.userId());
+        InsuredSearchCondition condition = InsuredSearchCondition.builder()
+            .dateType(request.dateType())
+            .startDate(request.startDate())
+            .endDate(request.endDate())
+            .account(request.account())
+            .path(request.path())
+            .insuranceCompany(request.insuranceCompany())
+            .keyword(request.keyword())
+            .build();
+        int totalCount = insuredService.sendBulkRenewalNotifications(condition, request.statuses(), admin.userId());
         return ApiResponse.success(new BulkNotificationSendResponse(totalCount, "발송이 시작되었습니다."));
     }
 

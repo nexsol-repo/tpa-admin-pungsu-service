@@ -7,5 +7,5 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record BulkNotificationSendRequest(DateType dateType, LocalDate startDate, LocalDate endDate,
-        List<DisplayStatus> statuses) {
+        List<DisplayStatus> statuses, String account, String path, String insuranceCompany, String keyword) {
 }

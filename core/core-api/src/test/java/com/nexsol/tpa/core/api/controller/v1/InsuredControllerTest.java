@@ -463,12 +463,16 @@ public class InsuredControllerTest extends RestDocsTest {
     @DisplayName("대량 발송 대상 조회 (Preview) API 문서화")
     void getBulkNotificationPreview() throws Exception {
         BulkNotificationPreview mockPreview = new BulkNotificationPreview(1234, 567, 1801);
-        given(insuredService.getBulkNotificationPreview(any(), any(), any())).willReturn(mockPreview);
+        given(insuredService.getBulkNotificationPreview(any(InsuredSearchCondition.class))).willReturn(mockPreview);
 
         mockMvc
             .perform(get("/v1/admin/pungsu/bulk-notification/preview").param("dateType", "INSURANCE_END")
                 .param("startDate", "2025-11-01")
                 .param("endDate", "2026-02-28")
+                .param("insuranceCompany", "DB손해보험")
+                .param("account", "channel1")
+                .param("path", "partner1")
+                .param("keyword", "홍길동")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(document("admin-bulk-notification-preview", queryParameters(
@@ -477,7 +481,11 @@ public class InsuredControllerTest extends RestDocsTest {
                                 "날짜 기준 (CREATED_AT: 신청일, INSURANCE_START: 보험시작일, INSURANCE_END: 보험종료일, 기본: CREATED_AT)")
                         .optional(),
                     parameterWithName("startDate").description("조회 시작일 (yyyy-MM-dd)"),
-                    parameterWithName("endDate").description("조회 종료일 (yyyy-MM-dd)")),
+                    parameterWithName("endDate").description("조회 종료일 (yyyy-MM-dd)"),
+                    parameterWithName("insuranceCompany").description("보험사").optional(),
+                    parameterWithName("account").description("채널").optional(),
+                    parameterWithName("path").description("제휴사").optional(),
+                    parameterWithName("keyword").description("검색 키워드 (사업자번호, 전화번호, 상호명)").optional()),
                     responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과"),
                             fieldWithPath("data.expiredCount").type(JsonFieldType.NUMBER).description("기간만료 건수"),
                             fieldWithPath("data.expiringSoonCount").type(JsonFieldType.NUMBER).description("만기임박 건수"),
@@ -490,9 +498,10 @@ public class InsuredControllerTest extends RestDocsTest {
     void sendBulkNotification() throws Exception {
         BulkNotificationSendRequest request = new BulkNotificationSendRequest(DateType.INSURANCE_END,
                 java.time.LocalDate.of(2025, 11, 1), java.time.LocalDate.of(2026, 2, 28),
-                List.of(DisplayStatus.EXPIRED, DisplayStatus.EXPIRING_SOON));
+                List.of(DisplayStatus.EXPIRED, DisplayStatus.EXPIRING_SOON),
+                "channel1", "partner1", "DB손해보험", "홍길동");
 
-        given(insuredService.sendBulkRenewalNotifications(any(), any(), any(), any(), any())).willReturn(1801);
+        given(insuredService.sendBulkRenewalNotifications(any(InsuredSearchCondition.class), any(), any())).willReturn(1801);
 
         mockMvc
             .perform(post("/v1/admin/pungsu/bulk-notification/send").contentType(MediaType.APPLICATION_JSON)
@@ -504,7 +513,11 @@ public class InsuredControllerTest extends RestDocsTest {
                                 .description("날짜 기준 (CREATED_AT: 신청일, INSURANCE_START: 보험시작일, INSURANCE_END: 보험종료일)"),
                             fieldWithPath("startDate").description("조회 시작일 (yyyy-MM-dd)"),
                             fieldWithPath("endDate").description("조회 종료일 (yyyy-MM-dd)"),
-                            fieldWithPath("statuses").description("발송 대상 상태 목록 (EXPIRED: 기간만료, EXPIRING_SOON: 만기임박)")),
+                            fieldWithPath("statuses").description("발송 대상 상태 목록 (EXPIRED: 기간만료, EXPIRING_SOON: 만기임박)"),
+                            fieldWithPath("account").description("채널").optional(),
+                            fieldWithPath("path").description("제휴사").optional(),
+                            fieldWithPath("insuranceCompany").description("보험사").optional(),
+                            fieldWithPath("keyword").description("검색 키워드 (사업자번호, 전화번호, 상호명)").optional()),
                     responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과"),
                             fieldWithPath("data.totalCount").type(JsonFieldType.NUMBER).description("발송 대상 건수"),
                             fieldWithPath("data.message").type(JsonFieldType.STRING).description("결과 메시지"),
