@@ -92,6 +92,16 @@ public class InsuredContractFinder {
             .toList();
     }
 
+    public List<InsuredContractDetail> findContractsByEndDate(LocalDate endDate) {
+        LocalDateTime start = endDate.atStartOfDay();
+        LocalDateTime end = start.plusDays(1).minusNanos(1);
+
+        return totalFormMemberRepository.findAllByInsuranceEndDateBetween(start, end)
+            .stream()
+            .map(this::mapToDetail)
+            .toList();
+    }
+
     public List<InsuredContractDetail> findBulkNotificationTargets(InsuredSearchCondition condition,
             List<DisplayStatus> statuses) {
         List<InsuredContractDetail> results = new java.util.ArrayList<>();
