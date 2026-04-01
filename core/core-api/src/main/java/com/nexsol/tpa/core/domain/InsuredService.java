@@ -143,6 +143,37 @@ public class InsuredService {
         return targets.size();
     }
 
+    @Transactional
+    public int sendRenewalNotificationsByEndDate(LocalDate endDate) {
+        List<InsuredContractDetail> targets = insuredContractFinder.findContractsByEndDate(endDate);
+
+        for (int i = 0; i < targets.size(); i++) {
+            InsuredContractDetail detail = targets.get(i);
+            String rejoinUrl = "http://pungsu.tpakorea.com/rejoin/feeGuide?idx=" + detail.referIdx();
+
+            try {
+                this.send(detail, MailType.REJOIN, rejoinUrl, 0L);
+            }
+            catch (Exception e) {
+                log.error("재가입 알림 발송 실패 contractId={}", detail.id(), e);
+            }
+
+            if ((i + 1) % BATCH_SIZE == 0 && i + 1 < targets.size()) {
+                try {
+                    Thread.sleep(BATCH_DELAY_MS);
+                }
+                catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    log.warn("재가입 알림 배치 발송 중단");
+                    return i + 1;
+                }
+            }
+        }
+
+        log.info("재가입 알림 발송 완료 (종료일 기준 {}): 총 {}건", endDate, targets.size());
+        return targets.size();
+    }
+
     @Transactional(readOnly = true)
     public BulkNotificationPreview getBulkNotificationPreview(InsuredSearchCondition condition) {
         return insuredContractFinder.countByStatusForPreview(condition);
