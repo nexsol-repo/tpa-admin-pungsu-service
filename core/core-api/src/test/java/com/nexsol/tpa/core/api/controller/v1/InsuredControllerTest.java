@@ -54,11 +54,14 @@ public class InsuredControllerTest extends RestDocsTest {
 
     private InsuredService insuredService;
 
+    private RenewalGroupService renewalGroupService;
+
     private final JsonMapper jsonMapper = JsonMapper.builder().findAndAddModules().build();
 
     @BeforeEach
     public void setUp(RestDocumentationContextProvider restDocumentation) {
         insuredService = mock(InsuredService.class);
+        renewalGroupService = mock(RenewalGroupService.class);
 
         HandlerMethodArgumentResolver loginAdminResolver = new HandlerMethodArgumentResolver() {
             @Override
@@ -75,7 +78,7 @@ public class InsuredControllerTest extends RestDocsTest {
         };
 
         // standaloneSetup을 직접 호출하여 customArgumentResolvers 등록
-        mockMvc = MockMvcBuilders.standaloneSetup(new InsuredController(insuredService))
+        mockMvc = MockMvcBuilders.standaloneSetup(new InsuredController(insuredService, renewalGroupService))
             .setCustomArgumentResolvers(loginAdminResolver)
             .apply(documentationConfiguration(restDocumentation))
             .build();
@@ -498,10 +501,10 @@ public class InsuredControllerTest extends RestDocsTest {
     void sendBulkNotification() throws Exception {
         BulkNotificationSendRequest request = new BulkNotificationSendRequest(DateType.INSURANCE_END,
                 java.time.LocalDate.of(2025, 11, 1), java.time.LocalDate.of(2026, 2, 28),
-                List.of(DisplayStatus.EXPIRED, DisplayStatus.EXPIRING_SOON),
-                "channel1", "partner1", "DB손해보험", "홍길동");
+                List.of(DisplayStatus.EXPIRED, DisplayStatus.EXPIRING_SOON), "channel1", "partner1", "DB손해보험", "홍길동");
 
-        given(insuredService.sendBulkRenewalNotifications(any(InsuredSearchCondition.class), any(), any())).willReturn(1801);
+        given(insuredService.sendBulkRenewalNotifications(any(InsuredSearchCondition.class), any(), any()))
+            .willReturn(1801);
 
         mockMvc
             .perform(post("/v1/admin/pungsu/bulk-notification/send").contentType(MediaType.APPLICATION_JSON)
@@ -521,6 +524,40 @@ public class InsuredControllerTest extends RestDocsTest {
                     responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과"),
                             fieldWithPath("data.totalCount").type(JsonFieldType.NUMBER).description("발송 대상 건수"),
                             fieldWithPath("data.message").type(JsonFieldType.STRING).description("결과 메시지"),
+                            fieldWithPath("error").description("에러 정보").optional())));
+    }
+
+    @Test
+    @DisplayName("재가입 이력 조회 API 문서화")
+    void getRenewalHistory() throws Exception {
+        List<RenewalHistory> mockHistories = List.of(
+                new RenewalHistory(123, "20260401175459e1l41e", 1, "Y", LocalDateTime.of(2025, 3, 15, 16, 0),
+                        LocalDateTime.of(2026, 3, 15, 16, 0), 5000L, true),
+                new RenewalHistory(40192, "INS_03241756_594", 0, "Y", LocalDateTime.of(2024, 3, 15, 16, 0),
+                        LocalDateTime.of(2025, 3, 15, 16, 0), 5000L, false));
+
+        given(renewalGroupService.getRenewalHistory(123)).willReturn(mockHistories);
+
+        mockMvc.perform(get("/v1/admin/pungsu/{id}/renewal-history", 123).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andDo(document("admin-renewal-history", pathParameters(parameterWithName("id").description("계약 ID")),
+                    responseFields(
+                            fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (SUCCESS/ERROR)"),
+                            fieldWithPath("data.history[]").type(JsonFieldType.ARRAY).description("재가입 이력 목록"),
+                            fieldWithPath("data.history[].no").type(JsonFieldType.NUMBER)
+                                .description("번호 (재가입 차수 + 1)"),
+                            fieldWithPath("data.history[].contractId").type(JsonFieldType.NUMBER).description("계약 ID"),
+                            fieldWithPath("data.history[].renewSeq").type(JsonFieldType.NUMBER)
+                                .description("재가입 차수 (0: 최초가입)"),
+                            fieldWithPath("data.history[].joinStatus").type(JsonFieldType.STRING)
+                                .description("가입 상태 (가입완료, 미가입, 대기, 접수, 해지, 임의해지, 가입오류, 보험만료)"),
+                            fieldWithPath("data.history[].insuranceStartDate").type(JsonFieldType.STRING)
+                                .description("보험 시작일"),
+                            fieldWithPath("data.history[].insuranceEndDate").type(JsonFieldType.STRING)
+                                .description("보험 종료일"),
+                            fieldWithPath("data.history[].applyCost").type(JsonFieldType.NUMBER).description("적용 보험료"),
+                            fieldWithPath("data.history[].isCurrent").type(JsonFieldType.BOOLEAN)
+                                .description("현재 계약 여부 (true: 현재 계약, false: 이전 계약)"),
                             fieldWithPath("error").description("에러 정보").optional())));
     }
 

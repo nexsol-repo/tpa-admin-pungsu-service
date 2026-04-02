@@ -10,6 +10,7 @@ import com.nexsol.tpa.core.api.controller.v1.response.FreeContractUploadResponse
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractDetailResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractListResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuredContractResponse;
+import com.nexsol.tpa.core.api.controller.v1.response.RenewalHistoryResponse;
 import com.nexsol.tpa.core.domain.*;
 import com.nexsol.tpa.core.enums.MailType;
 import com.nexsol.tpa.core.support.DomainPage;
@@ -38,6 +39,8 @@ import java.util.List;
 public class InsuredController {
 
     private final InsuredService insuredService;
+
+    private final RenewalGroupService renewalGroupService;
 
     // private final MeritzService meritzService;
 
@@ -210,6 +213,12 @@ public class InsuredController {
             .build();
         int totalCount = insuredService.sendBulkRenewalNotifications(condition, request.statuses(), admin.userId());
         return ApiResponse.success(new BulkNotificationSendResponse(totalCount, "발송이 시작되었습니다."));
+    }
+
+    @GetMapping("/{id}/renewal-history")
+    public ApiResponse<RenewalHistoryResponse> getRenewalHistory(@PathVariable Integer id) {
+        List<RenewalHistory> histories = renewalGroupService.getRenewalHistory(id);
+        return ApiResponse.success(RenewalHistoryResponse.of(histories));
     }
 
     // 만기임박 대상 발송 트리거 (테스트용)
