@@ -68,7 +68,7 @@ public class InsuredContractorWriter {
         return diffs;
     }
 
-    public Integer write(InsuredInfo insured, ContractInfo contract, BusinessLocationInfo location,
+    public ContractWriteResult write(InsuredInfo insured, ContractInfo contract, BusinessLocationInfo location,
             InsuredSubscriptionInfo subscription, PaymentInfo payment) {
         // 1. 키 생성
         String referIdx = keyGenerator.generate();
@@ -80,7 +80,8 @@ public class InsuredContractorWriter {
         // 3. 건물급수,지역코드 계산 및 적용
         directRegistration.applyDerivedFields(entity, location);
 
-        return totalFormMemberRepository.save(entity).getId();
+        TotalFormMemberEntity saved = totalFormMemberRepository.save(entity);
+        return new ContractWriteResult(saved.getId(), saved.getReferIdx());
     }
 
     @Transactional

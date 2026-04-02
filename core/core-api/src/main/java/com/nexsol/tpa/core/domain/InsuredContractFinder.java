@@ -115,8 +115,7 @@ public class InsuredContractFinder {
     }
 
     public BulkNotificationPreview countByStatusForPreview(InsuredSearchCondition condition) {
-        long expiredCount = totalFormMemberRepository
-            .count(buildBulkSpec(DisplayStatus.EXPIRED, condition));
+        long expiredCount = totalFormMemberRepository.count(buildBulkSpec(DisplayStatus.EXPIRED, condition));
         InsuredSearchCondition expiringSoonCondition = InsuredSearchCondition.builder()
             .account(condition.account())
             .path(condition.path())
@@ -128,8 +127,7 @@ public class InsuredContractFinder {
         return new BulkNotificationPreview(expiredCount, expiringSoonCount, expiredCount + expiringSoonCount);
     }
 
-    private Specification<TotalFormMemberEntity> buildBulkSpec(DisplayStatus status,
-            InsuredSearchCondition condition) {
+    private Specification<TotalFormMemberEntity> buildBulkSpec(DisplayStatus status, InsuredSearchCondition condition) {
         return (root, query, cb) -> {
             List<jakarta.persistence.criteria.Predicate> predicates = new java.util.ArrayList<>();
             predicates.add(cb.isNull(root.get("deletedAt")));
@@ -138,16 +136,17 @@ public class InsuredContractFinder {
                 case EXPIRED -> {
                     // 기간만료: joinCheck='Y' + insuranceEndDate <= now
                     predicates.add(cb.equal(root.get("joinCheck"), "Y"));
-                    predicates.add(cb.lessThanOrEqualTo(root.get("insuranceEndDate"),
-                            LocalDateTime.now()));
+                    predicates.add(cb.lessThanOrEqualTo(root.get("insuranceEndDate"), LocalDateTime.now()));
                     if (condition.dateType() != null && condition.startDate() != null && condition.endDate() != null) {
                         String dateField = switch (condition.dateType()) {
                             case INSURANCE_START -> "insuranceStartDate";
                             case INSURANCE_END -> "insuranceEndDate";
                             case CREATED_AT -> "createdAt";
                         };
-                        predicates.add(cb.greaterThanOrEqualTo(root.get(dateField), condition.startDate().atStartOfDay()));
-                        predicates.add(cb.lessThanOrEqualTo(root.get(dateField), condition.endDate().atTime(23, 59, 59)));
+                        predicates
+                            .add(cb.greaterThanOrEqualTo(root.get(dateField), condition.startDate().atStartOfDay()));
+                        predicates
+                            .add(cb.lessThanOrEqualTo(root.get(dateField), condition.endDate().atTime(23, 59, 59)));
                     }
                 }
                 case EXPIRING_SOON -> {
