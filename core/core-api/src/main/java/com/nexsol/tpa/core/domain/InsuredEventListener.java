@@ -65,12 +65,14 @@ public class InsuredEventListener {
         if (event.email() != null && !event.email().isBlank()) {
             try {
                 memoClient.sendMail(cId,
-                        new SendMailRequest(ServiceType.PUNGSU, List.of(event.email()), mailTitle, mailContent), adminId);
+                        new SendMailRequest(ServiceType.PUNGSU, List.of(event.email()), mailTitle, mailContent),
+                        adminId);
             }
             catch (Exception e) {
                 log.error("메일 발송 실패: {}", event.contractId(), e);
             }
-        } else {
+        }
+        else {
             log.info("이메일 없음 - 메일 발송 스킵: contractId={}", event.contractId());
         }
 
@@ -83,7 +85,8 @@ public class InsuredEventListener {
             catch (Exception e) {
                 log.error("문자 발송 실패: {}", event.contractId(), e);
             }
-        } else {
+        }
+        else {
             log.info("전화번호 없음 - 문자 발송 스킵: contractId={}", event.contractId());
         }
     }

@@ -44,7 +44,8 @@ public class InsuredContractQueryGenerator {
                         predicates.add(cb.equal(root.get("joinCheck"), "Y"));
                         // insuranceEndDate > today (만료되지 않은 것)
                         predicates.add(cb.greaterThan(root.get("insuranceEndDate"), now));
-                        // 만기임박 윈도우 밖 (insuranceEndDate is null OR endDate > maxExpiringSoonEnd)
+                        // 만기임박 윈도우 밖 (insuranceEndDate is null OR endDate >
+                        // maxExpiringSoonEnd)
                         predicates.add(cb.or(cb.isNull(root.get("insuranceEndDate")),
                                 cb.greaterThan(root.get("insuranceEndDate"), maxExpiringSoonEnd)));
                     }
